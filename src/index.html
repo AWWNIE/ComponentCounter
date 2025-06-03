@@ -30,36 +30,46 @@
       <div class="col-12 col-md-6 offset-md-3">
         <div class="card shadow-sm">
           <div class="card-body">
-            <h5 class="card-title text-center mb-4">Discord Settings</h5>
 
-            <!-- Discord ID input -->
-            <div class="mb-3">
-              <label for="discordIdInput" class="form-label">Discord ID</label>
-              <input
-                type="text"
-                id="discordIdInput"
-                class="form-control"
-                placeholder="Enter your Discord ID"
-              />
+            <!-- Container for form fields -->
+            <div id="discordFormFields">
+              <h5 class="card-title text-center mb-4">Discord Settings</h5>
+
+              <!-- Discord ID input -->
+              <div class="mb-3">
+                <label for="discordIdInput" class="form-label">Discord ID</label>
+                <input
+                  type="text"
+                  id="discordIdInput"
+                  class="form-control"
+                  placeholder="Enter your Discord ID"
+                />
+              </div>
+
+              <!-- Discord Webhook input -->
+              <div class="mb-4">
+                <label for="discordWebhookInput" class="form-label">
+                  Discord Webhook URL
+                </label>
+                <input
+                  type="text"
+                  id="discordWebhookInput"
+                  class="form-control"
+                  placeholder="Enter your Webhook URL"
+                />
+              </div>
+
+              <!-- Save button (always enabled) -->
+              <button id="saveDiscordBtn" class="btn btn-primary w-100">
+                Save
+              </button>
             </div>
 
-            <!-- Discord Webhook input -->
-            <div class="mb-4">
-              <label for="discordWebhookInput" class="form-label">
-                Discord Webhook URL
-              </label>
-              <input
-                type="text"
-                id="discordWebhookInput"
-                class="form-control"
-                placeholder="Enter your Webhook URL"
-              />
+            <!-- Container for spinner / success / error icon -->
+            <div id="saveStatusContainer" class="text-center my-4" style="display: none;">
+              <!-- Content inserted dynamically -->
             </div>
 
-            <!-- Save button (always enabled) -->
-            <button id="saveDiscordBtn" class="btn btn-primary w-100">
-              Save
-            </button>
           </div>
         </div>
       </div>
@@ -191,7 +201,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div>  
     </div>
   </div> <!-- end #mainContent -->
 
@@ -201,31 +211,64 @@
   <script src="./main.js"></script>
 
   <!-- ============================================ -->
-  <!-- Inline script: hide form, show content on Save -->
+  <!-- Inline script: loading → success/error → show content -->
   <!-- ============================================ -->
   <script>
     const discordFormContainer = document.getElementById("discordFormContainer");
-    const mainContent = document.getElementById("mainContent");
-    const discordIdInput = document.getElementById("discordIdInput");
-    const discordWebhookInput = document.getElementById("discordWebhookInput");
-    const saveBtn = document.getElementById("saveDiscordBtn");
+    const discordFormFields    = document.getElementById("discordFormFields");
+    const saveStatusContainer  = document.getElementById("saveStatusContainer");
+    const mainContent          = document.getElementById("mainContent");
+    const discordIdInput       = document.getElementById("discordIdInput");
+    const discordWebhookInput  = document.getElementById("discordWebhookInput");
+    const saveBtn              = document.getElementById("saveDiscordBtn");
 
     saveBtn.addEventListener("click", () => {
-      // Read whatever the user typed (even if empty)
-      const idValue = discordIdInput.value.trim();
+      const idValue      = discordIdInput.value.trim();
       const webhookValue = discordWebhookInput.value.trim();
 
-      // Call your existing save functions:
+      // 1) Call your existing save‐to‐localStorage functions:
       updateSaveData({ discordID: idValue });
       updateSaveData({ discordWebhook: webhookValue });
 
-      // Hide the Discord form:
-      discordFormContainer.style.display = "none";
-      // Show the original content:
-      mainContent.style.display = "block";
+      // 2) Hide the input fields and Save button
+      discordFormFields.style.display = "none";
+
+      // 3) Show a Bootstrap spinner in saveStatusContainer
+      saveStatusContainer.innerHTML = `
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Saving…</span>
+        </div>
+      `;
+      saveStatusContainer.style.display = "block";
+
+      // 4) After 2 seconds, replace spinner with success or error icon
+      setTimeout(() => {
+        // Check if both values were actually saved:
+        const savedId = getSaveData("discordID");
+        const savedWebhook = getSaveData("discordWebhook");
+        const success = savedId && savedWebhook;
+
+        if (success) {
+          saveStatusContainer.innerHTML = `
+            <div class="fs-1 text-success">✅</div>
+            <div class="mt-2">Saved successfully</div>
+          `;
+        } else {
+          saveStatusContainer.innerHTML = `
+            <div class="fs-1 text-danger">❌</div>
+            <div class="mt-2">Save failed</div>
+          `;
+        }
+
+        // 5) After another 2 seconds, hide the entire form and show main content
+        setTimeout(() => {
+          discordFormContainer.style.display = "none";
+          mainContent.style.display = "block";
+        }, 2000);
+      }, 2000);
     });
 
-    // Ensure the original content is hidden on page load
+    // Ensure original content is hidden on page load:
     window.addEventListener("DOMContentLoaded", () => {
       mainContent.style.display = "none";
     });
