@@ -71,8 +71,13 @@
               </div>
 
               <!-- Save button (always enabled) -->
-              <button id="saveDiscordBtn" class="btn btn-primary w-100">
+              <button id="saveDiscordBtn" class="btn btn-primary w-100 mb-2">
                 Save
+              </button>
+
+              <!-- New: Load Saved Info button -->
+              <button id="loadSavedBtn" class="btn btn-secondary w-100">
+                Load Saved Info
               </button>
             </div>
 
@@ -232,6 +237,31 @@
     const discordIdInput       = document.getElementById("discordIdInput");
     const discordWebhookInput  = document.getElementById("discordWebhookInput");
     const saveBtn              = document.getElementById("saveDiscordBtn");
+    const loadSavedBtn         = document.getElementById("loadSavedBtn");
+
+    // On page load, check for saved values and enable/disable the Load button
+    window.addEventListener("DOMContentLoaded", () => {
+      mainContent.style.display = "none";
+      const storedId = localStorage.getItem("discordID");
+      const storedWebhook = localStorage.getItem("discordWebhook");
+      if (storedId && storedWebhook) {
+        loadSavedBtn.disabled = false;
+      } else {
+        loadSavedBtn.disabled = true;
+      }
+    });
+
+    // Load saved inputs into the form fields when button is clicked
+    loadSavedBtn.addEventListener("click", () => {
+      const storedId = localStorage.getItem("discordID");
+      const storedWebhook = localStorage.getItem("discordWebhook");
+      if (storedId) {
+        discordIdInput.value = storedId;
+      }
+      if (storedWebhook) {
+        discordWebhookInput.value = storedWebhook;
+      }
+    });
 
     saveBtn.addEventListener("click", () => {
       const idValue      = discordIdInput.value.trim();
@@ -269,6 +299,13 @@
         // Do not proceed to save or show main content
         return;
       }
+
+      // 1a) Store valid inputs in localStorage
+      localStorage.setItem("discordID", idValue);
+      localStorage.setItem("discordWebhook", webhookValue);
+
+      // Enable the Load Saved button now that data is stored
+      loadSavedBtn.disabled = false;
 
       // 2) If we reach here, BOTH inputs are valid, so proceed with existing logic:
 
@@ -312,11 +349,6 @@
           mainContent.style.display = "block";
         }, 2000);
       }, 2000);
-    });
-
-    // Ensure original content is hidden on page load:
-    window.addEventListener("DOMContentLoaded", () => {
-      mainContent.style.display = "none";
     });
   </script>
 </body>
