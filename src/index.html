@@ -23,7 +23,7 @@
 
 <body class="nis">
   <!-- ============================================= -->
-  <!-- Step 1: Only show this “Discord settings” form at first -->
+  <!-- Step 1: Discord‐input form (shown first)      -->
   <!-- ============================================= -->
   <div id="discordFormContainer" class="container my-5">
     <div class="row">
@@ -45,9 +45,9 @@
 
             <!-- Discord Webhook input -->
             <div class="mb-4">
-              <label for="discordWebhookInput" class="form-label"
-                >Discord Webhook URL</label
-              >
+              <label for="discordWebhookInput" class="form-label">
+                Discord Webhook URL
+              </label>
               <input
                 type="text"
                 id="discordWebhookInput"
@@ -56,12 +56,8 @@
               />
             </div>
 
-            <!-- Save button (disabled until both fields are non-empty) -->
-            <button
-              id="saveDiscordBtn"
-              class="btn btn-primary w-100"
-              disabled
-            >
+            <!-- Save button (always enabled) -->
+            <button id="saveDiscordBtn" class="btn btn-primary w-100">
               Save
             </button>
           </div>
@@ -71,8 +67,7 @@
   </div>
 
   <!-- ============================================= -->
-  <!-- Step 2: All existing content is wrapped in this div and hidden by default -->
-  <!-- It will be shown only after “Save” is clicked with valid inputs. -->
+  <!-- Step 2: Original content (hidden initially)   -->
   <!-- ============================================= -->
   <div id="mainContent" style="display: none;">
     <ul class="itemList list-group">
@@ -196,66 +191,43 @@
             </div>
           </div>
         </div>
-      </div>  
+      </div>
     </div>
   </div> <!-- end #mainContent -->
 
   <!-- ============================================ -->
-  <!-- Step 3: Load your compiled index.ts (main.js) -->
+  <!-- Load your compiled TypeScript (main.js)     -->
   <!-- ============================================ -->
   <script src="./main.js"></script>
 
   <!-- ============================================ -->
-  <!-- Step 4: Inline script to control “Save” logic  -->
+  <!-- Inline script: hide form, show content on Save -->
   <!-- ============================================ -->
   <script>
-    // Grab references to the form elements and main content
-    const discordFormContainer = document.getElementById(
-      "discordFormContainer"
-    );
+    const discordFormContainer = document.getElementById("discordFormContainer");
     const mainContent = document.getElementById("mainContent");
     const discordIdInput = document.getElementById("discordIdInput");
-    const discordWebhookInput = document.getElementById(
-      "discordWebhookInput"
-    );
+    const discordWebhookInput = document.getElementById("discordWebhookInput");
     const saveBtn = document.getElementById("saveDiscordBtn");
 
-    // Helper: enable the Save button only if both inputs are non-empty
-    function updateSaveButtonState() {
-      const hasId = discordIdInput.value.trim().length > 0;
-      const hasWebhook =
-        discordWebhookInput.value.trim().length > 0;
-      saveBtn.disabled = !(hasId && hasWebhook);
-    }
-
-    // Listen for any change/typing in either input
-    discordIdInput.addEventListener("input", updateSaveButtonState);
-    discordWebhookInput.addEventListener("input", updateSaveButtonState);
-
-    // When “Save” is clicked:
     saveBtn.addEventListener("click", () => {
+      // Read whatever the user typed (even if empty)
       const idValue = discordIdInput.value.trim();
       const webhookValue = discordWebhookInput.value.trim();
 
-      // You could add extra validation here (e.g. URL format check for webhook),
-      // but at minimum, we’ve ensured non-empty values above.
-
-      // 1) Call your existing save‐to‐localStorage functions (from index.ts):
+      // Call your existing save functions:
       updateSaveData({ discordID: idValue });
       updateSaveData({ discordWebhook: webhookValue });
 
-      // 2) Hide the form and reveal the rest of the page
+      // Hide the Discord form:
       discordFormContainer.style.display = "none";
+      // Show the original content:
       mainContent.style.display = "block";
     });
 
-    // On page load, keep everything hidden until user clicks Save
+    // Ensure the original content is hidden on page load
     window.addEventListener("DOMContentLoaded", () => {
-      // Make sure the initial state is correct:
-      // - #mainContent = hidden
-      // - Save button disabled
       mainContent.style.display = "none";
-      saveBtn.disabled = true;
     });
   </script>
 </body>
