@@ -245,9 +245,9 @@
 
       let messageText;
       if (type === "notInstalled") {
-        messageText = "Alt1 is not installed. Please install via Alt1:";
+        messageText = "App is not installed through Alt1.";
       } else {
-        messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are enabled.";
+        messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are all enabled.";
       }
 
       saveStatusContainer.innerHTML = `
@@ -271,9 +271,9 @@
         <div class="mt-2">Alt1 is installed and all permissions granted:</div>
         <div class="text-start mt-2">
           <div>✅ Alt1 installed</div>
-          <div>✅ gamestate permission</div>
-          <div>✅ overlay permission</div>
-          <div>✅ pixel permission</div>
+          <div>✅ Gamestate</div>
+          <div>✅ Overlay</div>
+          <div>✅ Pixel</div>
         </div>
       `;
       saveStatusContainer.style.display = "block";
