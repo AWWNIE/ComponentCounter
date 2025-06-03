@@ -70,7 +70,14 @@ window.setTimeout(function () {
 			if (getSaveData("discordWebhook")) {
 				// discordWebhook already set
 			} else {
+				// add user input box 
 				updateSaveData({ discordWebhook: "https://discord.com/api/webhooks/1379298168042160168/20HTHbg5K5uNLpuw_RCPoBMnHBEGjUAlqITpD02Qy0l8VCpWMs3U5Q6cBdrPt07aHyRP" });
+			}
+			if (getSaveData("discordID")) {
+				// discordID already set
+			} else {
+				// add user input box 
+				updateSaveData({ discordID: "600408294003048450" });
 			}
 			showSelectedChat(reader.pos);
 			//build table from saved data, start tracking.
