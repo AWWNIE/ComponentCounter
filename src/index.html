@@ -2,245 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>RS3 Item Price Notifier (Wiki-Only, Robust)</title>
-
-  <!-- Bootstrap CSS (optional for nicer styling) -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-    crossorigin="anonymous"
-  />
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #1e1e1e;
-      color: #f0f0f0;
-      margin: 0;
-      padding: 16px;
-    }
-    h2 {
-      margin-bottom: 8px;
-    }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-size: 0.9rem;
-    }
-    input, button {
-      margin-top: 4px;
-      padding: 8px;
-      font-size: 0.9rem;
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid #555;
-      background: #2e2e2e;
-      color: #f0f0f0;
-      outline: none;
-      border-radius: 4px;
-    }
-    button {
-      cursor: pointer;
-      background: #007acc;
-      border: none;
-      color: white;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: #005a99;
-    }
-    #status {
-      margin-top: 12px;
-      font-size: 0.9rem;
-      color: #fa0;
-    }
-    .section {
-      margin-bottom: 16px;
-    }
-    .error {
-      color: #f33 !important;
-    }
-  </style>
+  <title>RS3 Item Price Notifier</title>
 </head>
 <body>
-  <h2>RS3 Item Price Notifier</h2>
-  <p>
-    Type an exact RS3 item name (case-insensitive; spaces allowed).<br>
-    The script will Title-case & underscore your input (e.g. “abyssal whip” → “Abyssal_Whip”),<br>
-    fetch its Grand Exchange price + thumbnail from the Wiki, and send both to Discord.
-  </p>
+  <h1>RS3 Item Price Notifier</h1>
 
-  <div class="section">
-    <label for="webhookUrl">Discord Webhook URL</label>
-    <input
-      type="text"
-      id="webhookUrl"
-      placeholder="https://discord.com/api/webhooks/…" />
+  <label for="itemName">Item Name (e.g. abyssal_whip):</label><br />
+  <input type="text" id="itemName" placeholder="abyssal_whip" /><br /><br />
 
-    <label for="userId">Your Discord User ID</label>
-    <input
-      type="text"
-      id="userId"
-      placeholder="123456789012345678" />
-  </div>
+  <label for="webhookUrl">Discord Webhook URL:</label><br />
+  <input
+    type="text"
+    id="webhookUrl"
+    placeholder="https://discord.com/api/webhooks/…"
+    style="width: 350px;"
+  /><br /><br />
 
-  <div class="section">
-    <label for="itemName">RS3 Item Name (any case)</label>
-    <input
-      type="text"
-      id="itemName"
-      placeholder="e.g. Abyssal Whip" />
-  </div>
+  <label for="userId">Discord User ID:</label><br />
+  <input type="text" id="userId" placeholder="123456789012345678" /><br /><br />
 
-  <button id="sendBtn">Send Item Info</button>
-  <div id="status">Idle</div>
+  <button id="sendBtn">Send Price to Discord</button>
 
   <script>
-    const sendBtn   = document.getElementById("sendBtn");
-    const statusDiv = document.getElementById("status");
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const itemNameInput = document
+        .getElementById("itemName")
+        .value.trim();
+      const webhookUrl = document
+        .getElementById("webhookUrl")
+        .value.trim();
+      const userId = document.getElementById("userId").value.trim();
 
-    function updateStatus(msg, isError = false) {
-      statusDiv.textContent = msg;
-      statusDiv.classList.toggle("error", isError);
-      statusDiv.style.color = isError ? "#f33" : "#fa0";
-    }
-
-    // Convert input to Title Case + underscores: "abyssal whip" → "Abyssal_Whip"
-    function toWikiTitle(name) {
-      return name
-        .trim()
-        .split(/\s+/)
-        .map(
-          word =>
-            word.charAt(0).toUpperCase() +
-            word.slice(1).toLowerCase()
-        )
-        .join("_");
-    }
-
-    sendBtn.addEventListener("click", async () => {
-      const webhookUrl = document.getElementById("webhookUrl").value.trim();
-      const userId     = document.getElementById("userId").value.trim();
-      const rawName    = document.getElementById("itemName").value.trim();
-
-      // Basic validation
-      if (!webhookUrl || !userId || !rawName) {
-        updateStatus("Please fill in all fields.", true);
-        return;
-      }
-      if (!/^\d+$/.test(userId)) {
-        updateStatus("User ID must be numeric (no brackets).", true);
+      if (!itemNameInput || !webhookUrl || !userId) {
+        alert("Please fill in all fields.");
         return;
       }
 
-      // Convert to Page Title
-      const pageTitle = toWikiTitle(rawName);
-      updateStatus(`Looking up “${pageTitle}” on the Wiki…`);
-
-      // 1) Fetch raw infobox HTML via MediaWiki parse endpoint
-      const wikiApiUrl =
-        "https://runescape.wiki/api.php?" +
-        "action=parse&" +
-        "page=" + encodeURIComponent(pageTitle) + "&" +
-        "prop=text&" +
-        "formatversion=2&" +
-        "format=json";
-
-      let pageJson;
       try {
-        const resp = await fetch(wikiApiUrl);
-        if (!resp.ok) {
-          throw new Error(`Wiki API returned HTTP ${resp.status}`);
+        // 1. Fetch latest price data for the given RS3 item name
+        const apiUrl = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${encodeURIComponent(
+          itemNameInput
+        )}`;
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+          alert("Error fetching price data from WeirdGloop API.");
+          return;
         }
-        pageJson = await resp.json();
-      } catch (err) {
-        console.error("Error fetching Wiki parse:", err);
-        updateStatus(`Failed to fetch Wiki page: ${err.message}`, true);
-        return;
-      }
 
-      if (!pageJson.parse || !pageJson.parse.text) {
-        updateStatus("Item page not found on the Wiki.", true);
-        return;
-      }
+        const data = await response.json();
+        // The API returns an object whose single key is the properly cased item name:
+        // e.g. { "Abyssal whip": { id: "4151", timestamp: "…", price: 72492, volume: 1326 } }
+        const itemKey = Object.keys(data)[0];
+        const itemData = data[itemKey];
+        const price = itemData.price;
+        const id = itemData.id;
 
-      // 2) Parse that HTML string, then find “Grand Exchange” row
-      const htmlString = pageJson.parse.text;
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(htmlString, "text/html");
+        // 2. Construct a thumbnail URL for the RS3 item.
+        //    For RS3, item icons can be fetched via secure.runescape.com/m=itemdb_rs/ITEM_ID.png
+        const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/${id}.png`;
 
-      // 2a) Find any <div class="pi-data-label"> whose text contains "ge"
-      const dataLabels = doc.querySelectorAll(".pi-data-label");
-      let priceText = null;
-      dataLabels.forEach(labelElem => {
-        const label = labelElem.textContent.trim().toLowerCase();
-        if (label.includes("ge")) {
-          // If it contains “ge” (e.g. “GE price” or “Grand Exchange”), grab the sibling value
-          const parent = labelElem.closest(".pi-item");
-          if (parent) {
-            const valueElem = parent.querySelector(".pi-data-value");
-            if (valueElem) {
-              priceText = valueElem.textContent.trim();
-            }
-          }
-        }
-      });
+        // 3. Prepare Discord message payload:
+        //    - Mention the user via <@USER_ID>
+        //    - Include an embed with title, description, and thumbnail
+        const content = `<@${userId}> The current price of **${itemKey}** is **${price.toLocaleString()} gp**.`;
+        const embed = {
+          title: `${itemKey} Price`,
+          description: `${price.toLocaleString()} gp`,
+          thumbnail: { url: thumbnailUrl },
+        };
+        const payload = {
+          content,
+          embeds: [embed],
+        };
 
-      if (!priceText) {
-        updateStatus("GE Price row not found in infobox.", true);
-        return;
-      }
-      // Append “gp” if missing
-      if (!/gp$/i.test(priceText)) {
-        priceText += " gp";
-      }
-
-      // 2b) Find thumbnail: query for .pi-image-thumbnail img
-      let thumbUrl = "";
-      const thumbElem = doc.querySelector(".pi-image-thumbnail img");
-      if (thumbElem && thumbElem.src) {
-        thumbUrl = thumbElem.src;
-      } else {
-        const fallback = doc.querySelector(".portable-infobox img");
-        if (fallback && fallback.src) {
-          thumbUrl = fallback.src;
-        }
-      }
-
-      updateStatus(`Found price ${priceText}. Preparing Discord message…`);
-
-      // 3) Build the Discord embed + mention
-      const mention = `<@${userId}>`;
-      const embed = {
-        title: pageTitle.replace(/_/g, " "),  // show spaces instead of underscores
-        description: `**Current GE Price:** ${priceText}`,
-        ...(thumbUrl ? { thumbnail: { url: thumbUrl } } : {})
-      };
-      const payload = {
-        content: mention,
-        embeds: [embed]
-      };
-
-      updateStatus("Sending to Discord…");
-
-      // 4) POST to Discord webhook
-      try {
-        const discordResp = await fetch(webhookUrl, {
+        // 4. POST to the Discord webhook
+        const webhookResponse = await fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
-        if (discordResp.ok) {
-          updateStatus("Item info sent successfully.");
-          document.getElementById("itemName").value = "";
+
+        if (!webhookResponse.ok) {
+          alert("Error sending message to Discord. Check your webhook URL.");
         } else {
-          const text = await discordResp.text();
-          updateStatus(`Discord error ${discordResp.status}: ${text}`, true);
+          alert("Message sent to Discord successfully!");
         }
       } catch (err) {
-        console.error("Error sending to Discord:", err);
-        updateStatus("Network error—check console.", true);
+        console.error(err);
+        alert("An unexpected error occurred. Check console for details.");
       }
     });
   </script>
