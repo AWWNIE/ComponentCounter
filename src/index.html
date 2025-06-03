@@ -239,31 +239,62 @@
     const saveBtn              = document.getElementById("saveDiscordBtn");
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
 
-    // Helper: show Alt1 error and return to form
-    function showAlt1Error() {
+    // Show an error screen if Alt1 is not installed or permissions missing.
+    function showAlt1Error(type) {
       discordFormFields.style.display = "none";
+
+      let messageText;
+      if (type === "notInstalled") {
+        messageText = "Alt1 is not installed. Please install via Alt1:";
+      } else {
+        messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are enabled.";
+      }
+
       saveStatusContainer.innerHTML = `
         <div class="fs-1 text-danger">❌</div>
-        <div class="mt-2">Alt1 not detected, not installed, or missing required permissions. Please run this in the Alt1 client with screen‐pixels, game‐state, and overlay permissions enabled.</div>
+        <div class="mt-2">${messageText}</div>
+        <div class="mt-3">
+          <a href="alt1://addapp/https://awwnie.github.io/SerenTracker/appconfig.json">
+            Install the application via Alt1
+          </a>
+        </div>
       `;
       saveStatusContainer.style.display = "block";
+      // Do not auto-hide or revert; user must install/grant manually.
+    }
+
+    // Show a temporary success screen with green checks for Alt1 and permissions.
+    function showAlt1Success(callback) {
+      discordFormFields.style.display = "none";
+      saveStatusContainer.innerHTML = `
+        <div class="fs-1 text-success">✅</div>
+        <div class="mt-2">Alt1 is installed and all permissions granted:</div>
+        <div class="text-start mt-2">
+          <div>✅ Alt1 installed</div>
+          <div>✅ gamestate permission</div>
+          <div>✅ overlay permission</div>
+          <div>✅ pixel permission</div>
+        </div>
+      `;
+      saveStatusContainer.style.display = "block";
+
       setTimeout(() => {
         saveStatusContainer.style.display = "none";
-        discordFormFields.style.display = "block";
+        callback();
       }, 2000);
     }
 
-    // Wrapper: check Alt1 presence & all 3 permissions, then callback
+    // Wrapper: check Alt1 presence & required permissions, then proceed or error
     function checkAlt1AndProceed(callback) {
       if (!window.alt1 || !alt1.permissionInstalled) {
-        showAlt1Error();
+        showAlt1Error("notInstalled");
         return;
       }
       if (!alt1.permissionGameState || !alt1.permissionOverlay || !alt1.permissionPixel) {
-        showAlt1Error();
+        showAlt1Error("noPermission");
         return;
       }
-      callback();
+      showAlt1Success(callback);
     }
 
     // On page load, decide which button to show
