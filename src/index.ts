@@ -67,6 +67,11 @@ window.setTimeout(function () {
 				reader.pos.mainbox = reader.pos.boxes[0];
 				updateSaveData({ chat: "0" });
 			}
+			if (getSaveData("discordWebhook")) {
+				// discordWebhook already set
+			} else {
+				updateSaveData({ discordWebhook: "https://discord.com/api/webhooks/1379298168042160168/20HTHbg5K5uNLpuw_RCPoBMnHBEGjUAlqITpD02Qy0l8VCpWMs3U5Q6cBdrPt07aHyRP" });
+			}
 			showSelectedChat(reader.pos);
 			//build table from saved data, start tracking.
 			showItems();
