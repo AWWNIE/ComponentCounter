@@ -61,14 +61,16 @@
         const id = itemData.id;
 
         // 3. Construct a thumbnail URL using the RuneScape Wiki:
-        //    Format: https://runescape.wiki/images/{normalizedName}.png
-        //    (normalizedName is already lowercase with underscores)
-        const thumbnailUrl = `https://runescape.wiki/images/${normalizedName}.png`;
+        //    First, capitalize the first letter of the normalized name:
+        //    e.g. "abyssal_whip" -> "Abyssal_whip"
+        const thumbnailName =
+          normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);
+        const thumbnailUrl = `https://runescape.wiki/images/${thumbnailName}.png`;
 
         // 4. Prepare Discord message payload:
         //    - Mention the user via <@USER_ID>
         //    - Include an embed with title, description, and thumbnail
-        const content = `<@${userId}>`;
+        const content = `<@${userId}> The current price of **${itemKey}** is **${price.toLocaleString()} gp**.`;
         const embed = {
           title: `${itemKey} Price`,
           description: `${price.toLocaleString()} gp`,
