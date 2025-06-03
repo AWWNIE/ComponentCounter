@@ -102,7 +102,7 @@
 
   <div class="section">
     <label>Chat‐Box Region (in game‐client coordinates)</label>
-    <small style="color:#ccc;">Provide X, Y relative to top‐left of RuneScape window, plus width & height.</small>
+    <small style="color:#ccc;">Provide X, Y relative to top‐left of RuneScape window, plus width &amp; height.</small>
 
     <label for="offsetX">Chat Offset X</label>
     <input type="number" id="offsetX" placeholder="e.g. 10" />
@@ -146,7 +146,7 @@
     /**
      * scanChatOnce( ) → void
      *
-     * Captures the predefined chatRegion via alt1.captureRegion, OCRs it, and
+     * Captures the predefined chatRegion via alt1.capture, OCRs it, and
      * looks for:
      *  - “You have killed Rasial … (#) times”
      *  - “Your <ItemName> (<value>) has appeared on the ground”
@@ -164,8 +164,8 @@
 
       const { x, y, width, height } = chatRegion;
       try {
-        // Use alt1.captureRegion instead of captureArea
-        const img = await alt1.captureRegion(x, y, width, height);
+        // Use alt1.capture(startX, startY, width, height)
+        const img = await alt1.capture(x, y, width, height);
         const rawText = await alt1.ocrText(img);
         if (!rawText) {
           updateStatus("No text detected in chat.");
@@ -281,7 +281,7 @@
 
         // 3) Cache the chatRegion
         if (typeof alt1 === "undefined") {
-          alert("You must run this inside Alt1 for alt1.captureRegion to work.");
+          alert("You must run this inside Alt1 for alt1.capture to work.");
           return;
         }
         // alt1.rsX/rsY = top-left of RuneScape window
