@@ -239,6 +239,36 @@
     const saveBtn              = document.getElementById("saveDiscordBtn");
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
 
+    // Helper: show Alt1 error and return to form
+    function showAlt1Error() {
+      discordFormFields.style.display = "none";
+      saveStatusContainer.innerHTML = `
+        <div class="fs-1 text-danger">❌</div>
+        <div class="mt-2">Alt1 not detected or full permissions not granted. Please run this in the Alt1 client with full permissions enabled.</div>
+      `;
+      saveStatusContainer.style.display = "block";
+      setTimeout(() => {
+        saveStatusContainer.style.display = "none";
+        discordFormFields.style.display = "block";
+      }, 2000);
+    }
+
+    // Wrapper: check Alt1 presence & permissions, then callback
+    function checkAlt1AndProceed(callback) {
+      if (!window.alt1) {
+        showAlt1Error();
+        return;
+      }
+      // Request full permissions
+      alt1.permissionRequest({ name: "RS3DropNotifier" }).then((granted) => {
+        if (!granted) {
+          showAlt1Error();
+          return;
+        }
+        callback();
+      });
+    }
+
     // On page load, decide which button to show
     window.addEventListener("DOMContentLoaded", () => {
       mainContent.style.display = "none";
@@ -250,34 +280,86 @@
       saveBtn.style.display = "block";
 
       if (storedId && storedWebhook) {
-        // Show Load if both are present
         loadSavedBtn.style.display = "block";
       } else {
-        // Hide Load otherwise
         loadSavedBtn.style.display = "none";
       }
     });
 
-    // Load Saved Info: show spinner, validate, then apply or show error
+    // Load Saved Info: check Alt1, then show spinner, validate, apply or show error
     loadSavedBtn.addEventListener("click", () => {
-      const storedId = localStorage.getItem("discordID") || "";
-      const storedWebhook = localStorage.getItem("discordWebhook") || "";
+      checkAlt1AndProceed(() => {
+        const storedId = localStorage.getItem("discordID") || "";
+        const storedWebhook = localStorage.getItem("discordWebhook") || "";
 
-      // Immediately hide form fields and show spinner
-      discordFormFields.style.display = "none";
-      saveStatusContainer.innerHTML = `
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading…</span>
-        </div>
-      `;
-      saveStatusContainer.style.display = "block";
+        // Immediately hide form fields and show spinner
+        discordFormFields.style.display = "none";
+        saveStatusContainer.innerHTML = `
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading…</span>
+          </div>
+        `;
+        saveStatusContainer.style.display = "block";
 
-      setTimeout(() => {
-        // Validate retrieved values
-        const idValid      = /^\d{18}$/.test(storedId);
-        const webhookValid = storedWebhook.startsWith("https://discord.com/api/webhooks/");
+        setTimeout(() => {
+          // Validate retrieved values
+          const idValid      = /^\d{18}$/.test(storedId);
+          const webhookValid = storedWebhook.startsWith("https://discord.com/api/webhooks/");
+
+          if (!idValid || !webhookValid) {
+            let errorMessage = "";
+            if (!idValid && !webhookValid) {
+              errorMessage = "Invalid Discord ID and Discord Webhook.";
+            } else if (!idValid) {
+              errorMessage = "A valid Discord ID was not entered.";
+            } else {
+              errorMessage = "A valid Discord Webhook was not entered.";
+            }
+
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-danger">❌</div>
+              <div class="mt-2">${errorMessage}</div>
+            `;
+
+            // After 2 seconds, hide status and show form again
+            setTimeout(() => {
+              saveStatusContainer.style.display = "none";
+              discordFormFields.style.display = "block";
+            }, 2000);
+          } else {
+            // Valid: call updateSaveData and show success
+            updateSaveData({ discordID: storedId });
+            updateSaveData({ discordWebhook: storedWebhook });
+
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-success">✅</div>
+              <div class="mt-2">Loaded successfully</div>
+            `;
+
+            // After 2 seconds, hide form container and show main content
+            setTimeout(() => {
+              discordFormContainer.style.display = "none";
+              mainContent.style.display = "block";
+            }, 2000);
+          }
+        }, 2000);
+      });
+    });
+
+    // Save New Info: check Alt1, then validate inputs, save, and proceed
+    saveBtn.addEventListener("click", () => {
+      checkAlt1AndProceed(() => {
+        const idValue      = discordIdInput.value.trim();
+        const webhookValue = discordWebhookInput.value.trim();
+
+        // VALIDATE inputs before saving:
+        const idValid = /^\d{18}$/.test(idValue);
+        const webhookValid = webhookValue.startsWith("https://discord.com/api/webhooks/");
 
         if (!idValid || !webhookValid) {
+          // Hide form fields, show red X + appropriate error text
+          discordFormFields.style.display = "none";
+
           let errorMessage = "";
           if (!idValid && !webhookValid) {
             errorMessage = "Invalid Discord ID and Discord Webhook.";
@@ -291,117 +373,64 @@
             <div class="fs-1 text-danger">❌</div>
             <div class="mt-2">${errorMessage}</div>
           `;
+          saveStatusContainer.style.display = "block";
 
-          // After 2 seconds, hide status and show form again
+          // After 2 seconds, hide the status and return to the form
           setTimeout(() => {
             saveStatusContainer.style.display = "none";
             discordFormFields.style.display = "block";
           }, 2000);
-        } else {
-          // Valid: call updateSaveData and show success
-          updateSaveData({ discordID: storedId });
-          updateSaveData({ discordWebhook: storedWebhook });
 
-          saveStatusContainer.innerHTML = `
-            <div class="fs-1 text-success">✅</div>
-            <div class="mt-2">Loaded successfully</div>
-          `;
+          return;
+        }
 
-          // After 2 seconds, hide form container and show main content
+        // Store valid inputs in localStorage
+        localStorage.setItem("discordID", idValue);
+        localStorage.setItem("discordWebhook", webhookValue);
+
+        // After storing, ensure Load button is visible
+        loadSavedBtn.style.display = "block";
+
+        // Call existing save‐to‐localStorage functions:
+        updateSaveData({ discordID: idValue });
+        updateSaveData({ discordWebhook: webhookValue });
+
+        // Hide the input fields
+        discordFormFields.style.display = "none";
+
+        // Show a Bootstrap spinner
+        saveStatusContainer.innerHTML = `
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Saving…</span>
+          </div>
+        `;
+        saveStatusContainer.style.display = "block";
+
+        // After 2 seconds, replace spinner with success or error icon
+        setTimeout(() => {
+          const savedId = getSaveData("discordID");
+          const savedWebhook = getSaveData("discordWebhook");
+          const success = savedId && savedWebhook;
+
+          if (success) {
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-success">✅</div>
+              <div class="mt-2">Saved successfully</div>
+            `;
+          } else {
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-danger">❌</div>
+              <div class="mt-2">Save failed</div>
+            `;
+          }
+
+          // After another 2 seconds, hide the form and show main content
           setTimeout(() => {
             discordFormContainer.style.display = "none";
             mainContent.style.display = "block";
           }, 2000);
-        }
-      }, 2000);
-    });
-
-    saveBtn.addEventListener("click", () => {
-      const idValue      = discordIdInput.value.trim();
-      const webhookValue = discordWebhookInput.value.trim();
-
-      // 1) VALIDATE inputs before saving:
-      const idValid = /^\d{18}$/.test(idValue);
-      const webhookValid = webhookValue.startsWith("https://discord.com/api/webhooks/");
-
-      if (!idValid || !webhookValid) {
-        // Hide form fields, show red X + appropriate error text
-        discordFormFields.style.display = "none";
-
-        let errorMessage = "";
-        if (!idValid && !webhookValid) {
-          errorMessage = "Invalid Discord ID and Discord Webhook.";
-        } else if (!idValid) {
-          errorMessage = "A valid Discord ID was not entered.";
-        } else {
-          errorMessage = "A valid Discord Webhook was not entered.";
-        }
-
-        saveStatusContainer.innerHTML = `
-          <div class="fs-1 text-danger">❌</div>
-          <div class="mt-2">${errorMessage}</div>
-        `;
-        saveStatusContainer.style.display = "block";
-
-        // After 2 seconds, hide the status and return to the form
-        setTimeout(() => {
-          saveStatusContainer.style.display = "none";
-          discordFormFields.style.display = "block";
         }, 2000);
-
-        // Do not proceed to save or show main content
-        return;
-      }
-
-      // 1a) Store valid inputs in localStorage
-      localStorage.setItem("discordID", idValue);
-      localStorage.setItem("discordWebhook", webhookValue);
-
-      // After storing, ensure Load button is visible
-      loadSavedBtn.style.display = "block";
-
-      // 2) If we reach here, BOTH inputs are valid, so proceed with existing logic:
-
-      // (a) Call your existing save‐to‐localStorage functions:
-      updateSaveData({ discordID: idValue });
-      updateSaveData({ discordWebhook: webhookValue });
-
-      // (b) Hide the input fields
-      discordFormFields.style.display = "none";
-
-      // (c) Show a Bootstrap spinner in saveStatusContainer
-      saveStatusContainer.innerHTML = `
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Saving…</span>
-        </div>
-      `;
-      saveStatusContainer.style.display = "block";
-
-      // (d) After 2 seconds, replace spinner with success or error icon
-      setTimeout(() => {
-        // Check if both values were actually saved:
-        const savedId = getSaveData("discordID");
-        const savedWebhook = getSaveData("discordWebhook");
-        const success = savedId && savedWebhook;
-
-        if (success) {
-          saveStatusContainer.innerHTML = `
-            <div class="fs-1 text-success">✅</div>
-            <div class="mt-2">Saved successfully</div>
-          `;
-        } else {
-          saveStatusContainer.innerHTML = `
-            <div class="fs-1 text-danger">❌</div>
-            <div class="mt-2">Save failed</div>
-          `;
-        }
-
-        // (e) After another 2 seconds, hide the entire form and show main content
-        setTimeout(() => {
-          discordFormContainer.style.display = "none";
-          mainContent.style.display = "block";
-        }, 2000);
-      }, 2000);
+      });
     });
   </script>
 </body>
