@@ -246,13 +246,14 @@
       const storedId = localStorage.getItem("discordID");
       const storedWebhook = localStorage.getItem("discordWebhook");
 
+      // Always display Save button
+      saveBtn.style.display = "block";
+
       if (storedId && storedWebhook) {
-        // Hide Save, show Load
-        saveBtn.style.display = "none";
+        // Show Load if both are present
         loadSavedBtn.style.display = "block";
       } else {
-        // No stored data → show Save, hide Load
-        saveBtn.style.display = "block";
+        // Hide Load otherwise
         loadSavedBtn.style.display = "none";
       }
     });
@@ -356,8 +357,7 @@
       localStorage.setItem("discordID", idValue);
       localStorage.setItem("discordWebhook", webhookValue);
 
-      // After storing, switch button visibility:
-      saveBtn.style.display = "none";
+      // After storing, ensure Load button is visible
       loadSavedBtn.style.display = "block";
 
       // 2) If we reach here, BOTH inputs are valid, so proceed with existing logic:
@@ -366,7 +366,7 @@
       updateSaveData({ discordID: idValue });
       updateSaveData({ discordWebhook: webhookValue });
 
-      // (b) Hide the input fields and Save button
+      // (b) Hide the input fields
       discordFormFields.style.display = "none";
 
       // (c) Show a Bootstrap spinner in saveStatusContainer
