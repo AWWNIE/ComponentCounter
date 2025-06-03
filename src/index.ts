@@ -327,3 +327,8 @@ function getSaveData(name) {
 	const lsData = JSON.parse(localStorage.getItem(appName));
 	return lsData[name] || false;
 }
+
+// ─── ADD THESE LINES ───
+// Expose these functions globally so index.html’s inline script can call them:
+;(window as any).updateSaveData = updateSaveData
+;(window as any).getSaveData    = getSaveData
