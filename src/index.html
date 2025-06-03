@@ -70,12 +70,12 @@
                 />
               </div>
 
-              <!-- Save button (always enabled) -->
+              <!-- Save button -->
               <button id="saveDiscordBtn" class="btn btn-primary w-100 mb-2">
                 Save
               </button>
 
-              <!-- New: Load Saved Info button -->
+              <!-- Load Saved Info button -->
               <button id="loadSavedBtn" class="btn btn-secondary w-100">
                 Load Saved Info
               </button>
@@ -239,28 +239,45 @@
     const saveBtn              = document.getElementById("saveDiscordBtn");
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
 
-    // On page load, check for saved values and enable/disable the Load button
+    // On page load, decide which button to show
     window.addEventListener("DOMContentLoaded", () => {
       mainContent.style.display = "none";
+
       const storedId = localStorage.getItem("discordID");
       const storedWebhook = localStorage.getItem("discordWebhook");
+
       if (storedId && storedWebhook) {
-        loadSavedBtn.disabled = false;
+        // Hide Save, show Load
+        saveBtn.style.display = "none";
+        loadSavedBtn.style.display = "block";
       } else {
-        loadSavedBtn.disabled = true;
+        // No stored data → show Save, hide Load
+        saveBtn.style.display = "block";
+        loadSavedBtn.style.display = "none";
       }
     });
 
-    // Load saved inputs into the form fields when button is clicked
+    // Load Saved Info: validate and then apply
     loadSavedBtn.addEventListener("click", () => {
       const storedId = localStorage.getItem("discordID");
       const storedWebhook = localStorage.getItem("discordWebhook");
-      if (storedId) {
-        discordIdInput.value = storedId;
+
+      // Validate retrieved values
+      const idValid      = /^\d{18}$/.test(storedId || "");
+      const webhookValid = (storedWebhook || "").startsWith("https://discord.com/api/webhooks/");
+
+      if (!idValid || !webhookValid) {
+        // If invalid, do nothing (user must manually re‐enter)
+        return;
       }
-      if (storedWebhook) {
-        discordWebhookInput.value = storedWebhook;
-      }
+
+      // If valid, execute functionality of Save button:
+      updateSaveData({ discordID: storedId });
+      updateSaveData({ discordWebhook: storedWebhook });
+
+      // Hide the entire form and show main content
+      discordFormContainer.style.display = "none";
+      mainContent.style.display = "block";
     });
 
     saveBtn.addEventListener("click", () => {
@@ -304,8 +321,9 @@
       localStorage.setItem("discordID", idValue);
       localStorage.setItem("discordWebhook", webhookValue);
 
-      // Enable the Load Saved button now that data is stored
-      loadSavedBtn.disabled = false;
+      // After storing, switch button visibility:
+      saveBtn.style.display = "none";
+      loadSavedBtn.style.display = "block";
 
       // 2) If we reach here, BOTH inputs are valid, so proceed with existing logic:
 
