@@ -7,8 +7,8 @@
 <body>
   <h1>RS3 Item Price Notifier</h1>
 
-  <label for="itemName">Item Name (e.g. abyssal_whip):</label><br />
-  <input type="text" id="itemName" placeholder="abyssal_whip" /><br /><br />
+  <label for="itemName">Item Name (e.g. Abyssal Whip):</label><br />
+  <input type="text" id="itemName" placeholder="Abyssal Whip" /><br /><br />
 
   <label for="webhookUrl">Discord Webhook URL:</label><br />
   <input
@@ -25,23 +25,25 @@
 
   <script>
     document.getElementById("sendBtn").addEventListener("click", async () => {
-      const itemNameInput = document
-        .getElementById("itemName")
-        .value.trim();
-      const webhookUrl = document
-        .getElementById("webhookUrl")
-        .value.trim();
+      let rawName = document.getElementById("itemName").value.trim();
+      const webhookUrl = document.getElementById("webhookUrl").value.trim();
       const userId = document.getElementById("userId").value.trim();
 
-      if (!itemNameInput || !webhookUrl || !userId) {
+      if (!rawName || !webhookUrl || !userId) {
         alert("Please fill in all fields.");
         return;
       }
 
+      // 1. Normalize the item name: lowercase, replace spaces with underscores
+      //    e.g. "Abyssal Whip" -> "abyssal_whip"
+      const normalizedName = rawName
+        .toLowerCase()
+        .replace(/\s+/g, "_");
+
       try {
-        // 1. Fetch latest price data for the given RS3 item name
+        // 2. Fetch latest price data for the normalized RS3 item name
         const apiUrl = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${encodeURIComponent(
-          itemNameInput
+          normalizedName
         )}`;
         const response = await fetch(apiUrl);
 
@@ -52,20 +54,21 @@
 
         const data = await response.json();
         // The API returns an object whose single key is the properly cased item name:
-        // e.g. { "Abyssal whip": { id: "4151", timestamp: "…", price: 72492, volume: 1326 } }
+        // e.g. { "Abyssal whip": { id: "4151", timestamp: "...", price: 72492, volume: 1326 } }
         const itemKey = Object.keys(data)[0];
         const itemData = data[itemKey];
         const price = itemData.price;
         const id = itemData.id;
 
-        // 2. Construct a thumbnail URL for the RS3 item.
-        //    For RS3, item icons can be fetched via secure.runescape.com/m=itemdb_rs/ITEM_ID.png
-        const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/${id}.png`;
+        // 3. Construct a thumbnail URL using the RuneScape Wiki:
+        //    Format: https://runescape.wiki/images/{normalizedName}.png
+        //    (normalizedName is already lowercase with underscores)
+        const thumbnailUrl = `https://runescape.wiki/images/${normalizedName}.png`;
 
-        // 3. Prepare Discord message payload:
+        // 4. Prepare Discord message payload:
         //    - Mention the user via <@USER_ID>
         //    - Include an embed with title, description, and thumbnail
-        const content = `<@${userId}> The current price of **${itemKey}** is **${price.toLocaleString()} gp**.`;
+        const content = `<@${userId}>`;
         const embed = {
           title: `${itemKey} Price`,
           description: `${price.toLocaleString()} gp`,
@@ -76,7 +79,7 @@
           embeds: [embed],
         };
 
-        // 4. POST to the Discord webhook
+        // 5. POST to the Discord webhook
         const webhookResponse = await fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
