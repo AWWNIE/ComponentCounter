@@ -244,7 +244,7 @@
       discordFormFields.style.display = "none";
       saveStatusContainer.innerHTML = `
         <div class="fs-1 text-danger">❌</div>
-        <div class="mt-2">Alt1 not detected or full permissions not granted. Please run this in the Alt1 client with full permissions enabled.</div>
+        <div class="mt-2">Alt1 not detected, not installed, or missing required permissions. Please run this in the Alt1 client with screen‐pixels, game‐state, and overlay permissions enabled.</div>
       `;
       saveStatusContainer.style.display = "block";
       setTimeout(() => {
@@ -253,20 +253,17 @@
       }, 2000);
     }
 
-    // Wrapper: check Alt1 presence & permissions, then callback
+    // Wrapper: check Alt1 presence & all 3 permissions, then callback
     function checkAlt1AndProceed(callback) {
-      if (!window.alt1) {
+      if (!window.alt1 || !alt1.permissionInstalled) {
         showAlt1Error();
         return;
       }
-      // Request full permissions
-      alt1.permissionRequest({ name: "RS3DropNotifier" }).then((granted) => {
-        if (!granted) {
-          showAlt1Error();
-          return;
-        }
-        callback();
-      });
+      if (!alt1.permissionGameState || !alt1.permissionOverlay || !alt1.permissionPixel) {
+        showAlt1Error();
+        return;
+      }
+      callback();
     }
 
     // On page load, decide which button to show
