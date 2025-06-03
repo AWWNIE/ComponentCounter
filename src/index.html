@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rasial Drop Notifier (ChatboxReader)</title>
+  <title>Discord Message Sender</title>
 
   <!-- Bootstrap CSS -->
   <link
@@ -23,8 +23,6 @@
   <link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
   <link rel="stylesheet" type="text/css" href="https://runeapps.org/runeappslib.css" />
 
-  <!-- NO alt1.min.js CDN—Alt1 injects `alt1` automatically -->
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -34,26 +32,16 @@
       padding: 16px;
     }
     h2 {
-      margin-bottom: 4px;
-    }
-    p {
-      margin-top: 0;
-      font-size: 0.9rem;
-      color: #ccc;
-    }
-    #status {
-      margin-top: 12px;
-      font-size: 0.9rem;
-      color: #fa0;
+      margin-bottom: 8px;
     }
     label {
       display: block;
       margin-top: 12px;
       font-size: 0.9rem;
     }
-    input, select, button {
+    input, textarea, button {
       margin-top: 4px;
-      padding: 6px;
+      padding: 8px;
       font-size: 0.9rem;
       width: 100%;
       box-sizing: border-box;
@@ -61,6 +49,11 @@
       background: #2e2e2e;
       color: #f0f0f0;
       outline: none;
+      border-radius: 4px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
     }
     button {
       cursor: pointer;
@@ -72,22 +65,19 @@
     button:hover {
       background: #005a99;
     }
+    #status {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: #fa0;
+    }
     .section {
       margin-bottom: 16px;
-      padding: 12px;
-      border: 1px solid #444;
-      border-radius: 4px;
-      background: #2a2a2a;
-    }
-    .info-text {
-      font-size: 0.85rem;
-      color: #bbb;
     }
   </style>
 </head>
 <body>
-  <h2>Rasial Drop Notifier</h2>
-  <p>Uses Alt1’s ChatboxReader to OCR your chat and post rare Rasial drops to Discord.</p>
+  <h2>Discord Message Sender</h2>
+  <p>Enter your Discord Webhook URL, User ID, and a message. Click “Send” to post to Discord.</p>
 
   <div class="section">
     <label for="webhookUrl">Discord Webhook URL</label>
@@ -104,259 +94,60 @@
   </div>
 
   <div class="section">
-    <label for="chatSelect">Select Chatbox</label>
-    <select id="chatSelect">
-      <option value="">Detecting chatboxes...</option>
-    </select>
-    <p class="info-text">If multiple chatboxes are found, select the one overlayed on your RuneScape client.</p>
+    <label for="messageText">Message to Send</label>
+    <textarea id="messageText" placeholder="Type your message here…"></textarea>
   </div>
 
-  <button id="startBtn">Start Monitoring</button>
+  <button id="sendBtn">Send Message</button>
   <div id="status">Idle</div>
 
-  <script type="module">
-    import * as a1lib from "alt1";
-    import ChatboxReader from "alt1/chatbox";
-    import * as OCR from "alt1/ocr";
+  <script>
+    const sendBtn = document.getElementById("sendBtn");
+    const statusDiv = document.getElementById("status");
 
-    const appName = "RasialDropNotifier";
-    const timestampRegex = /\[\d{2}:\d{2}:\d{2}\]/g;
-    const reader = new ChatboxReader();
-
-    // Configure ChatboxReader read arguments (default colors suffice for chat text)
-    reader.readargs = {
-      colors: [
-        a1lib.mixColor(255, 255, 255), // Standard chat text (white)
-        a1lib.mixColor(0, 255, 0),     // Public chat (green)
-        a1lib.mixColor(255, 0, 0),     // Trade/Other (red)
-        // Add other colors if your chat uses custom text colors
-      ]
-    };
-
-    // References to DOM elements
-    const chatSelector = document.querySelector("#chatSelect");
-    const startButton  = document.querySelector("#startBtn");
-    const statusDiv    = document.querySelector("#status");
-    let monitoring     = false;
-    let scanIntervalHandle = null;
-    let lastKillCount  = 0;
-
-    // Identify Alt1 app URL for permissions
-    if (window.alt1) {
-      alt1.identifyAppUrl("./appconfig.json");
-    } else {
-      const addAppUrl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-      document.body.innerHTML = `
-        <p style="color:#faa;">
-          Alt1 not detected. Click 
-          <a href="${addAppUrl}">here</a> to add this app to Alt1.
-        </p>`;
+    function updateStatus(msg, isError = false) {
+      statusDiv.textContent = msg;
+      statusDiv.style.color = isError ? "#f33" : "#fa0";
     }
 
-    // On load: find all chatboxes
-    window.setTimeout(() => {
-      reader.find();
-      const findLoop = setInterval(() => {
-        if (reader.pos === null) {
-          reader.find();
-        } else {
-          clearInterval(findLoop);
-          populateChatSelector();
-          // If a previously saved chat index exists, select it
-          const savedIndex = sessionStorage.getItem(`${appName}_chatIndex`);
-          if (savedIndex !== null && reader.pos.boxes[savedIndex]) {
-            chatSelector.value = savedIndex;
-            reader.pos.mainbox = reader.pos.boxes[savedIndex];
-          } else {
-            // Default to first chatbox
-            chatSelector.value = "0";
-            reader.pos.mainbox = reader.pos.boxes[0];
-            sessionStorage.setItem(`${appName}_chatIndex`, "0");
-          }
-          updateStatus("Ready. Select chatbox and click ‘Start Monitoring’.");
-        }
-      }, 500);
-    }, 50);
+    sendBtn.addEventListener("click", async () => {
+      const webhookUrl = document.getElementById("webhookUrl").value.trim();
+      const userId = document.getElementById("userId").value.trim();
+      const messageText = document.getElementById("messageText").value.trim();
 
-    function populateChatSelector() {
-      chatSelector.innerHTML = "";
-      reader.pos.boxes.forEach((box, idx) => {
-        const opt = document.createElement("option");
-        opt.value = idx;
-        opt.text = `Chat ${idx + 1}`;
-        chatSelector.appendChild(opt);
-      });
-    }
-
-    // Listen for chatbox selection changes
-    chatSelector.addEventListener("change", () => {
-      const idx = chatSelector.value;
-      reader.pos.mainbox = reader.pos.boxes[idx];
-      sessionStorage.setItem(`${appName}_chatIndex`, idx);
-      showOverlay();
-    });
-
-    // Draw transparent overlay around selected chatbox
-    function showOverlay() {
-      try {
-        const box = reader.pos.mainbox.rect;
-        // Draw for 2000ms with a 5-pixel-thick outline
-        alt1.overLayRect(a1lib.mixColor(0, 255, 0), box.x, box.y, box.width, box.height, 2000, 5);
-      } catch {
-        // ignore if overlay fails
-      }
-    }
-
-    // Start/Stop monitoring loop
-    startButton.addEventListener("click", () => {
-      if (!monitoring) {
-        const webhookUrl = document.getElementById("webhookUrl").value.trim();
-        const userId     = document.getElementById("userId").value.trim();
-        if (!webhookUrl || !userId || !/^\d+$/.test(userId)) {
-          alert("Please enter a valid Discord Webhook URL and numeric User ID.");
-          return;
-        }
-
-        // Save Discord settings to sessionStorage
-        sessionStorage.setItem(`${appName}_webhook`, webhookUrl);
-        sessionStorage.setItem(`${appName}_userId`, userId);
-
-        monitoring = true;
-        startButton.textContent = "Stop Monitoring";
-        updateStatus("Monitoring chat…");
-
-        // Immediately read once, then every 6 seconds
-        readChatbox();
-        scanIntervalHandle = setInterval(readChatbox, 6000);
-      } else {
-        monitoring = false;
-        startButton.textContent = "Start Monitoring";
-        clearInterval(scanIntervalHandle);
-        updateStatus("Stopped.");
-      }
-    });
-
-    // Reads the chatbox via ChatboxReader and processes lines
-    async function readChatbox() {
-      if (!reader.pos || !reader.pos.mainbox) {
-        updateStatus("No chatbox selected.");
+      if (!webhookUrl || !userId || !messageText) {
+        updateStatus("Please fill in all fields.", true);
         return;
       }
-      try {
-        const rawOpts = reader.read() || [];
-        const lines = processChat(rawOpts);
-
-        for (const line of lines) {
-          // Skip if already seen
-          if (isInHistory(line)) continue;
-          updateChatHistory(line);
-
-          // 1) Check for kill-count update: “You have killed Rasial, … 123 times.”
-          const kcMatch = line.match(/You have killed Rasial.*?([\d,]+)\s+times/i);
-          if (kcMatch) {
-            lastKillCount = parseInt(kcMatch[1].replace(/,/g, ""), 10);
-          }
-
-          // 2) Check for rare drop: “Your <ItemName> (<value>) has appeared on the ground.”
-          const dropMatch = line.match(/Your\s+(.+?)\s+\(([\d,]+)\)\s+has appeared/i);
-          if (dropMatch) {
-            const currentKC = lastKillCount;
-            if (currentKC > Number(getLastKCFromHistory())) {
-              // New drop at higher KC
-              const itemName = dropMatch[1].trim();
-              const value    = dropMatch[2].replace(/,/g, "");
-              const timeStr  = new Date().toLocaleString();
-              await sendToDiscord(itemName, value, currentKC, timeStr);
-              updateLastKCInHistory(currentKC);
-            }
-          }
-        }
-        updateStatus(`Last KC: ${lastKillCount} | Next check at ${new Date().toLocaleTimeString()}`);
-      } catch (e) {
-        console.error("Error reading chat:", e);
-        updateStatus("Error reading chat—check console.");
+      if (!/^\d+$/.test(userId)) {
+        updateStatus("User ID must be numeric (no brackets).", true);
+        return;
       }
-    }
-
-    // Convert ChatboxReader output (opts) to an array of full chat lines
-    function processChat(opts) {
-      let chatStr = "";
-      const chatArr = [];
-
-      for (let i = 0; i < opts.length; i++) {
-        const frag = opts[i];
-        // Skip initial fragment if it has no timestamp (likely from a reload)
-        if (i === 0 && !frag.text.match(timestampRegex)) continue;
-
-        if (frag.text.match(timestampRegex)) {
-          // New chat line begins; push existing string first
-          if (chatStr.trim()) {
-            chatArr.push(chatStr.trim());
-          }
-          chatStr = frag.text + " ";
-        } else {
-          chatStr += frag.text + " ";
-        }
-      }
-      // Push last line if non-empty
-      if (chatStr.trim()) {
-        chatArr.push(chatStr.trim());
-      }
-      return chatArr;
-    }
-
-    // History tracking for full chat lines (to avoid duplicates)
-    function updateChatHistory(line) {
-      const key = `${appName}_chatHistory`;
-      let hist = sessionStorage.getItem(key) || "";
-      hist = hist.split("\n").filter(l => l); // array of lines
-      hist.push(line);
-      // Keep last 200 entries
-      if (hist.length > 200) hist.splice(0, hist.length - 200);
-      sessionStorage.setItem(key, hist.join("\n"));
-    }
-    function isInHistory(line) {
-      const key = `${appName}_chatHistory`;
-      const hist = (sessionStorage.getItem(key) || "").split("\n");
-      return hist.includes(line);
-    }
-
-    // Track last kill count to prevent duplicate notifications
-    function updateLastKCInHistory(kc) {
-      sessionStorage.setItem(`${appName}_lastKC`, kc.toString());
-    }
-    function getLastKCFromHistory() {
-      return sessionStorage.getItem(`${appName}_lastKC`) || "0";
-    }
-
-    // Send a Discord message via webhook
-    async function sendToDiscord(itemName, value, killCount, timeStr) {
-      const webhookUrl = sessionStorage.getItem(`${appName}_webhook`);
-      const userId     = sessionStorage.getItem(`${appName}_userId`);
-      if (!webhookUrl || !userId) return;
 
       const mention = `<@${userId}>`;
-      const content = `${mention} Rare drop detected!\n`
-                    + `• Item: **${itemName}**\n`
-                    + `• Value: **${value} gp**\n`
-                    + `• Kill Count: **${killCount}**\n`
-                    + `• Time: **${timeStr}`;
+      const content = `${mention} ${messageText}`;
+
+      updateStatus("Sending…");
 
       try {
-        await fetch(webhookUrl, {
+        const response = await fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content })
         });
-        console.log("Discord message sent:", content);
+        if (response.ok) {
+          updateStatus("Message sent successfully.");
+          // Optionally clear the message field:
+          document.getElementById("messageText").value = "";
+        } else {
+          const text = await response.text();
+          updateStatus(`Failed to send (status ${response.status}): ${text}`, true);
+        }
       } catch (err) {
-        console.error("Failed to post to Discord:", err);
+        console.error("Error sending to Discord:", err);
+        updateStatus("Network error—check console.", true);
       }
-    }
-
-    function updateStatus(msg) {
-      statusDiv.textContent = msg;
-    }
+    });
   </script>
 </body>
 </html>
