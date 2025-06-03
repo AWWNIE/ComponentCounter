@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>RS3 Drop Notifier</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- Bootstrap CSS -->
+  <!-- Bootstrap CSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
@@ -237,14 +237,49 @@
       const idValue      = discordIdInput.value.trim();
       const webhookValue = discordWebhookInput.value.trim();
 
-      // 1) Call your existing save‐to‐localStorage functions:
+      // 1) VALIDATE inputs before saving:
+      const idValid = /^\d{18}$/.test(idValue);
+      const webhookValid = webhookValue.startsWith("https://discord.com/api/webhooks/");
+
+      if (!idValid || !webhookValid) {
+        // Hide form fields, show red X + appropriate error text
+        discordFormFields.style.display = "none";
+
+        let errorMessage = "";
+        if (!idValid && !webhookValid) {
+          errorMessage = "Invalid Discord ID and Discord Webhook.";
+        } else if (!idValid) {
+          errorMessage = "A valid Discord ID was not entered.";
+        } else {
+          errorMessage = "A valid Discord Webhook was not entered.";
+        }
+
+        saveStatusContainer.innerHTML = `
+          <div class="fs-1 text-danger">❌</div>
+          <div class="mt-2">${errorMessage}</div>
+        `;
+        saveStatusContainer.style.display = "block";
+
+        // After 2 seconds, hide the status and return to the form
+        setTimeout(() => {
+          saveStatusContainer.style.display = "none";
+          discordFormFields.style.display = "block";
+        }, 2000);
+
+        // Do not proceed to save or show main content
+        return;
+      }
+
+      // 2) If we reach here, BOTH inputs are valid, so proceed with existing logic:
+
+      // (a) Call your existing save‐to‐localStorage functions:
       updateSaveData({ discordID: idValue });
       updateSaveData({ discordWebhook: webhookValue });
 
-      // 2) Hide the input fields and Save button
+      // (b) Hide the input fields and Save button
       discordFormFields.style.display = "none";
 
-      // 3) Show a Bootstrap spinner in saveStatusContainer
+      // (c) Show a Bootstrap spinner in saveStatusContainer
       saveStatusContainer.innerHTML = `
         <div class="spinner-border" role="status">
           <span class="visually-hidden">Saving…</span>
@@ -252,7 +287,7 @@
       `;
       saveStatusContainer.style.display = "block";
 
-      // 4) After 2 seconds, replace spinner with success or error icon
+      // (d) After 2 seconds, replace spinner with success or error icon
       setTimeout(() => {
         // Check if both values were actually saved:
         const savedId = getSaveData("discordID");
@@ -271,7 +306,7 @@
           `;
         }
 
-        // 5) After another 2 seconds, hide the entire form and show main content
+        // (e) After another 2 seconds, hide the entire form and show main content
         setTimeout(() => {
           discordFormContainer.style.display = "none";
           mainContent.style.display = "block";
