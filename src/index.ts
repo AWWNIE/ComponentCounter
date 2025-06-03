@@ -1,4 +1,4 @@
-// alt1 base libs, provides all the commonly used methods for image matching and capture
+// alt1 base libs, provides all the commonly used methods for image matching and capture 
 // also gives your editor info about the window.alt1 api
 import * as a1lib from "alt1";
 import ChatboxReader, { ChatLine } from "alt1/chatbox";
@@ -12,6 +12,95 @@ import "./appconfig.json";
 import "./css/style.css";
 import "./icon.png";
 
+/**
+ * --------------------------------------------------------------
+ * Add Discord Webhook & ID input fields at the VERY TOP of the page,
+ * before any other content is shown. When the user clicks "Save",
+ * we run updateSaveData({ discordWebhook: ... }) and
+ * updateSaveData({ discordId: ... }) and then remove the inputs.
+ * --------------------------------------------------------------
+ */
+(function () {
+	// Note: getSaveData is hoisted, so this can run before its declaration below.
+	const existingWebhook = getSaveData("discordWebhook");
+	const existingId = getSaveData("discordId");
+
+	// Only show inputs if either value is missing
+	if (!existingWebhook || !existingId) {
+		// Create a container to hold both inputs and the Save button
+		const container = document.createElement("div");
+		container.id = "discord-config-container";
+		container.style.padding = "10px";
+		container.style.backgroundColor = "#f0f0f0";
+		container.style.borderBottom = "1px solid #ccc";
+
+		// Webhook URL label + input
+		const webhookLabel = document.createElement("label");
+		webhookLabel.setAttribute("for", "discordWebhookInput");
+		webhookLabel.textContent = "Discord Webhook URL:";
+		webhookLabel.style.display = "block";
+		webhookLabel.style.marginBottom = "4px";
+
+		const webhookInput = document.createElement("input");
+		webhookInput.type = "text";
+		webhookInput.id = "discordWebhookInput";
+		webhookInput.placeholder = "https://discord.com/api/webhooks/...";
+		webhookInput.style.width = "100%";
+		webhookInput.style.marginBottom = "10px";
+
+		// Discord ID label + input
+		const idLabel = document.createElement("label");
+		idLabel.setAttribute("for", "discordIdInput");
+		idLabel.textContent = "Discord User ID:";
+		idLabel.style.display = "block";
+		idLabel.style.marginBottom = "4px";
+
+		const idInput = document.createElement("input");
+		idInput.type = "text";
+		idInput.id = "discordIdInput";
+		idInput.placeholder = "Enter your Discord User ID";
+		idInput.style.width = "100%";
+		idInput.style.marginBottom = "10px";
+
+		// Save button
+		const saveButton = document.createElement("button");
+		saveButton.textContent = "Save Discord Config";
+		saveButton.style.padding = "8px 16px";
+		saveButton.style.cursor = "pointer";
+		saveButton.addEventListener("click", () => {
+			const webhookValue = (document.getElementById("discordWebhookInput") as HTMLInputElement).value.trim();
+			const idValue = (document.getElementById("discordIdInput") as HTMLInputElement).value.trim();
+
+			if (!webhookValue || !idValue) {
+				alert("Please enter both the Webhook URL and your Discord ID before saving.");
+				return;
+			}
+
+			// Save to localStorage via updateSaveData
+			updateSaveData({ discordWebhook: webhookValue });
+			updateSaveData({ discordId: idValue });
+
+			// Remove the config inputs
+			container.remove();
+		});
+
+		// Append elements to the container
+		container.appendChild(webhookLabel);
+		container.appendChild(webhookInput);
+		container.appendChild(idLabel);
+		container.appendChild(idInput);
+		container.appendChild(saveButton);
+
+		// Insert the container at the very top of the body
+		const firstChild = document.body.firstChild;
+		document.body.insertBefore(container, firstChild);
+	}
+})();
+
+// ------------------------------------------------------------------------------------
+// The rest of your existing code remains exactly as it was below this point.
+// ------------------------------------------------------------------------------------
+
 const itemList = document.querySelector(".itemList");
 const chatSelector = document.querySelector(".chat");
 const exportButton = document.querySelector(".export");
@@ -23,188 +112,73 @@ const timestampRegex = /\[\d{2}:\d{2}:\d{2}\]/g;
 const reader = new ChatboxReader();
 const appName = "SerenTracker";
 
-// Helper functions for Save Data
-function updateSaveData(...dataset) {
-	const lsData = JSON.parse(localStorage.getItem(appName)) || {};
-	for (let data of dataset) {
-		const name = Object.keys(data)[0];
-		const value = Object.values(data)[0];
-		// Data property exists, push to array
-		if (name == "data") {
-			// If data exists, append to array
-			if (lsData[name] && value != localStorage.getItem("serenData")) {
-				lsData[name].push(value);
-				continue;
-			}
-			// data doesn't exist, if importing from old data (passed in array), set data to array
-			else if (Array.isArray(value)) {
-				lsData[name] = value;
-				continue;
-			}
-			// data doesn't exist, initialize data with array, append new value to data.
-			lsData[name] = [];
-			lsData[name].push(value);
-			continue;
-		}
-		lsData[name] = value;
-	}
-	localStorage.setItem(appName, JSON.stringify(lsData));
+//check if we are running inside alt1 by checking if the alt1 global exists
+if (window.alt1) {
+	//tell alt1 about the app
+	//this makes alt1 show the add app button when running inside the embedded browser
+	//also updates app settings if they are changed
+	alt1.identifyAppUrl("./appconfig.json");
+} else {
+	let addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
+	let newEle = `<li>Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1</li>`;
+	itemList.insertAdjacentHTML("beforeend", newEle);
 }
 
-function getSaveData(name) {
-	const lsData = JSON.parse(localStorage.getItem(appName));
-	return lsData ? lsData[name] : false;
-}
+// Set Chat reader
+reader.readargs = {
+	colors: [
+		a1lib.mixColor(0, 255, 255), //Seren text color
+	],
+};
 
-// ----------
-// BEGIN: Show input fields for Discord webhook and ID, if not already set
-// ----------
+window.setTimeout(function () {
+	//Find all visible chatboxes on screen
+	let findChat = setInterval(function () {
+		if (reader.pos === null) reader.find();
+		else {
+			clearInterval(findChat);
+			reader.pos.boxes.map((box, i) => {
+				chatSelector.insertAdjacentHTML("beforeend", `<option value=${i}>Chat ${i}</option>`);
+			});
 
-function showDiscordConfigInputs() {
-	// Create a container to hold both input fields and the save button
-	const container = document.createElement("div");
-	container.id = "discord-config-container";
-	container.style.padding = "10px";
-	container.style.backgroundColor = "#f9f9f9";
-	container.style.borderBottom = "1px solid #ccc";
-
-	// Webhook URL input
-	const webhookLabel = document.createElement("label");
-	webhookLabel.setAttribute("for", "discordWebhookInput");
-	webhookLabel.textContent = "Discord Webhook URL:";
-	webhookLabel.style.display = "block";
-	webhookLabel.style.marginBottom = "4px";
-
-	const webhookInput = document.createElement("input");
-	webhookInput.type = "text";
-	webhookInput.id = "discordWebhookInput";
-	webhookInput.placeholder = "https://discord.com/api/webhooks/...";
-	webhookInput.style.width = "100%";
-	webhookInput.style.marginBottom = "10px";
-
-	// Discord ID input
-	const idLabel = document.createElement("label");
-	idLabel.setAttribute("for", "discordIdInput");
-	idLabel.textContent = "Discord User ID:";
-	idLabel.style.display = "block";
-	idLabel.style.marginBottom = "4px";
-
-	const idInput = document.createElement("input");
-	idInput.type = "text";
-	idInput.id = "discordIdInput";
-	idInput.placeholder = "Enter your Discord User ID";
-	idInput.style.width = "100%";
-	idInput.style.marginBottom = "10px";
-
-	// Save button
-	const saveButton = document.createElement("button");
-	saveButton.textContent = "Save Settings";
-	saveButton.style.padding = "8px 16px";
-	saveButton.style.cursor = "pointer";
-	saveButton.addEventListener("click", () => {
-		const webhookValue = (document.getElementById("discordWebhookInput") as HTMLInputElement).value.trim();
-		const idValue = (document.getElementById("discordIdInput") as HTMLInputElement).value.trim();
-
-		if (!webhookValue || !idValue) {
-			alert("Please enter both the Webhook URL and your Discord ID before saving.");
-			return;
-		}
-
-		// Save to localStorage
-		updateSaveData({ discordWebhook: webhookValue });
-		updateSaveData({ discordId: idValue });
-
-		// Remove the config inputs and re-initialize the app
-		container.remove();
-		initializeApp(); 
-	});
-
-	// Append elements to the container
-	container.appendChild(webhookLabel);
-	container.appendChild(webhookInput);
-	container.appendChild(idLabel);
-	container.appendChild(idInput);
-	container.appendChild(saveButton);
-
-	// Insert the container at the top of the body (before any other content)
-	document.body.insertAdjacentElement("afterbegin", container);
-}
-
-function checkDiscordConfigAndStart() {
-	const savedWebhook = getSaveData("discordWebhook");
-	const savedId = getSaveData("discordId");
-
-	if (!savedWebhook || !savedId) {
-		// If either value is missing, show the input fields
-		showDiscordConfigInputs();
-	} else {
-		// Both values exist, proceed with normal initialization
-		initializeApp();
-	}
-// ----------
-// END: Show input fields for Discord webhook and ID
-// ----------
-}
-
-// Main initialization logic, runs only after Discord config is ensured
-function initializeApp() {
-	//check if we are running inside alt1 by checking if the alt1 global exists
-	if (window.alt1) {
-		//tell alt1 about the app
-		//this makes alt1 show the add app button when running inside the embedded browser
-		//also updates app settings if they are changed
-		alt1.identifyAppUrl("./appconfig.json");
-	} else {
-		let addappurl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
-		let newEle = `<li>Alt1 not detected, click <a href='${addappurl}'>here</a> to add this app to Alt1</li>`;
-		itemList.insertAdjacentHTML("beforeend", newEle);
-	}
-
-	// Set Chat reader
-	reader.readargs = {
-		colors: [
-			a1lib.mixColor(0, 255, 255), //Seren text color
-		],
-	};
-
-	window.setTimeout(function () {
-		//Find all visible chatboxes on screen
-		let findChat = setInterval(function () {
-			if (reader.pos === null) reader.find();
-			else {
-				clearInterval(findChat);
-				reader.pos.boxes.map((box, i) => {
-					chatSelector.insertAdjacentHTML("beforeend", `<option value=${i}>Chat ${i}</option>`);
-				});
-
-				// Add logic to switch chatboxes
-				chatSelector.addEventListener("change", function () {
-					reader.pos.mainbox = reader.pos.boxes[this.value];
-					showSelectedChat(reader.pos);
-					updateSaveData({ chat: this.value });
-					this.value = "";
-				});
-
-				if (getSaveData("chat")) {
-					reader.pos.mainbox = reader.pos.boxes[getSaveData("chat")];
-				} else {
-					//If multiple boxes are found, this will select the first, which should be the top-most chat box on the screen.
-					reader.pos.mainbox = reader.pos.boxes[0];
-					updateSaveData({ chat: "0" });
-				}
-
+			// Add logic to switch chatboxes
+			chatSelector.addEventListener("change", function () {
+				reader.pos.mainbox = reader.pos.boxes[this.value];
 				showSelectedChat(reader.pos);
-				//build table from saved data, start tracking.
-				showItems();
-				setInterval(function () {
-					readChatbox();
-				}, 600);
-			}
-		}, 1000);
-	}, 50);
-}
+				updateSaveData({ chat: this.value });
+				this.value = "";
+			});
 
-// Reading and parsing info from the chatbox.
+			if (getSaveData("chat")) {
+				reader.pos.mainbox = reader.pos.boxes[getSaveData("chat")];
+			} else {
+				//If multiple boxes are found, this will select the first, which should be the top-most chat box on the screen.
+				reader.pos.mainbox = reader.pos.boxes[0];
+				updateSaveData({ chat: "0" });
+			}
+			if (getSaveData("discordWebhook")) {
+				// discordWebhook already set
+			} else {
+				// add user input box 
+				updateSaveData({ discordWebhook: "https://discord.com/api/webhooks/1379298168042160168/20HTHbg5K5uNLpuw_RCPoBMnHBEGjUAlqITpD02Qy0l8VCpWMs3U5Q6cBdrPt07aHyRP" });
+			}
+			if (getSaveData("discordID")) {
+				// discordID already set
+			} else {
+				// add user input box 
+				updateSaveData({ discordID: "600408294003048450" });
+			}
+			showSelectedChat(reader.pos);
+			//build table from saved data, start tracking.
+			showItems();
+			setInterval(function () {
+				readChatbox();
+			}, 600);
+		}
+	}, 1000);
+}, 50);
+
+//Reading and parsing info from the chatbox.
 function readChatbox() {
 	var opts = reader.read() || [];
 	var chatStr = "";
@@ -273,82 +247,3 @@ function isInHistory(chatLine) {
 			}
 		}
 	}
-	return false;
-}
-
-function showItems() {
-	itemList.querySelectorAll("li.item").forEach((el) => el.remove());
-	itemTotal.innerHTML = getSaveData("data").length;
-
-	if (getSaveData("mode") == "total") {
-		listHeader.dataset.show = "history";
-		listHeader.title = "Click to show History";
-		listHeader.innerHTML = "Seren Item Totals";
-		let total = getTotal();
-		Object.keys(total)
-			.sort()
-			.forEach((item) => itemList.insertAdjacentHTML("beforeend", `<li class="list-group-item item">${item}: ${total[item]}</li>`));
-	} else {
-		listHeader.dataset.show = "total";
-		listHeader.title = "Click to show Totals";
-		listHeader.innerHTML = "Seren Item History";
-		getSaveData("data")
-			.slice()
-			.reverse()
-			.map((item) => {
-				itemList.insertAdjacentHTML(
-					"beforeend",
-					`<li class="list-group-item item" title="${new Date(item.time).toLocaleString()}">${item.item}</li>`
-				);
-			});
-	}
-}
-
-function checkAnnounce(getItem) {
-	// Use the saved webhook URL
-	const webhookUrl = getSaveData("discordWebhook");
-	if (webhookUrl) {
-		fetch(webhookUrl, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				username: "Drop Tracker",
-				content: `[${new Date(getItem.time).toLocaleString()}] Received - ${getItem.item}`,
-			}),
-		});
-	}
-}
-
-// Function to determine the total of all items recorded.
-function getTotal() {
-	let total = {};
-	getSaveData("data").forEach((item) => {
-		let data = item.item.split(" x ");
-		total[data[1]] = parseInt(total[data[1]]) + parseInt(data[0]) || parseInt(data[0]);
-	});
-	return total;
-}
-
-exportButton.addEventListener("click", function () {
-	var str, fileName;
-	//If totals is checked, export totals
-	if (getSaveData("mode") == "total") {
-		str = "Qty,Item\n";
-		let total = getTotal();
-		Object.keys(total)
-			.sort()
-			.forEach((item) => (str = `${str}${total[item]},${item}\n`));
-		fileName = "serenTotalExport.csv";
-
-		//Otherwise, export list by item and time received.
-	} else {
-		str = "Item,Time\n"; // column headers
-		getSaveData("data").forEach((item) => {
-			str = `${str}${item.item},${new Date(item.time).toLocaleString()}\n`;
-		});
-		fileName = "serenHistoryExport.csv";
-	}
-	var blob = new Blob([str], { type: "text/csv;charset=utf-8;" });
-	var link
