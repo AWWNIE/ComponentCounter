@@ -10,6 +10,5 @@
   "minHeight": 139,
   "requestHandlers": [],
   "activators": [],
-  "discordWebhook": "https://discord.com/api/webhooks/1379298168042160168/20HTHbg5K5uNLpuw_RCPoBMnHBEGjUAlqITpD02Qy0l8VCpWMs3U5Q6cBdrPt07aHyRP",
   "permissions": "pixel,gamestate,overlay"
 }
