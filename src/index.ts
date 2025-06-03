@@ -1,4 +1,4 @@
-// alt1 base libs, provides all the commonly used methods for image matching and capture 
+// alt1 base libs, provides all the commonly used methods for image matching and capture
 // also gives your editor info about the window.alt1 api
 import * as a1lib from "alt1";
 import ChatboxReader, { ChatLine } from "alt1/chatbox";
@@ -11,19 +11,6 @@ import "./index.html";
 import "./appconfig.json";
 import "./css/style.css";
 import "./icon.png";
-
-/**
- * --------------------------------------------------------------
- * Add Discord Webhook & ID input fields at the VERY TOP of the page,
- * before any other content is shown. When the user clicks "Save",
- * we run updateSaveData({ discordWebhook: ... }) and
- * updateSaveData({ discordId: ... }) and then remove the inputs.
- * --------------------------------------------------------------
- */
-
-// ------------------------------------------------------------------------------------
-// The rest of your existing code remains exactly as it was below this point.
-// ------------------------------------------------------------------------------------
 
 const itemList = document.querySelector(".itemList");
 const chatSelector = document.querySelector(".chat");
@@ -171,3 +158,183 @@ function isInHistory(chatLine) {
 			}
 		}
 	}
+	return false;
+}
+
+function showItems() {
+	itemList.querySelectorAll("li.item").forEach((el) => el.remove());
+	itemTotal.innerHTML = getSaveData("data").length;
+
+	if (getSaveData("mode") == "total") {
+		listHeader.dataset.show = "history";
+		listHeader.title = "Click to show History";
+		listHeader.innerHTML = "Seren Item Totals";
+		let total = getTotal();
+		Object.keys(total)
+			.sort()
+			.forEach((item) => itemList.insertAdjacentHTML("beforeend", `<li class="list-group-item item">${item}: ${total[item]}</li>`));
+	} else {
+		listHeader.dataset.show = "total";
+		listHeader.title = "Click to show Totals";
+		listHeader.innerHTML = "Seren Item History";
+		getSaveData("data")
+			.slice()
+			.reverse()
+			.map((item) => {
+				itemList.insertAdjacentHTML(
+					"beforeend",
+					`<li class="list-group-item item" title="${new Date(item.time).toLocaleString()}">${item.item}</li>`
+				);
+			});
+	}
+}
+
+function checkAnnounce(getItem) {
+	if (getSaveData("discordWebhook")) {
+		fetch(getSaveData("discordWebhook"), {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				username: "Drop Tracker",
+				content: `[${new Date(getItem.time).toLocaleString()}] Received - ${getItem.item}`,
+			}),
+		});
+	}
+}
+
+//Function to determine the total of all items recorded.
+function getTotal() {
+	let total = {};
+	getSaveData("data").forEach((item) => {
+		let data = item.item.split(" x ");
+		total[data[1]] = parseInt(total[data[1]]) + parseInt(data[0]) || parseInt(data[0]);
+	});
+	return total;
+}
+
+exportButton.addEventListener("click", function () {
+	var str, fileName;
+	//If totals is checked, export totals
+	if (getSaveData("mode") == "total") {
+		str = "Qty,Item\n";
+		let total = getTotal();
+		Object.keys(total)
+			.sort()
+			.forEach((item) => (str = `${str}${total[item]},${item}\n`));
+		fileName = "serenTotalExport.csv";
+
+		//Otherwise, export list by item and time received.
+	} else {
+		str = "Item,Time\n"; // column headers
+		getSaveData("data").forEach((item) => {
+			str = `${str}${item.item},${new Date(item.time).toLocaleString()}\n`;
+		});
+		fileName = "serenHistoryExport.csv";
+	}
+	var blob = new Blob([str], { type: "text/csv;charset=utf-8;" });
+	var link = document.createElement("a");
+	if (link.download !== undefined) {
+		// feature detection
+		// Browsers that support HTML5 download attribute
+		var url = URL.createObjectURL(blob);
+		link.setAttribute("href", url);
+		link.setAttribute("download", fileName);
+		link.style.visibility = "hidden";
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	}
+});
+
+// Factory Reset logic
+clearButton.addEventListener("click", function () {
+	localStorage.removeItem(appName);
+	localStorage.setItem(appName, JSON.stringify({ chat: 0, data: [], mode: "history" }));
+	location.reload();
+});
+
+// "View" logic
+listHeader.addEventListener("click", function () {
+	updateSaveData({ mode: this.dataset.show });
+	showItems();
+});
+
+function showSelectedChat(chat) {
+	//Attempt to show a temporary rectangle around the chatbox.  skip if overlay is not enabled.
+	try {
+		alt1.overLayRect(appColor, chat.mainbox.rect.x, chat.mainbox.rect.y, chat.mainbox.rect.width, chat.mainbox.rect.height, 2000, 5);
+	} catch {}
+}
+
+/*
+TODO:
+- New Save Data format - DONE
+	- appName - Object that contains all specific values for app
+		- data - Tracked Items
+		- chat - Selected Chat Window
+		- total - Rename to mode - Selected data display mode.
+- Convert existing data into new format - DONE
+- Continue to tidy code, create pure functions, etc.
+- Look into only keeping the relavent SerenSpirit line in chatHistory. - DONE
+*/
+
+(function () {
+	// Fresh install, initialize Save Data
+	if(!localStorage.getItem("serenData") &&
+	!localStorage.getItem("serenTotal") &&
+	!localStorage.getItem("serenChat") &&
+	!localStorage.getItem(appName)
+) {
+	localStorage.setItem(appName, JSON.stringify({ chat: 0, data: [], mode: "history" }));
+	location.reload();
+}
+
+	// Convert old localStorage save data to new format.  Keep serenData entry just in case.
+	if (localStorage.getItem("serenData")) {
+		updateSaveData({ data: JSON.parse(localStorage.getItem("serenData")) });
+		localStorage.setItem("serenDataBackup", localStorage.getItem("serenData"));
+		localStorage.removeItem("serenData");
+	}
+	if (localStorage.getItem("serenTotal")) {
+		updateSaveData({ mode: localStorage.getItem("serenTotal") });
+		localStorage.removeItem("serenTotal");
+	}
+	if (localStorage.getItem("serenChat")) {
+		updateSaveData({ chat: localStorage.getItem("serenChat") });
+		localStorage.removeItem("serenChat");
+	}
+})();
+
+function updateSaveData(...dataset) {
+	const lsData = JSON.parse(localStorage.getItem(appName)) || {};
+	for (let data of dataset) {
+		const name = Object.keys(data)[0];
+		const value = Object.values(data)[0];
+		// Data property exists, push to array
+		if (name == "data") {
+			// If data exists, append to array
+			if (lsData[name] && value != localStorage.getItem("serenData")) {
+				lsData[name].push(value);
+				continue;
+			}
+			// data doesn't exist, if importing from old data (passed in array), set data to array
+			else if (Array.isArray(value)) {
+				lsData[name] = value;
+				continue;
+			}
+			// data doesn't exist, initialize data with array, append new value to data.
+			lsData[name] = [];
+			lsData[name].push(value);
+			continue;
+		}
+		lsData[name] = value;
+	}
+	localStorage.setItem(appName, JSON.stringify(lsData));
+}
+
+function getSaveData(name) {
+	const lsData = JSON.parse(localStorage.getItem(appName));
+	return lsData[name] || false;
+}
