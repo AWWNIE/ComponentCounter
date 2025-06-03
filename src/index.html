@@ -60,17 +60,14 @@
         const price = itemData.price;
         const id = itemData.id;
 
-        // 3. Construct a thumbnail URL using the RuneScape Wiki:
-        //    First, capitalize the first letter of the normalized name:
-        //    e.g. "abyssal_whip" -> "Abyssal_whip"
-        const thumbnailName =
-          normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1);${id}
-        const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/1748859615066_obj_sprite.gif?id=${id}`;
+        // 3. Construct a thumbnail URL using the official RS3 Grand Exchange icon endpoint:
+        //    Format: https://services.runescape.com/m=itemdb_rs/obj_sprite.gif?id=<ITEM_ID>
+        const thumbnailUrl = `https://services.runescape.com/m=itemdb_rs/obj_sprite.gif?id=${id}`;
 
         // 4. Prepare Discord message payload:
         //    - Mention the user via <@USER_ID>
         //    - Include an embed with title, description, and thumbnail
-        const content = `<@${userId}>`;
+        const content = `<@${userId}> The current price of **${itemKey}** is **${price.toLocaleString()} gp**.`;
         const embed = {
           title: `${itemKey} Price`,
           description: `${price.toLocaleString()} gp`,
