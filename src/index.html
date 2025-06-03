@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rasial Drop Notifier (Manual Chat Region)</title>
+  <title>Rasial Drop Notifier (ChatboxReader)</title>
 
   <!-- Bootstrap CSS -->
   <link
@@ -23,8 +23,7 @@
   <link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
   <link rel="stylesheet" type="text/css" href="https://runeapps.org/runeappslib.css" />
 
-  <!-- DO NOT load alt1.min.js from CDN—Alt1 injects `alt1` automatically -->
-  <!-- <script src="https://cdn.alt1.s3.amazonaws.com/alt1/alt1.min.js"></script> -->
+  <!-- NO alt1.min.js CDN—Alt1 injects `alt1` automatically -->
 
   <style>
     body {
@@ -52,7 +51,7 @@
       margin-top: 12px;
       font-size: 0.9rem;
     }
-    input, button {
+    input, select, button {
       margin-top: 4px;
       padding: 6px;
       font-size: 0.9rem;
@@ -80,11 +79,15 @@
       border-radius: 4px;
       background: #2a2a2a;
     }
+    .info-text {
+      font-size: 0.85rem;
+      color: #bbb;
+    }
   </style>
 </head>
 <body>
   <h2>Rasial Drop Notifier</h2>
-  <p>Enter your Discord details and chat‐box region manually, then click “Start Monitoring.”</p>
+  <p>Uses Alt1’s ChatboxReader to OCR your chat and post rare Rasial drops to Discord.</p>
 
   <div class="section">
     <label for="webhookUrl">Discord Webhook URL</label>
@@ -101,221 +104,259 @@
   </div>
 
   <div class="section">
-    <label>Chat‐Box Region (in game‐client coordinates)</label>
-    <small style="color:#ccc;">Provide X, Y relative to top‐left of RuneScape window, plus width &amp; height.</small>
-
-    <label for="offsetX">Chat Offset X</label>
-    <input type="number" id="offsetX" placeholder="e.g. 10" />
-
-    <label for="offsetY">Chat Offset Y</label>
-    <input type="number" id="offsetY" placeholder="e.g. 800" />
-
-    <label for="chatWidth">Chat Width</label>
-    <input type="number" id="chatWidth" placeholder="e.g. 496" />
-
-    <label for="chatHeight">Chat Height</label>
-    <input type="number" id="chatHeight" placeholder="e.g. 120" />
+    <label for="chatSelect">Select Chatbox</label>
+    <select id="chatSelect">
+      <option value="">Detecting chatboxes...</option>
+    </select>
+    <p class="info-text">If multiple chatboxes are found, select the one overlayed on your RuneScape client.</p>
   </div>
 
   <button id="startBtn">Start Monitoring</button>
   <div id="status">Idle</div>
 
-  <script>
-    // ============================
-    // GLOBAL STATE & CONFIGURATION
-    // ============================
-    let DISCORD_WEBHOOK = "";
-    let DISCORD_USER_ID = "";
-    let lastKillCount = 0;
-    let monitoring = false;
-    let scanHandle = null;
+  <script type="module">
+    import * as a1lib from "alt1";
+    import ChatboxReader from "alt1/chatbox";
+    import * as OCR from "alt1/ocr";
 
-    // How often (ms) to re-scan the chat
-    const SCAN_INTERVAL = 10 * 1000; // 10 seconds
+    const appName = "RasialDropNotifier";
+    const timestampRegex = /\[\d{2}:\d{2}:\d{2}\]/g;
+    const reader = new ChatboxReader();
 
-    // Cached chat region object { x, y, width, height }
-    let chatRegion = null;
+    // Configure ChatboxReader read arguments (default colors suffice for chat text)
+    reader.readargs = {
+      colors: [
+        a1lib.mixColor(255, 255, 255), // Standard chat text (white)
+        a1lib.mixColor(0, 255, 0),     // Public chat (green)
+        a1lib.mixColor(255, 0, 0),     // Trade/Other (red)
+        // Add other colors if your chat uses custom text colors
+      ]
+    };
 
-    // ===========================
-    // UTILITY / HELPER FUNCTIONS
-    // ===========================
-    function updateStatus(msg) {
-      document.getElementById("status").innerText = msg;
+    // References to DOM elements
+    const chatSelector = document.querySelector("#chatSelect");
+    const startButton  = document.querySelector("#startBtn");
+    const statusDiv    = document.querySelector("#status");
+    let monitoring     = false;
+    let scanIntervalHandle = null;
+    let lastKillCount  = 0;
+
+    // Identify Alt1 app URL for permissions
+    if (window.alt1) {
+      alt1.identifyAppUrl("./appconfig.json");
+    } else {
+      const addAppUrl = `alt1://addapp/${new URL("./appconfig.json", document.location.href).href}`;
+      document.body.innerHTML = `
+        <p style="color:#faa;">
+          Alt1 not detected. Click 
+          <a href="${addAppUrl}">here</a> to add this app to Alt1.
+        </p>`;
     }
 
-    /**
-     * scanChatOnce( ) → void
-     *
-     * Captures the predefined chatRegion via alt1.capture, OCRs it, and
-     * looks for:
-     *  - “You have killed Rasial … (#) times”
-     *  - “Your <ItemName> (<value>) has appeared on the ground”
-     * If found and kill‐count > lastKillCount, sends a Discord message and updates lastKillCount.
-     */
-    async function scanChatOnce() {
-      if (typeof alt1 === "undefined") {
-        updateStatus("Must run inside Alt1.");
-        return;
-      }
-      if (!chatRegion) {
-        updateStatus("Chat region not set. Stopping.");
-        return;
-      }
+    // On load: find all chatboxes
+    window.setTimeout(() => {
+      reader.find();
+      const findLoop = setInterval(() => {
+        if (reader.pos === null) {
+          reader.find();
+        } else {
+          clearInterval(findLoop);
+          populateChatSelector();
+          // If a previously saved chat index exists, select it
+          const savedIndex = sessionStorage.getItem(`${appName}_chatIndex`);
+          if (savedIndex !== null && reader.pos.boxes[savedIndex]) {
+            chatSelector.value = savedIndex;
+            reader.pos.mainbox = reader.pos.boxes[savedIndex];
+          } else {
+            // Default to first chatbox
+            chatSelector.value = "0";
+            reader.pos.mainbox = reader.pos.boxes[0];
+            sessionStorage.setItem(`${appName}_chatIndex`, "0");
+          }
+          updateStatus("Ready. Select chatbox and click ‘Start Monitoring’.");
+        }
+      }, 500);
+    }, 50);
 
-      const { x, y, width, height } = chatRegion;
+    function populateChatSelector() {
+      chatSelector.innerHTML = "";
+      reader.pos.boxes.forEach((box, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.text = `Chat ${idx + 1}`;
+        chatSelector.appendChild(opt);
+      });
+    }
+
+    // Listen for chatbox selection changes
+    chatSelector.addEventListener("change", () => {
+      const idx = chatSelector.value;
+      reader.pos.mainbox = reader.pos.boxes[idx];
+      sessionStorage.setItem(`${appName}_chatIndex`, idx);
+      showOverlay();
+    });
+
+    // Draw transparent overlay around selected chatbox
+    function showOverlay() {
       try {
-        // Use alt1.capture(startX, startY, width, height)
-        const img = await alt1.capture(x, y, width, height);
-        const rawText = await alt1.ocrText(img);
-        if (!rawText) {
-          updateStatus("No text detected in chat.");
+        const box = reader.pos.mainbox.rect;
+        // Draw for 2000ms with a 5-pixel-thick outline
+        alt1.overLayRect(a1lib.mixColor(0, 255, 0), box.x, box.y, box.width, box.height, 2000, 5);
+      } catch {
+        // ignore if overlay fails
+      }
+    }
+
+    // Start/Stop monitoring loop
+    startButton.addEventListener("click", () => {
+      if (!monitoring) {
+        const webhookUrl = document.getElementById("webhookUrl").value.trim();
+        const userId     = document.getElementById("userId").value.trim();
+        if (!webhookUrl || !userId || !/^\d+$/.test(userId)) {
+          alert("Please enter a valid Discord Webhook URL and numeric User ID.");
           return;
         }
 
-        const lines = rawText.split("\n");
-        let currentKC = lastKillCount;
+        // Save Discord settings to sessionStorage
+        sessionStorage.setItem(`${appName}_webhook`, webhookUrl);
+        sessionStorage.setItem(`${appName}_userId`, userId);
+
+        monitoring = true;
+        startButton.textContent = "Stop Monitoring";
+        updateStatus("Monitoring chat…");
+
+        // Immediately read once, then every 6 seconds
+        readChatbox();
+        scanIntervalHandle = setInterval(readChatbox, 6000);
+      } else {
+        monitoring = false;
+        startButton.textContent = "Start Monitoring";
+        clearInterval(scanIntervalHandle);
+        updateStatus("Stopped.");
+      }
+    });
+
+    // Reads the chatbox via ChatboxReader and processes lines
+    async function readChatbox() {
+      if (!reader.pos || !reader.pos.mainbox) {
+        updateStatus("No chatbox selected.");
+        return;
+      }
+      try {
+        const rawOpts = reader.read() || [];
+        const lines = processChat(rawOpts);
 
         for (const line of lines) {
-          // 1) Kill count pattern: “You have killed Rasial … (#) times”
+          // Skip if already seen
+          if (isInHistory(line)) continue;
+          updateChatHistory(line);
+
+          // 1) Check for kill-count update: “You have killed Rasial, … 123 times.”
           const kcMatch = line.match(/You have killed Rasial.*?([\d,]+)\s+times/i);
           if (kcMatch) {
-            currentKC = parseInt(kcMatch[1].replace(/,/g, ""), 10);
+            lastKillCount = parseInt(kcMatch[1].replace(/,/g, ""), 10);
           }
 
-          // 2) Rare drop pattern: “Your <Item> (<value>) has appeared on the ground”
+          // 2) Check for rare drop: “Your <ItemName> (<value>) has appeared on the ground.”
           const dropMatch = line.match(/Your\s+(.+?)\s+\(([\d,]+)\)\s+has appeared/i);
-          if (dropMatch && currentKC > lastKillCount) {
-            const itemName = dropMatch[1].trim();
-            const value = dropMatch[2].replace(/,/g, "");
-            const timeStr = new Date().toLocaleString();
-            await sendToDiscord(itemName, value, currentKC, timeStr);
-            lastKillCount = currentKC;
+          if (dropMatch) {
+            const currentKC = lastKillCount;
+            if (currentKC > Number(getLastKCFromHistory())) {
+              // New drop at higher KC
+              const itemName = dropMatch[1].trim();
+              const value    = dropMatch[2].replace(/,/g, "");
+              const timeStr  = new Date().toLocaleString();
+              await sendToDiscord(itemName, value, currentKC, timeStr);
+              updateLastKCInHistory(currentKC);
+            }
           }
         }
-
-        updateStatus(
-          `Last KC: ${lastKillCount} | Next check at ${new Date().toLocaleTimeString()}`
-        );
-      } catch (err) {
-        console.error("Error scanning chat:", err);
-        updateStatus("Error scanning chat—see console.");
+        updateStatus(`Last KC: ${lastKillCount} | Next check at ${new Date().toLocaleTimeString()}`);
+      } catch (e) {
+        console.error("Error reading chat:", e);
+        updateStatus("Error reading chat—check console.");
       }
     }
 
-    /**
-     * sendToDiscord( itemName, value, killCount, timeStr ) → void
-     *
-     * Wraps the stored Discord user ID in <@…> for mention,
-     * composes a message, and POSTs it to the configured webhook.
-     */
-    async function sendToDiscord(itemName, value, killCount, timeStr) {
-      if (!DISCORD_WEBHOOK) {
-        console.warn("No webhook URL set; skipping Discord post.");
-        return;
+    // Convert ChatboxReader output (opts) to an array of full chat lines
+    function processChat(opts) {
+      let chatStr = "";
+      const chatArr = [];
+
+      for (let i = 0; i < opts.length; i++) {
+        const frag = opts[i];
+        // Skip initial fragment if it has no timestamp (likely from a reload)
+        if (i === 0 && !frag.text.match(timestampRegex)) continue;
+
+        if (frag.text.match(timestampRegex)) {
+          // New chat line begins; push existing string first
+          if (chatStr.trim()) {
+            chatArr.push(chatStr.trim());
+          }
+          chatStr = frag.text + " ";
+        } else {
+          chatStr += frag.text + " ";
+        }
       }
-      const mention = `<@${DISCORD_USER_ID}>`;
-      const content =
-        `${mention} Rare drop detected!\n` +
-        `• Item: **${itemName}**\n` +
-        `• Value: **${value} gp**\n` +
-        `• Kill Count: **${killCount}**\n` +
-        `• Time: **${timeStr}`;
+      // Push last line if non-empty
+      if (chatStr.trim()) {
+        chatArr.push(chatStr.trim());
+      }
+      return chatArr;
+    }
+
+    // History tracking for full chat lines (to avoid duplicates)
+    function updateChatHistory(line) {
+      const key = `${appName}_chatHistory`;
+      let hist = sessionStorage.getItem(key) || "";
+      hist = hist.split("\n").filter(l => l); // array of lines
+      hist.push(line);
+      // Keep last 200 entries
+      if (hist.length > 200) hist.splice(0, hist.length - 200);
+      sessionStorage.setItem(key, hist.join("\n"));
+    }
+    function isInHistory(line) {
+      const key = `${appName}_chatHistory`;
+      const hist = (sessionStorage.getItem(key) || "").split("\n");
+      return hist.includes(line);
+    }
+
+    // Track last kill count to prevent duplicate notifications
+    function updateLastKCInHistory(kc) {
+      sessionStorage.setItem(`${appName}_lastKC`, kc.toString());
+    }
+    function getLastKCFromHistory() {
+      return sessionStorage.getItem(`${appName}_lastKC`) || "0";
+    }
+
+    // Send a Discord message via webhook
+    async function sendToDiscord(itemName, value, killCount, timeStr) {
+      const webhookUrl = sessionStorage.getItem(`${appName}_webhook`);
+      const userId     = sessionStorage.getItem(`${appName}_userId`);
+      if (!webhookUrl || !userId) return;
+
+      const mention = `<@${userId}>`;
+      const content = `${mention} Rare drop detected!\n`
+                    + `• Item: **${itemName}**\n`
+                    + `• Value: **${value} gp**\n`
+                    + `• Kill Count: **${killCount}**\n`
+                    + `• Time: **${timeStr}`;
 
       try {
-        await fetch(DISCORD_WEBHOOK, {
+        await fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content })
         });
-        console.log("Discord payload sent:", content);
+        console.log("Discord message sent:", content);
       } catch (err) {
         console.error("Failed to post to Discord:", err);
       }
     }
 
-    /**
-     * toggleMonitoring( ) → void
-     *
-     * On start:
-     *  - Reads Discord webhook, user ID, and manual chat region inputs.
-     *  - Validates them.
-     *  - Caches chatRegion = { x, y, width, height }.
-     *  - Kicks off scanChatOnce() immediately and every SCAN_INTERVAL.
-     *
-     * On stop:
-     *  - Clears the interval, resets state.
-     */
-    function toggleMonitoring() {
-      if (!monitoring) {
-        // 1) Read and validate Discord inputs
-        DISCORD_WEBHOOK = document.getElementById("webhookUrl").value.trim();
-        DISCORD_USER_ID = document.getElementById("userId").value.trim();
-        if (!DISCORD_WEBHOOK || !DISCORD_USER_ID) {
-          alert("Please enter both a Discord Webhook URL and your Discord User ID.");
-          return;
-        }
-        if (!/^\d+$/.test(DISCORD_USER_ID)) {
-          alert("Discord User ID must be numeric (no <@…> brackets).");
-          return;
-        }
-
-        // 2) Read and validate chat region inputs
-        const offsetX = parseInt(document.getElementById("offsetX").value, 10);
-        const offsetY = parseInt(document.getElementById("offsetY").value, 10);
-        const chatW   = parseInt(document.getElementById("chatWidth").value, 10);
-        const chatH   = parseInt(document.getElementById("chatHeight").value, 10);
-
-        if (
-          isNaN(offsetX) ||
-          isNaN(offsetY) ||
-          isNaN(chatW)   ||
-          isNaN(chatH)   ||
-          offsetX < 0    ||
-          offsetY < 0    ||
-          chatW  <= 0    ||
-          chatH  <= 0
-        ) {
-          alert("Please enter valid positive numbers for chat region (X, Y, width, height).");
-          return;
-        }
-
-        // 3) Cache the chatRegion
-        if (typeof alt1 === "undefined") {
-          alert("You must run this inside Alt1 for alt1.capture to work.");
-          return;
-        }
-        // alt1.rsX/rsY = top-left of RuneScape window
-        chatRegion = {
-          x: alt1.rsX + offsetX,
-          y: alt1.rsY + offsetY,
-          width: chatW,
-          height: chatH
-        };
-
-        monitoring = true;
-        document.getElementById("startBtn").innerText = "Stop Monitoring";
-        updateStatus("Initializing scan…");
-
-        // Run first scan immediately, then set interval
-        scanChatOnce();
-        scanHandle = setInterval(scanChatOnce, SCAN_INTERVAL);
-      } else {
-        // Stop Monitoring
-        monitoring = false;
-        document.getElementById("startBtn").innerText = "Start Monitoring";
-        clearInterval(scanHandle);
-        updateStatus("Stopped.");
-      }
+    function updateStatus(msg) {
+      statusDiv.textContent = msg;
     }
-
-    // ================
-    // EVENT LISTENERS
-    // ================
-    document.getElementById("startBtn").addEventListener("click", toggleMonitoring);
-
-    window.addEventListener("load", () => {
-      updateStatus("Idle. Enter Discord & chat‐region, then click Start.");
-    });
   </script>
 </body>
 </html>
