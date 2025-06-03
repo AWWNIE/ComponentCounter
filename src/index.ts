@@ -17,16 +17,6 @@ const actions = document.querySelector(".actions") as HTMLElement;
 const timestampRegex = /\[\d{2}:\d{2}:\d{2}\]/g;
 const reader = new ChatboxReader();
 
-// Set Chat reader and settings.
-reader.readargs = {
-	colors: [
-		a1lib.mixColor(255, 128, 0), //Uncommon Mats
-		a1lib.mixColor(255, 165, 0), //Scavenging comps
-		a1lib.mixColor(255, 0, 0), //Rare Mats
-		a1lib.mixColor(67, 188, 188), //Ancient components
-	],
-};
-
 // Work continues on this. forwardnudge to work past multi-spaces.  See images/test/multi_line.data.png
 // reader.forwardnudges.push({
 // 	match: /parts|components|Junk/,
@@ -45,99 +35,6 @@ reader.readargs = {
 // 	},
 // });
 
-// White colored Comma between two different colored texts.
-reader.forwardnudges.push({
-	match: /./,
-	name: "comma",
-	fn: (ctx) => {
-		let startx = ctx.rightx;
-		let maybe_one = OCR.readChar(ctx.imgdata, ctx.font, [255, 255, 255], startx, ctx.baseliney, false, true);
-		if (maybe_one?.chr == ",") {
-			let maybe_x = OCR.readChar(ctx.imgdata, ctx.font, [255, 255, 255], startx, ctx.baseliney, false, true);
-			ctx.addfrag({ color: [255, 255, 255], index: -1, text: ", ", xstart: startx, xend: startx + maybe_x.basechar.width + ctx.font.spacewidth });
-			return true;
-		}
-	},
-});
-
-// Check for "1" in different colors.  Potentially adds a second "x" to string, this is adjusted in the processChat function
-reader.forwardnudges.push({
-	match: /You receive|parts|components|Junk/,
-	name: "uncommon_1",
-	fn: (ctx) => {
-		let startx = ctx.rightx;
-		let maybe_one = OCR.readChar(ctx.imgdata, ctx.font, [255, 128, 0], startx + ctx.font.spacewidth, ctx.baseliney, false, true);
-		if (maybe_one?.chr == "1") {
-			let maybe_x = OCR.readChar(
-				ctx.imgdata,
-				ctx.font,
-				[255, 128, 0],
-				maybe_one.x + maybe_one.basechar.width + ctx.font.spacewidth,
-				ctx.baseliney,
-				false,
-				true
-			);
-			if (maybe_x?.chr == "x") {
-				ctx.addfrag({ color: [255, 128, 0], index: -1, text: " 1 x", xstart: startx, xend: startx + maybe_one.basechar.width + ctx.font.spacewidth });
-			} else {
-				ctx.addfrag({ color: [255, 128, 0], index: -1, text: " 1", xstart: startx, xend: startx + maybe_one.basechar.width + ctx.font.spacewidth });
-			}
-			return true;
-		}
-	},
-});
-
-reader.forwardnudges.push({
-	match: /You receive|parts|components|Junk/,
-	name: "rare_1",
-	fn: (ctx) => {
-		let startx = ctx.rightx;
-		let maybe_one = OCR.readChar(ctx.imgdata, ctx.font, [255, 0, 0], startx + ctx.font.spacewidth, ctx.baseliney, false, true);
-		if (maybe_one?.chr == "1") {
-			let maybe_x = OCR.readChar(
-				ctx.imgdata,
-				ctx.font,
-				[255, 0, 0],
-				maybe_one.x + maybe_one.basechar.width + ctx.font.spacewidth,
-				ctx.baseliney,
-				false,
-				true
-			);
-			if (maybe_x?.chr == "x") {
-				ctx.addfrag({ color: [255, 0, 0], index: -1, text: " 1", xstart: startx, xend: startx + maybe_one.basechar.width + ctx.font.spacewidth });
-				return true;
-			}
-			ctx.addfrag({ color: [255, 0, 0], index: -1, text: " 1 x", xstart: startx, xend: startx + maybe_one.basechar.width + ctx.font.spacewidth });
-			return true;
-		}
-	},
-});
-
-reader.forwardnudges.push({
-	match: /You receive|parts|components|Junk/,
-	name: "ancient_1",
-	fn: (ctx) => {
-		let startx = ctx.rightx;
-		let maybe_one = OCR.readChar(ctx.imgdata, ctx.font, [67, 188, 188], startx + ctx.font.spacewidth, ctx.baseliney, false, true);
-		if (maybe_one?.chr == "1") {
-			let maybe_x = OCR.readChar(
-				ctx.imgdata,
-				ctx.font,
-				[67, 188, 188],
-				maybe_one.x + maybe_one.basechar.width + ctx.font.spacewidth,
-				ctx.baseliney,
-				false,
-				true
-			);
-			if (maybe_x?.chr == "x") {
-				ctx.addfrag({ color: [67, 188, 188], index: -1, text: " 1", xstart: startx, xend: startx + maybe_one.basechar.width + ctx.font.spacewidth });
-				return true;
-			}
-			ctx.addfrag({ color: [67, 188, 188], index: -1, text: " 1 x", xstart: startx, xend: startx + maybe_one.basechar.width + ctx.font.spacewidth });
-			return true;
-		}
-	},
-});
 
 if (window.alt1) {
 	alt1.identifyAppUrl("./appconfig.json");
