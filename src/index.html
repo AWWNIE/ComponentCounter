@@ -257,27 +257,62 @@
       }
     });
 
-    // Load Saved Info: validate and then apply
+    // Load Saved Info: show spinner, validate, then apply or show error
     loadSavedBtn.addEventListener("click", () => {
-      const storedId = localStorage.getItem("discordID");
-      const storedWebhook = localStorage.getItem("discordWebhook");
+      const storedId = localStorage.getItem("discordID") || "";
+      const storedWebhook = localStorage.getItem("discordWebhook") || "";
 
-      // Validate retrieved values
-      const idValid      = /^\d{18}$/.test(storedId || "");
-      const webhookValid = (storedWebhook || "").startsWith("https://discord.com/api/webhooks/");
+      // Immediately hide form fields and show spinner
+      discordFormFields.style.display = "none";
+      saveStatusContainer.innerHTML = `
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading…</span>
+        </div>
+      `;
+      saveStatusContainer.style.display = "block";
 
-      if (!idValid || !webhookValid) {
-        // If invalid, do nothing (user must manually re‐enter)
-        return;
-      }
+      setTimeout(() => {
+        // Validate retrieved values
+        const idValid      = /^\d{18}$/.test(storedId);
+        const webhookValid = storedWebhook.startsWith("https://discord.com/api/webhooks/");
 
-      // If valid, execute functionality of Save button:
-      updateSaveData({ discordID: storedId });
-      updateSaveData({ discordWebhook: storedWebhook });
+        if (!idValid || !webhookValid) {
+          let errorMessage = "";
+          if (!idValid && !webhookValid) {
+            errorMessage = "Invalid Discord ID and Discord Webhook.";
+          } else if (!idValid) {
+            errorMessage = "A valid Discord ID was not entered.";
+          } else {
+            errorMessage = "A valid Discord Webhook was not entered.";
+          }
 
-      // Hide the entire form and show main content
-      discordFormContainer.style.display = "none";
-      mainContent.style.display = "block";
+          saveStatusContainer.innerHTML = `
+            <div class="fs-1 text-danger">❌</div>
+            <div class="mt-2">${errorMessage}</div>
+          `;
+
+          // After 2 seconds, hide status and show form again
+          setTimeout(() => {
+            saveStatusContainer.style.display = "none";
+            discordFormFields.style.display = "block";
+          }, 2000);
+        } else {
+          // Valid: call updateSaveData and show success
+          updateSaveData({ discordID: storedId });
+          updateSaveData({ discordWebhook: storedWebhook });
+
+          saveStatusContainer.innerHTML = `
+            <div class="fs-1 text-success">✅</div>
+            <div class="mt-2">Loaded successfully</div>
+          `;
+
+          // After 2 seconds, hide form container and show main content
+          setTimeout(() => {
+            discordFormContainer.style.display = "none";
+            mainContent.style.display = "block";
+          }, 2000);
+        }
+      }, 2000);
     });
 
     saveBtn.addEventListener("click", () => {
