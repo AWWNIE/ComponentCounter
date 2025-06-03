@@ -1,107 +1,387 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<link
-			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-			rel="stylesheet"
-			integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-			crossorigin="anonymous"
-		/>
-		<script
-			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-			integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-			crossorigin="anonymous"
-		></script>
-		<link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
-		<link rel="stylesheet" type="text/css" href="https://runeapps.org/runeappslib.css" />
-	</head>
-	<body class="nis">
-		<div class="container scroll">
-			<div class="row matHeader">
-				<div class="col">Materials</div>
-				<div class="col">Quantity</div>
-			</div>
-			<div class="row ancient">
-				<div class="mats col">
-					<span style="word-wrap: break-word; white-space: normal; color:white"
-						>If this message is showing for an extended period of time, then the chatbox reader for Alt1 isn't working due to an update. Please be
-						patient, and the issue will be fixed as soon as it can!</span
-					>
-				</div>
-			</div>
-			<div class="row rare">
-				<div class="mats col"></div>
-			</div>
-			<div class="row uncommon">
-				<div class="mats col"></div>
-			</div>
-			<div class="row common">
-				<div class="mats col"></div>
-			</div>
-			<div class="row fixed-bottom">
-				<div class="row">
-					<div class="col">
-						<button class="nisbutton" data-bs-toggle="modal" data-bs-target="#settings" type="button">Settings</button>
-					</div>
-					<div class="col">
-						<div class="row pt-2">
-							<div class="col">Actions:</div>
-							<div class="col"><span class="actions">0</span></div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="modal nis" tabindex="-1" role="dialog" id="settings">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Settings</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<div class="modal-body">
-						<div class="row">
-							<div class="col" title="Allows the user to select the chat box the app should target.">
-								<h6>Select Chat</h6>
-							</div>
-							<div class="col">
-								<select class="chat">
-									<option value="">Select Chat</option>
-								</select>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col" title="Exports the current data as a CSV file.">
-								<button class="nisbutton export">CSV Export</button>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col">
-								<button class="nisbutton" data-type="reset" data-bs-toggle="collapse" href="#resetApp">Factory Reset</button>
-							</div>
-						</div>
-						<div class="row collapse danger" id="resetApp">
-							<div class="col">
-								<div class="row">
-									<div class="col text-center">This will remove all saved data and set all settings to default. This is irreversable!</div>
-								</div>
-								<div class="row">
-									<div class="col">
-										<button class="nisbutton clear" data-type="reset" data-bs-toggle="collapse" href="#resetApp">Yes</button>
-									</div>
-									<div class="col">
-										<button class="nisbutton" data-bs-toggle="collapse" href="#resetApp">No</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rasial Drop Notifier (Webhook + User ID)</title>
 
-		<script src="./main.js"></script>
-	</body>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+
+  <!-- Bootstrap Bundle (JS + Popper) -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+
+  <!-- RuneApps CSS -->
+  <link rel="stylesheet" type="text/css" href="https://runeapps.org/nis/nis.css" />
+  <link rel="stylesheet" type="text/css" href="https://runeapps.org/runeappslib.css" />
+
+  <!-- Alt1 permissions required: "View screen" and "Get game state" -->
+  <script src="https://cdn.alt1.s3.amazonaws.com/alt1/alt1.min.js"></script>
+
+  <!-- Your Custom Styles -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1e1e;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 8px;
+    }
+    h2 {
+      margin-bottom: 4px;
+    }
+    p {
+      margin-top: 0;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    #status {
+      margin-top: 8px;
+      font-size: 0.9rem;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+    input, button {
+      margin-top: 4px;
+      padding: 6px;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #555;
+      background: #2e2e2e;
+      color: #f0f0f0;
+      outline: none;
+    }
+    button {
+      cursor: pointer;
+      background: #007acc;
+      border: none;
+      color: white;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #005a99;
+    }
+  </style>
+</head>
+<body>
+  <h2>Rasial Drop Notifier</h2>
+  <p>Automatically scans your chatbox for rare Rasial drops and posts to Discord.</p>
+
+  <label for="webhookUrl">Discord Webhook URL:</label>
+  <input
+    type="text"
+    id="webhookUrl"
+    placeholder="https://discord.com/api/webhooks/…" />
+
+  <label for="userId">Your Discord User ID:</label>
+  <input
+    type="text"
+    id="userId"
+    placeholder="123456789012345678" />
+
+  <button id="startBtn">Start Monitoring</button>
+  <div id="status">Idle</div>
+
+  <script>
+    // ============================
+    // GLOBAL STATE & CONFIGURATION
+    // ============================
+    let DISCORD_WEBHOOK = "";
+    let DISCORD_USER_ID = "";
+    let lastKillCount = 0;
+    let monitoring = false;
+    let scanHandle = null;
+
+    // How often (ms) to re-scan the chat
+    const SCAN_INTERVAL = 10 * 1000; // 10 seconds
+
+    // Cached chat region once detected
+    let chatRegion = null;
+
+    // Tolerance & color for detecting the chat border (dark gray)
+    const BORDER_COLOR = { r: 48, g: 48, b: 48 };
+    const BORDER_TOLERANCE = 15;
+
+    // Minimum chat width/height (fallbacks)
+    const MIN_CHAT_WIDTH = 300;
+    const MIN_CHAT_HEIGHT = 100;
+
+    // ===========================
+    // UTILITY / HELPER FUNCTIONS
+    // ===========================
+    function updateStatus(msg) {
+      document.getElementById("status").innerText = msg;
+    }
+
+    function colorMatches(r, g, b, target, tol) {
+      return (
+        Math.abs(r - target.r) <= tol &&
+        Math.abs(g - target.g) <= tol &&
+        Math.abs(b - target.b) <= tol
+      );
+    }
+
+    /**
+     * Attempts to find the chat box region automatically.
+     * 1. Capture a narrow strip along the bottom 10% of the RS window.
+     * 2. Scan each row for a horizontal “border” line.
+     * 3. On that row, scan left→right to find left and right edges of chat.
+     * 4. Compute chat height from borderY to bottom of RS window.
+     */
+    async function computeChatRegion() {
+      if (!alt1.rsLinked) {
+        throw new Error("RuneScape client not linked via Alt1.");
+      }
+
+      // 1) Get RS window position & dimensions
+      const rsX = alt1.rsX;
+      const rsY = alt1.rsY;
+      const rsW = alt1.rsWidth;
+      const rsH = alt1.rsHeight;
+
+      // 2) Define a “scan strip” (bottom 10% of window, left 50% width)
+      const stripHeight = Math.floor(rsH * 0.10);
+      const stripY = rsY + rsH - stripHeight;
+      const stripW = Math.floor(rsW * 0.50);
+      const stripX = rsX;
+
+      // Capture that strip image
+      const stripImg = await alt1.captureArea(stripX, stripY, stripW, stripHeight);
+      const data = stripImg.data;
+      const w = stripImg.width;
+      const h = stripImg.height;
+
+      // 3) Find the border row (≥70% pixels matching BORDER_COLOR)
+      let borderRowInStrip = -1;
+      for (let row = 0; row < h; row++) {
+        let matchCount = 0;
+        for (let col = 0; col < w; col++) {
+          const idx = (row * w + col) * 4;
+          const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+          if (colorMatches(r, g, b, BORDER_COLOR, BORDER_TOLERANCE)) {
+            matchCount++;
+          }
+        }
+        if (matchCount >= w * 0.70) {
+          borderRowInStrip = row;
+          break;
+        }
+      }
+      if (borderRowInStrip < 0) {
+        throw new Error("Failed to detect chat border.");
+      }
+
+      // 4) Absolute Y of that border
+      const borderY = stripY + borderRowInStrip;
+
+      // 5) On the border row, scan full width to find chat’s left & right edges
+      const rowCapture = await alt1.captureArea(rsX, borderY, rsW, 1);
+      const rowData = rowCapture.data;
+      const rowW = rowCapture.width;
+
+      // Find chatLeftX: look for ≥20 contiguous border pixels, then chat starts at col+1
+      let chatLeftX = -1;
+      let consec = 0;
+      for (let col = 0; col < rowW; col++) {
+        const idx = col * 4;
+        const r = rowData[idx], g = rowData[idx + 1], b = rowData[idx + 2];
+        if (colorMatches(r, g, b, BORDER_COLOR, BORDER_TOLERANCE)) {
+          consec++;
+          if (consec >= 20) {
+            chatLeftX = rsX + col + 1;
+            break;
+          }
+        } else {
+          consec = 0;
+        }
+      }
+      if (chatLeftX < 0) {
+        // fallback: 8px from left edge
+        chatLeftX = rsX + 8;
+      }
+
+      // Find chatRightX: locate where that same border-run ends (≥20 contiguous border pixels)
+      let chatRightX = -1;
+      consec = 0;
+      let inRun = false;
+      for (let col = chatLeftX - rsX; col < rowW; col++) {
+        const idx = col * 4;
+        const r = rowData[idx], g = rowData[idx + 1], b = rowData[idx + 2];
+        if (colorMatches(r, g, b, BORDER_COLOR, BORDER_TOLERANCE)) {
+          if (!inRun) {
+            inRun = true;
+            consec = 1;
+          } else {
+            consec++;
+          }
+        } else if (inRun) {
+          if (consec >= 20) {
+            chatRightX = rsX + col;
+            break;
+          }
+          inRun = false;
+        }
+      }
+      if (chatRightX < 0) {
+        // fallback: 40% of window width
+        chatRightX = rsX + Math.floor(rsW * 0.40);
+      }
+
+      // 6) Compute chat height as bottom of window minus (borderY+1)
+      const chatTopY = borderY + 1;
+      const chatHeight = (rsY + rsH) - chatTopY;
+
+      // Ensure minimums
+      const width = Math.max(chatRightX - chatLeftX, MIN_CHAT_WIDTH);
+      const height = Math.max(chatHeight, MIN_CHAT_HEIGHT);
+
+      return { x: chatLeftX, y: chatTopY, width, height };
+    }
+
+    /**
+     * Captures the chat region, OCRs it, and looks for:
+     *  - "You have killed Rasial ... # times"
+     *  - "Your <ItemName> (<value>) has appeared on the ground"
+     * If found and KC > lastKillCount, posts to Discord.
+     */
+    async function scanChatOnce() {
+      if (!chatRegion) {
+        updateStatus("Detecting chat region...");
+        try {
+          chatRegion = await computeChatRegion();
+          updateStatus(
+            `Chat region found: x=${chatRegion.x}, y=${chatRegion.y}, ` +
+            `w=${chatRegion.width}, h=${chatRegion.height}`
+          );
+        } catch (err) {
+          updateStatus("Chat detection error: " + err.message);
+          return;
+        }
+      }
+
+      const { x, y, width, height } = chatRegion;
+      try {
+        const img = await alt1.captureArea(x, y, width, height);
+        const rawText = await alt1.ocrText(img);
+        if (!rawText) {
+          updateStatus("No text detected in chat.");
+          return;
+        }
+
+        const lines = rawText.split("\n");
+        let currentKC = lastKillCount;
+
+        for (const line of lines) {
+          // 1) Kill count pattern: "You have killed Rasial ... (number) times"
+          const kcMatch = line.match(/You have killed Rasial.*?([\d,]+)\s+times/i);
+          if (kcMatch) {
+            currentKC = parseInt(kcMatch[1].replace(/,/g, ""), 10);
+          }
+
+          // 2) Rare drop pattern: "Your <Item> (<value>) has appeared on the ground"
+          const dropMatch = line.match(/Your\s+(.+?)\s+\(([\d,]+)\)\s+has appeared/i);
+          if (dropMatch && currentKC > lastKillCount) {
+            const itemName = dropMatch[1].trim();
+            const value = dropMatch[2].replace(/,/g, "");
+            const timeStr = new Date().toLocaleString();
+            await sendToDiscord(itemName, value, currentKC, timeStr);
+            lastKillCount = currentKC;
+          }
+        }
+
+        updateStatus(
+          `Last KC: ${lastKillCount} | Next check at ${new Date().toLocaleTimeString()}`
+        );
+      } catch (err) {
+        console.error("Scan error:", err);
+        updateStatus("Error scanning chat—check console.");
+      }
+    }
+
+    /**
+     * Builds the Discord mention string ("<@USER_ID>") and sends payload.
+     */
+    async function sendToDiscord(itemName, value, killCount, timeStr) {
+      if (!DISCORD_WEBHOOK) {
+        console.warn("No webhook URL set; skipping Discord post.");
+        return;
+      }
+      // Wrap the user ID in <@...> for mention
+      const mention = `<@${DISCORD_USER_ID}>`;
+      const content =
+        `${mention} Rare drop detected!\n` +
+        `• Item: **${itemName}**\n` +
+        `• Value: **${value} gp**\n` +
+        `• Kill Count: **${killCount}**\n` +
+        `• Time: **${timeStr}`;
+
+      try {
+        await fetch(DISCORD_WEBHOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content })
+        });
+        console.log("Discord payload sent:", content);
+      } catch (err) {
+        console.error("Failed to post to Discord:", err);
+      }
+    }
+
+    /**
+     * Starts or stops the monitoring loop.
+     * - Reads the two input fields (webhook + userId) on start.
+     * - Clears interval on stop.
+     */
+    function toggleMonitoring() {
+      if (!monitoring) {
+        // Read inputs
+        DISCORD_WEBHOOK = document.getElementById("webhookUrl").value.trim();
+        DISCORD_USER_ID = document.getElementById("userId").value.trim();
+
+        if (!DISCORD_WEBHOOK || !DISCORD_USER_ID) {
+          alert("Please enter both a Discord Webhook URL and your Discord User ID.");
+          return;
+        }
+        // Basic validation: userId should be digits only
+        if (!/^\d+$/.test(DISCORD_USER_ID)) {
+          alert("Discord User ID must be numeric (no <@ > brackets).");
+          return;
+        }
+
+        monitoring = true;
+        document.getElementById("startBtn").innerText = "Stop Monitoring";
+        updateStatus("Initializing scan...");
+        // First run: compute chatRegion → then scan OCR
+        scanChatOnce();
+        scanHandle = setInterval(scanChatOnce, SCAN_INTERVAL);
+      } else {
+        monitoring = false;
+        document.getElementById("startBtn").innerText = "Start Monitoring";
+        clearInterval(scanHandle);
+        updateStatus("Stopped.");
+      }
+    }
+
+    // ================
+    // EVENT LISTENERS
+    // ================
+    document.getElementById("startBtn").addEventListener("click", toggleMonitoring);
+
+    window.addEventListener("load", () => {
+      updateStatus("Idle. Enter your Webhook & User ID, then click Start.");
+    });
+  </script>
+</body>
 </html>
