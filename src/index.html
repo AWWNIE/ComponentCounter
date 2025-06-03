@@ -70,7 +70,7 @@
         // 4. Prepare Discord message payload:
         //    - Mention the user via <@USER_ID>
         //    - Include an embed with title, description, and thumbnail
-        const content = `<@${userId}> The current price of **${itemKey}** is **${price.toLocaleString()} gp**.`;
+        const content = `<@${userId}>`;
         const embed = {
           title: `${itemKey} Price`,
           description: `${price.toLocaleString()} gp`,
