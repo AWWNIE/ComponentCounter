@@ -190,8 +190,8 @@ function checkAnnounce(getItem) {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				username: "Zero's Seren Tracker",
-				content: `${new Date(getItem.time).toLocaleString()}: Received - ${getItem.item}`,
+				username: "Drop Tracker",
+				content: `[${new Date(getItem.time).toLocaleString()}] Received - ${getItem.item}`,
 			}),
 		});
 	}
