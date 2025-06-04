@@ -24,36 +24,38 @@ body.nis {
   margin-top: 8px;
 }
 
-/* Prevent overlaps between boss display and list */
+/* Ensure Current Boss box has better margins and padding */
 #bossDisplay {
+  margin-top: 2rem;
   margin-bottom: 2rem;
+  padding: 1rem;
+  max-width: 800px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Adjust header position */
-.header {
-  position: relative;
-  margin-bottom: 1rem;
-  background-color: transparent;
-  color: #fff;
-  border: none;
-}
-
-/* Ensure item list is spaced properly */
-.list-group {
-  padding-top: 3rem;
-}
-
-/* Add padding to list items for clarity */
-.list-group-item {
+/* Provide more vertical spacing before the Total Spirits line */
+.total {
+  margin-top: 2rem;
+  font-size: 1rem;
+  font-weight: bold;
   padding: 0.75rem 1rem;
 }
 
-/* Clarify "Total Seren Spirits collected" line */
-.total {
-  margin-top: 1.5rem;
-  font-weight: bold;
-  font-size: 1rem;
-  color: rgb(0, 255, 255);
+/* Consistent padding for list items for readability */
+.list-group-item {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Center alignment for better appearance */
+.itemList {
+  margin: 0 auto;
+  max-width: 800px;
+  width: 100%;
+  padding-top: 1rem;
+  box-sizing: border-box;
 }
 
 /* ───────────────────────────────────────────────────────────────
