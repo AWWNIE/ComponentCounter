@@ -211,22 +211,22 @@ function handleBossParsing(chatLine)
   // Remove final : which occurs after the message "Welcome to your session against"
   bossName = bossName.substring(bossName.indexOf(':') + 1);
 
-  console.log("Boss is: " + bossName);
-
   bossName = bossName.replace(/[.,;:]+$/, "");
-  console.log("Parsed boss name:" + bossName);
+  console.log("Boss is: " + bossName);
   updateChatHistory(chatLine);
   updateBossInfo(bossName);
 }
 
 function updateBossInfo(chatLine)
 {
+  console.log("Updating boss info: " + chatLine);
   localStorage.setItem("bossName", JSON.stringify(chatLine));
 }
 
 function getCurrentBoss()
 {
-  JSON.parse(localStorage.getItem("bossName") || '"No boss"')
+  console.log("Getting current boss: " + JSON.parse(localStorage.getItem("bossName") || '"No boss"'));
+  return JSON.parse(localStorage.getItem("bossName") || '"No boss"')
 }
 
 // Make sure it’s exposed globally so our inline HTML script can see it:
