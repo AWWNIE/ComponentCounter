@@ -141,6 +141,16 @@ function readChatbox() {
       updateChatHistory(chatLine);
       checkAnnounce(getItem);
       showItems();
+    } else {
+      let getItem = {
+        item: chatLine,
+        time: new Date(),
+      };
+      console.log(getItem);
+      updateSaveData({ data: getItem });
+      updateChatHistory(chatLine);
+      checkAnnounce(getItem);
+      showItems();
     }
   }
 }
