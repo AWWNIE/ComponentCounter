@@ -142,62 +142,50 @@ function readChatbox() {
     if (isInHistory(chatLine)) {
       continue;
     }
-    if (chatLine.indexOf("Seren spirit gifts you") > -1) {
-      let item = chatLine.match(/\[\d+:\d+:\d+\] The Seren spirit gifts you: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+    messageParser(chatLine);
+  }
+}
 
-      let getItem = {
-        item: item[1].trim(),
-        time: new Date(),
-      };
-      updateEverything(getItem, chatLine);
-    } else if (chatLine.indexOf("Materials gained") > -1) {
-      let item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+function messageParser(chatLine)
+{
+  if (chatLine.indexOf("Seren spirit gifts you") > -1) {
+    let item = chatLine.match(/\[\d+:\d+:\d+\] The Seren spirit gifts you: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+    updateEverything(chatLine, chatLine);
 
-      let getItem = {
-        item: item[1].trim(),
-        time: new Date(),
-      };
-      updateEverything(getItem, chatLine);
-    }
-    else
-    {
-      console.log(chatLine);
-      if(chatLine.indexOf("EternalSong") > -1)
-      {
-        console.log("Detected EternalSong");
-        let item = chatLine.match(/\[\d+:\d+:\d+\] EternalSong: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-        let getItem = {
-          item: item[1].trim(),
-          time: new Date(),
-        };
-        updateEverything(getItem, chatLine);
-      }
-      else if(chatLine.indexOf("Awwnie") > -1)
-      {
-        console.log("Detected Awwnie");
-        let item = chatLine.match(/\[\d+:\d+:\d+\] Awwnie: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-        let getItem = {
-          item: item[1].trim(),
-          time: new Date(),
-        };
-        updateEverything(getItem, chatLine);
-      }
-      else if(chatLine.indexOf("Awwni") > -1)
-      {
-        console.log("Detected Awwni");
-        let item = chatLine.match(/\[\d+:\d+:\d+\] Awwni: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-        let getItem = {
-          item: item[1].trim(),
-          time: new Date(),
-        };
-        updateEverything(getItem, chatLine);
-      }
+  } else if (chatLine.indexOf("Materials gained") > -1) {
+    let item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+    updateEverything(chatLine, chatLine);
+  }
+  else if(chatLine.indexOf("Welcome to your session against") > -1) {
+    let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+    // Add code to handle name here.
+    // If update everything isn't needed, use your own function.
+    updateEverything(chatLine, chatLine);
+  }
+  else {
+    console.log(chatLine);
+    if (chatLine.indexOf("EternalSong") > -1) {
+      console.log("Detected EternalSong");
+      let item = chatLine.match(/\[\d+:\d+:\d+\] EternalSong: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+      updateEverything(chatLine, chatLine);
+    } else if (chatLine.indexOf("Awwnie") > -1) {
+      console.log("Detected Awwnie");
+      let item = chatLine.match(/\[\d+:\d+:\d+\] Awwnie: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+      updateEverything(chatLine, chatLine);
+    } else if (chatLine.indexOf("Awwni") > -1) {
+      console.log("Detected Awwni");
+      let item = chatLine.match(/\[\d+:\d+:\d+\] Awwni: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+      updateEverything(chatLine, item);
     }
   }
 }
 
-function updateEverything(getItem, chatLine)
+function updateEverything(chatLine, item)
 {
+  let getItem = {
+    item: item[1].trim(),
+    time: new Date(),
+  };
   console.log(getItem);
   updateSaveData({ data: getItem });
   updateChatHistory(chatLine);
