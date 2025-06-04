@@ -269,32 +269,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
 
   const { id, price } = entry;
  */
-
-  // 1. Parse your JSON (if it’s still in string form)
-// const jsonStr = '{"Tooth half of a key":{ ... }}';
-// const data = JSON.parse(jsonStr);
-
-// 2. Get top-level keys
-  const topKeys = Object.keys(data);
-
-// 3. For each top-level key, get its nested object and read properties
-  for (const topKey of topKeys) {
-    console.log("=== For item:", topKey, "===");
-    const nestedObj = data[topKey]; // { id, timestamp, price, volume }
-
-    // 4a. Direct access:
-    console.log("ID:", nestedObj.id);
-    console.log("Timestamp:", nestedObj.timestamp);
-    console.log("Price:", nestedObj.price);
-    console.log("Volume:", nestedObj.volume);
-
-    // 4b. Or dynamically:
-    Object.entries(nestedObj).forEach(([field, value]) => {
-      console.log(field + " →", value);
-    });
-  }
-
-  let id = data["itemName"]["id"];
+  console.log("Zero");
+  let id = data[itemName]["id"];
   console.log("First");
   console.log(id);
   id = data["id"];
