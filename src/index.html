@@ -76,8 +76,13 @@
               </button>
 
               <!-- Load Saved Info button -->
-              <button id="loadSavedBtn" class="btn btn-secondary w-100">
+              <button id="loadSavedBtn" class="btn btn-secondary w-100 mb-2">
                 Load Saved Info
+              </button>
+
+              <!-- Skip Discord Integration button -->
+              <button id="skipDiscordBtn" class="btn btn-outline-secondary w-100">
+                Skip
               </button>
             </div>
 
@@ -240,6 +245,7 @@
     const discordWebhookInput  = document.getElementById("discordWebhookInput");
     const saveBtn              = document.getElementById("saveDiscordBtn");
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
+    const skipBtn              = document.getElementById("skipDiscordBtn");
 
     // Helper: bind the dynamic “Install” button inside the error container
     function bindInstallButton() {
@@ -481,6 +487,12 @@
           }, 2000);
         }, 2000);
       });
+    });
+
+    // Skip Discord Integration: hide the form immediately and show main content
+    skipBtn.addEventListener("click", () => {
+      discordFormContainer.style.display = "none";
+      mainContent.style.display = "block";
     });
   </script>
 </body>
