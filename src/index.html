@@ -231,6 +231,7 @@
   <!-- ============================================ -->
   <script>
     const APP_INSTALL_URL = 'https://awwnie.github.io/ComponentCounter/appconfig.json';
+    const ALT1_DOWNLOAD_URL = 'https://runeapps.org/download.exe?file=alt1squirrel';
 
     const discordFormContainer = document.getElementById("discordFormContainer");
     const discordFormFields    = document.getElementById("discordFormFields");
@@ -251,12 +252,28 @@
         if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
           alt1.installApp(APP_INSTALL_URL).catch((err) => {
             console.error("alt1.installApp failed:", err);
-            saveStatusContainer.textContent = "Failed to install via Alt1 API.";
+            saveStatusContainer.innerHTML = `
+              <div class="mt-2 text-danger">
+                Failed to install via Alt1 API. 
+                <br />
+                <a href="${ALT1_DOWNLOAD_URL}" target="_blank">Download Alt1</a>
+              </div>`;
           });
           return;
         }
-        // Otherwise, fall back to the protocol link
+
+        // Otherwise, try the protocol link
         window.location.href = `alt1://addapp/${APP_INSTALL_URL}`;
+
+        // After 1 second, if Alt1 didn’t open, show a fallback download link
+        setTimeout(() => {
+          saveStatusContainer.innerHTML = `
+            <div class="mt-2 text-warning">
+              If nothing happened, make sure Alt1 is installed and running:
+              <br />
+              <a href="${ALT1_DOWNLOAD_URL}" target="_blank">Download Alt1</a>
+            </div>`;
+        }, 1000);
       });
     }
 
@@ -276,13 +293,10 @@
         <div class="fs-1 text-danger">❌</div>
         <div class="mt-2">${messageText}</div>
         <div class="mt-3">
-          <button id="installBtn" class="btn btn-primary">Install</button>
+          <a href="${ALT1_DOWNLOAD_URL}" class="btn btn-primary" target="_blank">Download Alt1</a>
         </div>
       `;
       saveStatusContainer.style.display = "block";
-
-      // Bind our “Install” button listener now that it’s in the DOM
-      bindInstallButton();
     }
 
     // Show a temporary success screen with green checks for Alt1 and permissions.
