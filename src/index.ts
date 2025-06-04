@@ -9,7 +9,7 @@ import ChatboxReader, { ChatLine } from "alt1/chatbox";
 // as assets
 import "./index.html";
 import "./appconfig.json";
-import "./css/style.css";
+import "./style.css";
 import "./icon.png";
 
 const itemList = document.querySelector(".itemList");
