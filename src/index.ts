@@ -218,7 +218,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
 
   const data = await resp.json();
   const entry = Array.isArray(data[normalized]) ? data[normalized][0] : null;
-
+	console.log(entry);
   if (!entry) {
     throw new Error(`No GE data found for "${itemName}"`);
   }
