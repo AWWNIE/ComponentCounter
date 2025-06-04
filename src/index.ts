@@ -35,6 +35,19 @@ if (window.alt1) {
   itemList.insertAdjacentHTML("beforeend", newEle);
 }
 
+// Set Chat reader
+reader.readargs = {
+	colors: [
+		a1lib.mixColor(0, 255, 255), //Seren text color
+		a1lib.mixColor(245, 245, 0), //Broach text color
+		a1lib.mixColor(255, 128, 0), //Uncommon Mats
+		a1lib.mixColor(255, 165, 0), //Scavenging comps
+		a1lib.mixColor(255, 0, 0), //Rare Mats
+		a1lib.mixColor(67, 188, 188), //Ancient components
+		a1lib.mixColor(255, 255, 255), // Normal Text White
+   	 	a1lib.mixColor(159,255,159),   // Clan chat green
+	],
+};
 
 window.setTimeout(function () {
   //Find all visible chatboxes on screen
@@ -116,21 +129,11 @@ function readChatbox() {
       updateChatHistory(chatLine);
       checkAnnounce(getItem);
       showItems();
-    } else if (chatLine.indexOf("Materials Gained") > -1) {
+    } else if (chatLine.indexOf("Materials gained") > -1) {
       let item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
 
       let getItem = {
         item: item[1].trim(),
-        time: new Date(),
-      };
-      console.log(getItem);
-      updateSaveData({ data: getItem });
-      updateChatHistory(chatLine);
-      checkAnnounce(getItem);
-      showItems();
-    } else {
-      let getItem = {
-        item: chatLine,
         time: new Date(),
       };
       console.log(getItem);
