@@ -179,18 +179,24 @@ function showItems() {
 }
 
 function checkAnnounce(getItem) {
-	if (getSaveData("discordWebhook")) {
-		fetch(getSaveData("discordWebhook"), {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				username: "Drop Tracker",
-				content: `[${new Date(getItem.time).toLocaleString()}] Received - ${getItem.item}`,
-			}),
-		});
-	}
+  const webhook = getSaveData("discordWebhook");
+  const userId = getSaveData("discordID");
+
+  if (webhook) {
+    // If a Discord ID is stored, format it as a mention; otherwise, leave it blank
+    const mention = userId ? `<@${userId}> ` : "";
+
+    fetch(webhook, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: "Drop Tracker",
+        content: `${mention} [${new Date(getItem.time).toLocaleString()}] Received – ${getItem.item}`,
+      }),
+    });
+  }
 }
 
 //Function to determine the total of all items recorded.
