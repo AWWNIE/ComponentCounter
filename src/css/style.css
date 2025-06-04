@@ -1,73 +1,236 @@
+/* ───────────────────────────────────────────────────────────────
+   Base layout tweaks
+──────────────────────────────────────────────────────────────── */
+
+/* Add enough top‐padding so that the fixed .header (loading/history)
+   never covers the rest of the content. Adjust the 4rem if your header
+   height changes. */
+body.nis {
+  padding-top: 4rem; /* push content below the fixed header */
+  background-color: #1e1e1e;
+  font-family: 'RuneScape UF', sans-serif;
+  margin: 0; /* reset any default margins */
+}
+
+/* Center all .row text by default, but override where needed */
 .row {
-    text-align: center;
+  text-align: center;
 }
 
-body {
-    margin-top: 10px !important;
-}
-
-.nisbutton {
-    font-size: 8pt !important;
-}
-
+/* Ensure .main container (if used) scrolls within 75vh. */
 .main {
-    overflow-y: scroll;
-    max-height: 75vh;
-    margin-top: 8px;
+  overflow-y: auto;
+  max-height: 75vh;
+  margin-top: 8px;
 }
 
+/* ───────────────────────────────────────────────────────────────
+   Header (the “Loading…” or history toggle item)
+──────────────────────────────────────────────────────────────── */
+
+/* The “Loading…” header is fixed at top:10px and spans 100%. */
+.header {
+  text-align: center;
+  background: url(https://runeapps.org/nis/alt1-currentskin/nisbutton.png) 0px -100%/24px 400% repeat content-box;
+  background-color: black;
+  color: black;
+  font-family: 'trajan-pro-3';
+  padding: 0.5rem 0; /* give it some vertical padding */
+  position: fixed;
+  top: 10px;
+  width: 100%;
+  z-index: 1000; /* stay above everything else */
+}
+
+/* Make sure the first visible content (e.g. #bossDisplay) lives below .header */
+#bossDisplay {
+  margin-top: 1rem;    /* small gap below header */
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #2a2a2a;
+  border: 1px solid #A67D3D;
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-size: 1rem;
+  width: calc(100% - 2rem); /* allow 1rem padding on left/right on narrow screens */
+  max-width: 800px; /* cap width for large desktops */
+  margin-left: auto;
+  margin-right: auto;
+}
+#bossDisplay span {
+  font-weight: bold;
+  color: #E2BE62;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Item list (history + total + messages)
+──────────────────────────────────────────────────────────────── */
+
+/* Make the list take up remaining viewport height minus header & bossDisplay,
+   and enable scrolling if items overflow vertically. */
+.list-group {
+  position: relative;
+  margin: auto; /* center horizontally within viewport */
+  max-width: 800px; /* cap width for large screens */
+  padding-top: 2rem; /* extra top‐padding so the fixed .header doesn’t cover list items */
+  height: calc(100vh - 10px - 0.5rem /* header top + padding */ - 3.5rem /* bossDisplay + margins */);
+  overflow-y: auto;
+  background: transparent;
+  border: none;
+}
+
+/* Each list item should wrap text and never be clipped. */
+.list-group-item {
+  background: transparent;
+  border: grey solid 1px;
+  white-space: normal; /* allow wrapping */
+  word-wrap: break-word;
+  padding: 0.5rem 1rem;
+  color: white;
+  text-align: left;
+}
+
+/* The “Total Seren Spirits collected” line gets a bit of extra top‐margin
+   so it never touches the “Loading…” header or bossDisplay. */
+.total {
+  color: rgb(0, 255, 255);
+  margin-top: 1.5rem;
+}
+
+/* Hide the scrollbar on WebKit if desired */
+.list-group::-webkit-scrollbar {
+  display: none;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Discord form (step 1) and modal styling
+──────────────────────────────────────────────────────────────── */
+
+/* Card container for Discord form */
+#discordFormContainer .card {
+  background-color: #292929;
+  border: 2px solid #A67D3D;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+#discordFormContainer .card-body {
+  padding: 1.5rem;
+}
+#discordFormContainer .card-title {
+  color: #E2BE62;
+  font-size: 1.25rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Labels/inputs */
+#discordFormContainer .form-label {
+  color: #FFFFFF;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+}
+#discordFormContainer .form-control {
+  background-color: #1f1f1f;
+  border: 1px solid #A67D3D;
+  color: #FFFFFF;
+  border-radius: 4px;
+}
+#discordFormContainer .form-control::placeholder {
+  color: #AAAAAA;
+}
+#discordFormContainer .form-control:focus {
+  border-color: #E2BE62;
+  box-shadow: 0 0 5px rgba(166, 125, 61, 0.8);
+  background-color: #1f1f1f;
+}
+
+/* Buttons */
+#discordFormContainer .btn {
+  background-color: #3C3C3C;
+  border: 1px solid #A67D3D;
+  color: #E2BE62;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+}
+#discordFormContainer .btn:hover {
+  background-color: #555555;
+  border-color: #E2BE62;
+}
+#discordFormContainer .btn-outline-secondary {
+  background-color: transparent;
+  border: 1px solid #A67D3D;
+  color: #E2BE62;
+}
+#discordFormContainer .btn-outline-secondary:hover {
+  background-color: #3C3C3C;
+  border-color: #E2BE62;
+  color: #FFFFFF;
+}
+
+/* Status icons (success / error) */
+#saveStatusContainer .text-success {
+  color: #4EC83D !important;
+}
+#saveStatusContainer .text-danger {
+  color: #C83D3D !important;
+}
+#saveStatusContainer .text-white {
+  color: #FFFFFF !important;
+}
+
+/* Center the Skip button text */
+#skipDiscordBtn {
+  margin-top: 0.5rem;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Modal (settings) background + text
+──────────────────────────────────────────────────────────────── */
 .modal-body,
 .modal-header,
 .modal-footer {
-    background-color: grey;
-    color: white;
+  background-color: grey;
+  color: white;
 }
 
+/* ───────────────────────────────────────────────────────────────
+   Utility classes
+──────────────────────────────────────────────────────────────── */
 .warning {
-    background-color: yellow;
-    color: black;
-    font-weight: bold;
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
 }
-
 .danger {
-    background-color: red;
-    color: black;
-    font-weight: bold;
+  background-color: red;
+  color: black;
+  font-weight: bold;
 }
 
-.list-group-item {
-    background: transparent;
-    border: grey solid 1px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: .25rem;
-    text-align: left;
-    color: white;
+/* ───────────────────────────────────────────────────────────────
+   Responsive tweaks
+──────────────────────────────────────────────────────────────── */
+
+/* Ensure the bossDisplay and list shrink/grow on smaller viewports */
+@media (max-width: 992px) {
+  #bossDisplay,
+  .list-group {
+    width: calc(100% - 2rem); /* 1rem padding on each side */
+  }
 }
 
-.list-group {
-    height: calc(100vh - 4.25em);
-    overflow-y: scroll;
-    padding-top: 20px;
-}
-
-.list-group::-webkit-scrollbar {
-    display: none;
-}
-
-.header {
-    text-align: center;
-    background: url(https://runeapps.org/nis/alt1-currentskin/nisbutton.png) 0px -100%/24px 400% repeat content-box;
-    background-color: black;
-    color: black;
-    font-family: 'trajan-pro-3';
-    padding: unset;
-    position: fixed;
-    top: 10px;
-    width: 100%;
-    z-index: 1;
-}
-
-.total {
-    color: rgb(0, 255, 255);
+/* Ensure Discord form adapts on very small screens */
+@media (max-width: 576px) {
+  #discordFormContainer .col-12 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  #discordFormContainer .form-label,
+  #discordFormContainer .form-control {
+    font-size: 0.9rem;
+  }
+  #discordFormContainer .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
 }
