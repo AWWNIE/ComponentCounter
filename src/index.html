@@ -242,19 +242,19 @@
     const saveBtn              = document.getElementById("saveDiscordBtn");
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
 
-    // Helper: bind the dynamic “Install” button inside the error container
+    // Helper: bind the dynamic “Install SerenTracker” button when inside Alt1
     function bindInstallButton() {
       const installBtn = document.getElementById("installBtn");
       if (!installBtn) return;
 
       installBtn.addEventListener("click", () => {
-        // If we’re inside Alt1’s built-in browser, call the API:
+        // If we’re inside Alt1’s built-in browser, call the API to install the app
         if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
           alt1.installApp(APP_INSTALL_URL).catch((err) => {
             console.error("alt1.installApp failed:", err);
             saveStatusContainer.innerHTML = `
               <div class="mt-2 text-danger">
-                Failed to install via Alt1 API. 
+                Could not install app via Alt1 API. 
                 <br />
                 <a href="${ALT1_DOWNLOAD_URL}" target="_blank">Download Alt1</a>
               </div>`;
@@ -262,14 +262,14 @@
           return;
         }
 
-        // Otherwise, try the protocol link
+        // Otherwise, fallback to protocol link (will prompt "Open in Alt1?")
         window.location.href = `alt1://addapp/${APP_INSTALL_URL}`;
 
-        // After 1 second, if Alt1 didn’t open, show a fallback download link
+        // After 1 second, if Alt1 didn’t open, show the download link
         setTimeout(() => {
           saveStatusContainer.innerHTML = `
             <div class="mt-2 text-warning">
-              If nothing happened, make sure Alt1 is installed and running:
+              If nothing happened, ensure Alt1 is installed and running:
               <br />
               <a href="${ALT1_DOWNLOAD_URL}" target="_blank">Download Alt1</a>
             </div>`;
@@ -288,14 +288,26 @@
         messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are all enabled.";
       }
 
-      // Replace the old anchor with a button we can bind
-      saveStatusContainer.innerHTML = `
-        <div class="fs-1 text-danger">❌</div>
-        <div class="mt-2">${messageText}</div>
-        <div class="mt-3">
-          <a href="${ALT1_DOWNLOAD_URL}" class="btn btn-primary" target="_blank">Download Alt1</a>
-        </div>
-      `;
+      // If inside Alt1, offer to install via alt1.installApp; otherwise, show download link
+      if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
+        saveStatusContainer.innerHTML = `
+          <div class="fs-1 text-danger">❌</div>
+          <div class="mt-2">${messageText}</div>
+          <div class="mt-3">
+            <button id="installBtn" class="btn btn-primary">Install SerenTracker</button>
+          </div>
+        `;
+        bindInstallButton();
+      } else {
+        saveStatusContainer.innerHTML = `
+          <div class="fs-1 text-danger">❌</div>
+          <div class="mt-2">${messageText}</div>
+          <div class="mt-3">
+            <a href="${ALT1_DOWNLOAD_URL}" class="btn btn-primary" target="_blank">Download Alt1</a>
+          </div>
+        `;
+      }
+
       saveStatusContainer.style.display = "block";
     }
 
@@ -320,7 +332,7 @@
       }, 2000);
     }
 
-    // Wrapper: check Alt1 presence & required permissions, then proceed or error
+    // Wrapper: check Alt1 presence & required permissions, then proceed or show error
     function checkAlt1AndProceed(callback) {
       if (!window.alt1 || !alt1.permissionInstalled) {
         showAlt1Error("notInstalled");
@@ -333,7 +345,7 @@
       showAlt1Success(callback);
     }
 
-    // On page load, decide which button to show
+    // On page load, decide which buttons to show
     window.addEventListener("DOMContentLoaded", () => {
       mainContent.style.display = "none";
 
@@ -356,7 +368,7 @@
         const storedId = localStorage.getItem("discordID") || "";
         const storedWebhook = localStorage.getItem("discordWebhook") || "";
 
-        // Immediately hide form fields and show spinner
+        // Hide form fields and show spinner
         discordFormFields.style.display = "none";
         saveStatusContainer.innerHTML = `
           <div class="spinner-border" role="status">
@@ -421,7 +433,7 @@
         const webhookValid = webhookValue.startsWith("https://discord.com/api/webhooks/");
 
         if (!idValid || !webhookValid) {
-          // Hide form fields, show red X + appropriate error text
+          // Hide form fields, show red X + appropriate error
           discordFormFields.style.display = "none";
 
           let errorMessage = "";
@@ -439,7 +451,7 @@
           `;
           saveStatusContainer.style.display = "block";
 
-          // After 2 seconds, hide the status and return to the form
+          // After 2 seconds, hide status and show form again
           setTimeout(() => {
             saveStatusContainer.style.display = "none";
             discordFormFields.style.display = "block";
@@ -452,7 +464,7 @@
         localStorage.setItem("discordID", idValue);
         localStorage.setItem("discordWebhook", webhookValue);
 
-        // After storing, ensure Load button is visible
+        // Ensure Load button is visible
         loadSavedBtn.style.display = "block";
 
         // Call existing save‐to‐localStorage functions:
@@ -470,7 +482,7 @@
         `;
         saveStatusContainer.style.display = "block";
 
-        // After 2 seconds, replace spinner with success or error icon
+        // After 2 seconds, show success or error
         setTimeout(() => {
           const savedId = getSaveData("discordID");
           const savedWebhook = getSaveData("discordWebhook");
@@ -488,7 +500,7 @@
             `;
           }
 
-          // After another 2 seconds, hide the form and show main content
+          // After another 2 seconds, hide form and show main content
           setTimeout(() => {
             discordFormContainer.style.display = "none";
             mainContent.style.display = "block";
