@@ -270,6 +270,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   const { id, price } = entry;
  */
   console.log("Zero");
+  let subObject = data[itemName];
+  console.log(subObject);
   let id = data[itemName]["id"];
   console.log("First");
   console.log(id);
