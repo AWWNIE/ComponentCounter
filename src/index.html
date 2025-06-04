@@ -489,8 +489,17 @@
       });
     });
 
-    // Skip Discord Integration: hide the form immediately and show main content
+    // Skip Discord Integration: clear saved data, clear updateSaveData, hide the form, and show main content
     skipBtn.addEventListener("click", () => {
+      // Clear any localStorage entries
+      localStorage.removeItem("discordID");
+      localStorage.removeItem("discordWebhook");
+
+      // Clear persisted data via updateSaveData
+      updateSaveData({ discordID: "" });
+      updateSaveData({ discordWebhook: "" });
+
+      // Hide discord form and show main content
       discordFormContainer.style.display = "none";
       mainContent.style.display = "block";
     });
