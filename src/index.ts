@@ -35,19 +35,6 @@ if (window.alt1) {
   itemList.insertAdjacentHTML("beforeend", newEle);
 }
 
-// Set Chat reader
-reader.readargs = {
-	colors: [
-		a1lib.mixColor(0, 255, 255), //Seren text color
-		a1lib.mixColor(245, 245, 0), //Broach text color
-		a1lib.mixColor(255, 128, 0), //Uncommon Mats
-		a1lib.mixColor(255, 165, 0), //Scavenging comps
-		a1lib.mixColor(255, 0, 0), //Rare Mats
-		a1lib.mixColor(67, 188, 188), //Ancient components
-		a1lib.mixColor(255, 255, 255), // Normal Text White
-   	 	a1lib.mixColor(159,255,159),   // Clan chat green
-	],
-};
 
 window.setTimeout(function () {
   //Find all visible chatboxes on screen
