@@ -167,7 +167,15 @@ function messageParser(chatLine)
     if (chatLine.indexOf("EternalSong") > -1) {
       console.log("Detected EternalSong");
       let item = chatLine.match(/\[\d+:\d+:\d+\] EternalSong: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-      updateDropData(chatLine, item);
+      console.log("Logging chatline: " + chatLine);
+      console.log("Logging item: " + item);
+
+      let getItem = {
+        item: item[1].trim(),
+        time: new Date(),
+      };
+      console.log("Logging getItem: " + getItem);
+      updateDropData2(chatLine, getItem);
     } else if (chatLine.indexOf("Awwnie") > -1) {
       console.log("Detected Awwnie");
       let item = chatLine.match(/\[\d+:\d+:\d+\] Awwnie: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
@@ -178,6 +186,14 @@ function messageParser(chatLine)
       updateDropData(chatLine, item);
     }
   }
+}
+
+function updateDropData2(chatLine, getItem)
+{
+  updateSaveData({ data: getItem });
+  updateChatHistory(chatLine);
+  checkAnnounce(getItem);
+  showItems();
 }
 
 function updateDropData(chatLine, item)
