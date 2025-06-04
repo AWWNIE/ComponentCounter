@@ -167,19 +167,6 @@ function isInHistory(chatLine) {
   return false;
 }
 
-/**
- * Given an item name (e.g. "Abyssal Whip"), this function:
- * 1. Normalizes it (spaces → underscores).
- * 2. Fetches the “latest” GE data from Weird Gloop.
- * 3. Extracts the item’s id and price.
- * 4. Builds the RuneScape ItemDB thumbnail URL using that id.
- *
- * Example thumbnail pattern (using their current cache‐buster):
- *   https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=<ITEM_ID>
- *
- * @param {string} itemName — The GE item name (case‐insensitive; spaces allowed).
- * @returns {Promise<{ price: number, thumbnailUrl: string }>}
- */
 async function fetchLatestPriceAndThumbnail(itemName) {
 
   const normalized = itemName.trim().replace(/\s+/g, "_");
@@ -273,7 +260,10 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
 
   const dropName = getItem.item;   
 	
-  fetchLatestPriceAndThumbnail(dropName)	
+  const priceInfo = fetchLatestPriceAndThumbnail(dropName)	
+  const price = priceInfo.price;
+  const thumbnailUrl = priceInfo.thumbnailUrl;
+	
   const killCount = "kill count";     // ← fill in dynamically if you track kill count somewhere
 	  
   const embedPayload = {
