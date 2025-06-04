@@ -256,7 +256,7 @@ function showItems() {
  * NOTE: Because this is running *inside Alt1 (a browser-like environment), we simply
  *       construct the JSON object manually and POST it to the webhook URL. 
  */
-async function checkAnnounce(getItem: { item: string }) {
+async function checkAnnounce(getItem: { item: string; time: Date}) {
   const webhook = getSaveData("discordWebhook");
   const userId = getSaveData("discordID");
 
