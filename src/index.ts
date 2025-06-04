@@ -39,6 +39,7 @@ if (window.alt1) {
 reader.readargs = {
 	colors: [
 		a1lib.mixColor(0, 255, 255), //Seren text color
+		a1lib.mixColor(245, 245, 1), //Broach text color
 	],
 };
 
@@ -123,6 +124,20 @@ function readChatbox() {
 			checkAnnounce(getItem);
 			showItems();
 		}
+		else if(chatLine.indexOf("Materials Gained") > -1)
+		{
+			let item = chatLine.match(/\[\d+:\d+:\d+\] Materials Gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+
+			let getItem = {
+				item: item[1].trim(),
+				time: new Date(),
+			};
+			console.log(getItem);
+			updateSaveData({ data: getItem });
+			updateChatHistory(chatLine);
+			checkAnnounce(getItem);
+			showItems();
+		}
 	}
 }
 
@@ -157,7 +172,7 @@ function showItems() {
 	if (getSaveData("mode") == "total") {
 		listHeader.dataset.show = "history";
 		listHeader.title = "Click to show History";
-		listHeader.innerHTML = "Seren Item Totals";
+		listHeader.innerHTML = "Item Totals";
 		let total = getTotal();
 		Object.keys(total)
 			.sort()
@@ -165,7 +180,7 @@ function showItems() {
 	} else {
 		listHeader.dataset.show = "total";
 		listHeader.title = "Click to show Totals";
-		listHeader.innerHTML = "Seren Item History";
+		listHeader.innerHTML = "Item History";
 		getSaveData("data")
 			.slice()
 			.reverse()
@@ -218,7 +233,7 @@ exportButton.addEventListener("click", function () {
 		Object.keys(total)
 			.sort()
 			.forEach((item) => (str = `${str}${total[item]},${item}\n`));
-		fileName = "serenTotalExport.csv";
+		fileName = "itemTotalExport.csv";
 
 		//Otherwise, export list by item and time received.
 	} else {
@@ -277,28 +292,28 @@ TODO:
 
 (function () {
 	// Fresh install, initialize Save Data
-	if(!localStorage.getItem("serenData") &&
-	!localStorage.getItem("serenTotal") &&
-	!localStorage.getItem("serenChat") &&
+	if(!localStorage.getItem("itemData") &&
+	!localStorage.getItem("itemTotal") &&
+	!localStorage.getItem("itemChat") &&
 	!localStorage.getItem(appName)
 ) {
 	localStorage.setItem(appName, JSON.stringify({ chat: 0, data: [], mode: "history" }));
 	location.reload();
 }
 
-	// Convert old localStorage save data to new format.  Keep serenData entry just in case.
-	if (localStorage.getItem("serenData")) {
-		updateSaveData({ data: JSON.parse(localStorage.getItem("serenData")) });
-		localStorage.setItem("serenDataBackup", localStorage.getItem("serenData"));
-		localStorage.removeItem("serenData");
+	// Convert old localStorage save data to new format.  Keep itemData entry just in case.
+	if (localStorage.getItem("itemData")) {
+		updateSaveData({ data: JSON.parse(localStorage.getItem("itemData")) });
+		localStorage.setItem("itemDataBackup", localStorage.getItem("itemData"));
+		localStorage.removeItem("itemData");
 	}
-	if (localStorage.getItem("serenTotal")) {
-		updateSaveData({ mode: localStorage.getItem("serenTotal") });
-		localStorage.removeItem("serenTotal");
+	if (localStorage.getItem("itemTotal")) {
+		updateSaveData({ mode: localStorage.getItem("itemTotal") });
+		localStorage.removeItem("itemTotal");
 	}
-	if (localStorage.getItem("serenChat")) {
-		updateSaveData({ chat: localStorage.getItem("serenChat") });
-		localStorage.removeItem("serenChat");
+	if (localStorage.getItem("itemChat")) {
+		updateSaveData({ chat: localStorage.getItem("itemChat") });
+		localStorage.removeItem("itemChat");
 	}
 })();
 
@@ -310,7 +325,7 @@ function updateSaveData(...dataset) {
 		// Data property exists, push to array
 		if (name == "data") {
 			// If data exists, append to array
-			if (lsData[name] && value != localStorage.getItem("serenData")) {
+			if (lsData[name] && value != localStorage.getItem("itemData")) {
 				lsData[name].push(value);
 				continue;
 			}
