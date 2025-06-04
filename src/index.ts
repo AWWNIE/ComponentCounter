@@ -167,6 +167,13 @@ function isInHistory(chatLine) {
   return false;
 }
 
+
+function extractItemName(str) {
+  const s = str.trim();
+  const m = s.match(/^\s*\d+\s*x\s+(.+)$/i);
+  return m ? m[1].trim() : s;
+}
+
 /**
  * Fetches the latest GE price + thumbnail URL for any given item name.
  */
@@ -272,7 +279,7 @@ async function checkAnnounce(getItem: { item: string; time: Date}) {
   let thumbnailUrl: string | null = null;
 
   try {
-    const result = await fetchLatestPriceAndThumbnail(getItem.item);
+    const result = await fetchLatestPriceAndThumbnail(extractItemName(getItem.item));
     price = result.price;
     thumbnailUrl = result.thumbnailUrl;
   } catch (err) {
