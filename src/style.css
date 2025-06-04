@@ -1,6 +1,6 @@
 /* ───────────────────────────────────────────────────────────────
    Base layout tweaks
-──────────────────────────────────────────────────────────────── */
+─────────────────────────────────────────────────────────-─────── */
 
 /* Add enough top‐padding so that the fixed .header (loading/history)
    never covers the rest of the content. Adjust the 4rem if your header
