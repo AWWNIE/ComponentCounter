@@ -165,11 +165,11 @@ function messageParser(chatLine)
     console.log("Message is: " + chatLine);
 
     let str = chatLine.substring(chatLine.indexOf(':') + 3);
-    console.log("Detected boss: " + str);
+    console.log("Boss is: " + str);
 
-    let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-    console.log("Detected message: " + item);
-    handleBossParsing(chatLine, item);
+    // let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+    // console.log("Detected message: " + item);
+    handleBossParsing(chatLine, str);
   }
   else {
     console.log(chatLine);
@@ -205,9 +205,8 @@ function updateDropData(chatLine, item)
   showItems();
 }
 
-function handleBossParsing(chatLine, match)
+function handleBossParsing(chatLine, bossName)
 {
-  let bossName = match[1];
   bossName = bossName.replace(/[.,;:]+$/, "");
   console.log("Parsed boss name:" + bossName);
   updateChatHistory(chatLine);
