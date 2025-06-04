@@ -44,7 +44,6 @@ reader.readargs = {
 		a1lib.mixColor(255, 165, 0), //Scavenging comps
 		a1lib.mixColor(255, 0, 0), //Rare Mats
 		a1lib.mixColor(67, 188, 188), //Ancient components
-        a1lib.mixColor(8, 252, 4), // FC color
 	],
 };
 
@@ -133,18 +132,6 @@ function readChatbox() {
 
       let getItem = {
         item: item[1].trim(),
-        time: new Date(),
-      };
-      console.log(getItem);
-      updateSaveData({ data: getItem });
-      updateChatHistory(chatLine);
-      checkAnnounce(getItem);
-      showItems();
-    }
-    else
-    {
-      let getItem = {
-        item: chatLine[1].trim(),
         time: new Date(),
       };
       console.log(getItem);
