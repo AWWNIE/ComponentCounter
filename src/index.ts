@@ -44,6 +44,9 @@ reader.readargs = {
 		a1lib.mixColor(255, 165, 0), //Scavenging comps
 		a1lib.mixColor(255, 0, 0), //Rare Mats
 		a1lib.mixColor(67, 188, 188), //Ancient components
+		A1lib.mixColor(255, 255, 255), // Normal Text White
+    		A1lib.mixColor(130, 70, 184),  // Gorvek Purple
+   	 	A1lib.mixColor(159,255,159),   // Clan chat green
 	],
 };
 
