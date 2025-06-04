@@ -166,7 +166,7 @@ function messageParser(chatLine)
     let str = chatLine;
     for(let i = 0; i < 3; i++)
     {
-      str = str.substring(str.indexOf(':') + 1)
+      str = str.substring(chatLine.indexOf(':') + 1)
     }
     console.log("Boss is: " + str);
 
