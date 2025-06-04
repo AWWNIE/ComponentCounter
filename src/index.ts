@@ -280,7 +280,6 @@ function handleBossKcParsing(chatLine)
   {
     // Remove final : which occurs after the message "Welcome to your session against"
     bossKc = bossKc.substring(bossKc.indexOf(':') + 2);
-    bossKc = bossKc[0].trim;
     bossKc = bossKc.split(' ')[0];
     console.log("Boss is: " + bossKc);
     updateBossInfo(JSON.parse(localStorage.getItem("bossName") || '"No boss"'), bossKc);
