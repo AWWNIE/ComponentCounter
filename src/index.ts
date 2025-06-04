@@ -163,7 +163,11 @@ function messageParser(chatLine)
   else if(chatLine.indexOf("Welcome to your session against") > -1) {
     console.log("Detected boss instance!");
     console.log("Message is: " + chatLine);
-    let item = chatLine.match(/\[\d+:\d+:\d+\]\nWelcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+
+    let str = chatLine.substring(chatLine.indexOf(':') + 3);
+    console.log("Detected boss: " + str);
+
+    let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
     console.log("Detected message: " + item);
     handleBossParsing(chatLine, item);
   }
