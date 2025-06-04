@@ -44,7 +44,6 @@ reader.readargs = {
 		a1lib.mixColor(255, 165, 0), //Scavenging comps
 		a1lib.mixColor(255, 0, 0), //Rare Mats
 		a1lib.mixColor(67, 188, 188), //Ancient components
-        a1lib.mixColor(8, 252, 4), //Ancient components
 	],
 };
 
@@ -140,20 +139,7 @@ function readChatbox() {
       updateChatHistory(chatLine);
       checkAnnounce(getItem);
       showItems();
-    }else if (chatLine.indexOf("[Be Afraid] EternalSong") > -1) {
-      let item = chatLine.match(/\[\d+:\d+:\d+\] [Be Afraid] EternalSong: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-
-      let getItem = {
-        item: item[1].trim(),
-        time: new Date(),
-      };
-      console.log(getItem);
-      updateSaveData({ data: getItem });
-      updateChatHistory(chatLine);
-      checkAnnounce(getItem);
-      showItems();
     }
-
   }
 }
 
