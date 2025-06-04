@@ -128,7 +128,7 @@ function readChatbox() {
       checkAnnounce(getItem);
       showItems();
     } else if (chatLine.indexOf("Materials Gained") > -1) {
-      let item = chatLine.match(/\[\d+:\d+:\d+\] Materials Gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+      let item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
 
       let getItem = {
         item: item[1].trim(),
