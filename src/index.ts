@@ -145,9 +145,9 @@ function readChatbox() {
     else
     {
       console.log(chatLine);
-      if(chatLine.indexOf("EternalSong of Death") > -1)
+      if(chatLine.indexOf("EternalSong") > -1)
       {
-        let item = chatLine.match(/\[\d+:\d+:\d+\] EternalSong of Death: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+        let item = chatLine.match(/\[\d+:\d+:\d+\] EternalSong: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
         let getItem = {
           item: item[1].trim(),
           time: new Date(),
