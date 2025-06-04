@@ -124,11 +124,7 @@ function readChatbox() {
         item: item[1].trim(),
         time: new Date(),
       };
-      console.log(getItem);
-      updateSaveData({ data: getItem });
-      updateChatHistory(chatLine);
-      checkAnnounce(getItem);
-      showItems();
+      updateEverything(getItem, chatLine);
     } else if (chatLine.indexOf("Materials gained") > -1) {
       let item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
 
@@ -136,16 +132,11 @@ function readChatbox() {
         item: item[1].trim(),
         time: new Date(),
       };
-      console.log(getItem);
-      updateSaveData({ data: getItem });
-      updateChatHistory(chatLine);
-      checkAnnounce(getItem);
-      showItems();
+      updateEverything(getItem, chatLine);
     }
     else
     {
       console.log(chatLine);
-      console.log(chatLine.indexOf("EternalSong"));
       if(chatLine.indexOf("EternalSong") > -1)
       {
         console.log("Detected EternalSong");
@@ -154,14 +145,39 @@ function readChatbox() {
           item: item[1].trim(),
           time: new Date(),
         };
-        console.log(getItem);
-        updateSaveData({ data: getItem });
-        updateChatHistory(chatLine);
-        checkAnnounce(getItem);
-        showItems();
+        updateEverything(getItem, chatLine);
+      }
+      else if(chatLine.indexOf("Awwnie") > -1)
+      {
+        console.log("Detected Awwnie");
+        let item = chatLine.match(/\[\d+:\d+:\d+\] Awwnie: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+        let getItem = {
+          item: item[1].trim(),
+          time: new Date(),
+        };
+        updateEverything(getItem, chatLine);
+      }
+      else if(chatLine.indexOf("Awwni") > -1)
+      {
+        console.log("Detected Awwni");
+        let item = chatLine.match(/\[\d+:\d+:\d+\] Awwni: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+        let getItem = {
+          item: item[1].trim(),
+          time: new Date(),
+        };
+        updateEverything(getItem, chatLine);
       }
     }
   }
+}
+
+function updateEverything(getItem, chatLine)
+{
+  console.log(getItem);
+  updateSaveData({ data: getItem });
+  updateChatHistory(chatLine);
+  checkAnnounce(getItem);
+  showItems();
 }
 
 function updateChatHistory(chatLine) {
