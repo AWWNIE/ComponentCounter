@@ -267,7 +267,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
     throw new Error(`No GE data found for "${itemName}"`);
   }
 
-
+  const { id, price } = entry;
   //const id = data[0].value;
   //const price = data[1].value;
 
