@@ -84,6 +84,7 @@ reader.readargs = {
  */
 function getCurrentBoss(): string | null {
   const history = sessionStorage.getItem(`${appName}chatHistory`);
+		console.log(history)
   if (!history) return null;
 
   const lines = history.split("\n");
