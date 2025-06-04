@@ -261,8 +261,8 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
   const dropName = getItem.item;   
 	
   const priceInfo = fetchLatestPriceAndThumbnail(dropName)	
-  const price = priceInfo.price;
-  const thumbnailUrl = priceInfo.thumbnailUrl;
+  const price = priceInfo[0];
+  const thumbnailUrl = priceInfo[1];
 	
   const killCount = "kill count";     // ← fill in dynamically if you track kill count somewhere
 	  
