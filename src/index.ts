@@ -76,7 +76,7 @@ reader.readargs = {
 
 /**
  * Scans stored chat history for the most recent
- * "Welcome to your session against: <boss>" line,
+ * "Welcome to your session against: <boss>." line,
  * optionally preceded by “[HH:MM:SS]”. Strips off any trailing
  * commas, semicolons, periods, or colons from the boss name.
  */
@@ -99,15 +99,6 @@ function getCurrentBoss(): string | null {
   }
   return null;
 }
-
-// Expose it globally so the HTML polling loop can use it:
-(window as any).getCurrentBoss = getCurrentBoss;
-
-// Expose it so the HTML polling loop can call it:
-(window as any).getCurrentBoss = getCurrentBoss;
-
-// Expose it for the HTML-side polling loop
-(window as any).getCurrentBoss = getCurrentBoss;
 
 // Make sure it’s exposed globally so our inline HTML script can see it:
 (window as any).getCurrentBoss = getCurrentBoss;
