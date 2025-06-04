@@ -23,6 +23,31 @@ const timestampRegex = /\[\d{2}:\d{2}:\d{2}\]/g;
 const reader = new ChatboxReader();
 const appName = "SerenTracker";
 
+const rareDropList = {
+  Rasial: {
+    items: [
+      "Omni guard",
+      "Soulbound lantern",
+      "Crown of the First Necromancer",
+      "Robe top of the First Necromancer",
+      "Robe bottom of the First Necromancer",
+      "Hand wrap of the First Necromancer",
+      "Foot wraps of the First Necromancer"
+    ]
+  },
+  Raksha: {
+    items: [
+      "Laceration boots",
+      "Blast diffusion boots",
+      "Fleeting boots",
+      "Shadow spike",
+      "Greater Ricochet ability codex",
+      "Greater Chain ability codex",
+      "Divert ability codex"
+    ]
+  }
+};
+
 //check if we are running inside alt1 by checking if the alt1 global exists
 if (window.alt1) {
   //tell alt1 about the app
