@@ -71,6 +71,8 @@ reader.readargs = {
 		a1lib.mixColor(67, 188, 188), //Ancient components
 		a1lib.mixColor(255, 255, 255), // Normal Text White
    	 	a1lib.mixColor(159,255,159),   // Clan chat green
+        a1lib.mixColor(147, 245, 148), //raksha idle messaging
+        a1lib.mixColor(255, 255, 0) // wilderness flash events + guthix cache
 	],
 };
 
@@ -150,37 +152,35 @@ function messageParser(chatLine)
 {
   if (chatLine.indexOf("Seren spirit gifts you") > -1) {
     let item = chatLine.match(/\[\d+:\d+:\d+\] The Seren spirit gifts you: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-    updateEverything(chatLine, chatLine);
+    updateDropData(chatLine, item);
 
   } else if (chatLine.indexOf("Materials gained") > -1) {
     let item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-    updateEverything(chatLine, chatLine);
+    updateDropData(chatLine, item);
   }
   else if(chatLine.indexOf("Welcome to your session against") > -1) {
     let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-    // Add code to handle name here.
-    // If update everything isn't needed, use your own function.
-    updateEverything(chatLine, chatLine);
+    handleBossParsing(item);
   }
   else {
     console.log(chatLine);
     if (chatLine.indexOf("EternalSong") > -1) {
       console.log("Detected EternalSong");
       let item = chatLine.match(/\[\d+:\d+:\d+\] EternalSong: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-      updateEverything(chatLine, chatLine);
+      updateDropData(chatLine, item);
     } else if (chatLine.indexOf("Awwnie") > -1) {
       console.log("Detected Awwnie");
       let item = chatLine.match(/\[\d+:\d+:\d+\] Awwnie: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-      updateEverything(chatLine, chatLine);
+      updateDropData(chatLine, item);
     } else if (chatLine.indexOf("Awwni") > -1) {
       console.log("Detected Awwni");
       let item = chatLine.match(/\[\d+:\d+:\d+\] Awwni: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-      updateEverything(chatLine, item);
+      updateDropData(chatLine, item);
     }
   }
 }
 
-function updateEverything(chatLine, item)
+function updateDropData(chatLine, item)
 {
   let getItem = {
     item: item[1].trim(),
@@ -192,6 +192,29 @@ function updateEverything(chatLine, item)
   checkAnnounce(getItem);
   showItems();
 }
+
+function handleBossParsing(match)
+{
+  if (match) {
+    let bossName = match[1];
+    bossName = bossName.replace(/[.,;:]+$/, "");
+    console.log("Parsed boss name:" + bossName);
+    updateBossInfo(bossName);
+  }
+}
+
+function updateBossInfo(chatLine)
+{
+  localStorage.setItem("bossName", JSON.stringify(chatLine));
+}
+
+function getCurrentBoss()
+{
+  JSON.parse(localStorage.getItem("bossName") || '"No boss"')
+}
+
+// Make sure it’s exposed globally so our inline HTML script can see it:
+(window as any).getCurrentBoss = getCurrentBoss;
 
 function updateChatHistory(chatLine) {
   if (!sessionStorage.getItem(`${appName}chatHistory`)) {
@@ -216,6 +239,7 @@ function isInHistory(chatLine) {
   }
   return false;
 }
+
 
 
 function extractItemName(str) {
@@ -490,6 +514,7 @@ TODO:
     !localStorage.getItem("itemData") &&
     !localStorage.getItem("itemTotal") &&
     !localStorage.getItem("itemChat") &&
+    !localStorage.getItem("bossName") &&
     !localStorage.getItem(appName)
   ) {
     localStorage.setItem(appName, JSON.stringify({ chat: 0, data: [], mode: "history" }));
@@ -509,6 +534,10 @@ TODO:
   if (localStorage.getItem("itemChat")) {
     updateSaveData({ chat: localStorage.getItem("itemChat") });
     localStorage.removeItem("itemChat");
+  }
+  if (localStorage.getItem("bossName")) {
+    updateSaveData({ chat: localStorage.getItem("bossName") });
+    localStorage.removeItem("bossName");
   }
 })();
 
