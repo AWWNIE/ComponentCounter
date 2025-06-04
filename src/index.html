@@ -116,6 +116,21 @@
     #skipDiscordBtn {
       margin-top: 0.5rem;
     }
+
+    /* New “Current Boss” display styling */
+    #bossDisplay {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      background-color: #2a2a2a;
+      border: 1px solid #A67D3D;
+      border-radius: 4px;
+      color: #FFFFFF;
+      font-size: 1rem;
+    }
+    #bossDisplay span {
+      font-weight: bold;
+      color: #E2BE62;
+    }
   </style>
 </head>
 
@@ -188,6 +203,11 @@
   <!-- Step 2: Original content (hidden initially)   -->
   <!-- ============================================= -->
   <div id="mainContent" style="display: none;">
+    <!-- ─── New: Current Boss Display ─────────────────────── -->
+    <div id="bossDisplay" class="container">
+      Current Boss: <span id="currentBossName">None</span>
+    </div>
+
     <ul class="itemList list-group">
       <li class="list-group-item header" data-show="history" title="Loading">
         Loading...
@@ -334,6 +354,9 @@
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
     const skipBtn              = document.getElementById("skipDiscordBtn");
 
+    // ─── NEW: Grab reference to the boss-name span ───────────────────
+    const bossNameSpan = document.getElementById("currentBossName");
+
     // Helper: bind the dynamic “Install” button inside the error container
     function bindInstallButton() {
       const installBtn = document.getElementById("installBtn");
@@ -429,7 +452,10 @@
         loadSavedBtn.style.display = "none";
       }
 
-      // ====== NEW: check Alt1 right away ======
+      // ====== NEW: Show boss placeholder until function is defined ======
+      bossNameSpan.textContent = "None";
+
+      // ====== EXISTING: check Alt1 right away ======
       if (!window.alt1 || !alt1.permissionInstalled) {
         // Not running inside Alt1 → show “not installed” message
         showAlt1Error("notInstalled");
@@ -602,6 +628,17 @@
       discordFormContainer.style.display = "none";
       mainContent.style.display = "block";
     });
+
+    // ─── NEW: Periodically ask index.ts for current boss and update the span ───────────────────
+    // Note: getCurrentBoss() should be defined in index.ts (compiled into main.js).
+    setInterval(() => {
+      if (typeof getCurrentBoss === "function") {
+        const boss = getCurrentBoss();
+        if (boss && boss !== bossNameSpan.textContent) {
+          bossNameSpan.textContent = boss;
+        }
+      }
+    }, 500);
   </script>
 </body>
 </html>
