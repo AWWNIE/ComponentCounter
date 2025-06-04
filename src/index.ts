@@ -258,7 +258,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
 
   const data = await resp.json();
   console.log(data);
-
+/*
   console.log(Array.isArray(data[nonNormalized]));
   console.log(data[nonNormalized][0]);
   const entry = Array.isArray(data[nonNormalized]) ? data[nonNormalized][0] : null;
@@ -268,12 +268,13 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   }
 
   const { id, price } = entry;
-  //const id = data[0].value;
-  //const price = data[1].value;
+ */
+  const id = data["id"];
+  const price = data["price"];
 
   const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=${id}`;
   console.log(thumbnailUrl);
-	console.log(price);
+  console.log(price);
   return { price, thumbnailUrl };
 }
 
