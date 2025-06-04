@@ -260,6 +260,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   console.log(data);
   console.log(data[nonNormalized]);
   console.log(data[nonNormalized]["id"]);
+  console.log(data[nonNormalized]["price"]);
+  /*
   console.log(Array.isArray(data[nonNormalized]));
   console.log(data[nonNormalized][0]);
   const entry = Array.isArray(data[nonNormalized]) ? data[nonNormalized][0] : null;
@@ -267,8 +269,11 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   if (!entry) {
     throw new Error(`No GE data found for "${itemName}"`);
   }
+  */
 
-  const { id, price } = entry;
+
+  const id = data[nonNormalized]["id"];
+  const price = data[nonNormalized]["price"];
 
   console.log("First");
   console.log(id);
