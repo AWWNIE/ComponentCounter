@@ -182,10 +182,12 @@ function messageParser(chatLine)
   else if(chatLine.indexOf("Welcome to your session against") > -1) {
     console.log("Detected boss instance!");
     console.log("Message is: " + chatLine);
-
-    // let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
-    // console.log("Detected message: " + item);
-    handleBossParsing(chatLine);
+    handleBossNameParsing(chatLine);
+  }
+  else if(chatLine.indexOf("You have killed") > -1) {
+    console.log("Detected boss kill!");
+    console.log("Message is: " + chatLine);
+    handleBossKcParsing(chatLine);
   }
   else {
     console.log(chatLine);
@@ -221,7 +223,7 @@ function updateDropData(chatLine, item)
   showItems();
 }
 
-function handleBossParsing(chatLine)
+function handleBossNameParsing(chatLine)
 {
   // Remove first : in timestamp
   let bossName = chatLine.substring(chatLine.indexOf(':') + 1);
@@ -235,15 +237,24 @@ function handleBossParsing(chatLine)
 
     bossName = bossName.replace(/[.,;:]+$/, "");
     console.log("Boss is: " + bossName);
-    updateBossInfo(bossName);
+    updateBossInfo(bossName, "N/A");
     updateChatHistory(chatLine);
   }
 }
 
-function updateBossInfo(chatLine)
+function updateBossInfo(bossName, bossKc)
 {
-  console.log("Updating boss info: " + chatLine);
-  localStorage.setItem("bossName", JSON.stringify(chatLine));
+  // check to see if it's the same boss currently. If so, just skip
+  if(JSON.parse(localStorage.getItem("bossName")) == bossName)
+  {
+    // Just update KC
+    localStorage.setItem("bossKc", JSON.stringify(bossKc));
+  }
+  // Not the same boss, refresh data. Clear KC
+  console.log("Updating boss info: " + bossName);
+
+  localStorage.setItem("bossName", JSON.stringify(bossName));
+  localStorage.setItem("bossKc", JSON.stringify("No boss"));
 }
 
 function getCurrentBoss()
@@ -251,6 +262,33 @@ function getCurrentBoss()
   console.log("Getting current boss: " + JSON.parse(localStorage.getItem("bossName") || '"No boss"'));
   return JSON.parse(localStorage.getItem("bossName") || '"No boss"')
 }
+
+function getCurrentKc()
+{
+  console.log("Getting current KC: " + JSON.parse(localStorage.getItem("bossKc") || '"N/A"'));
+  return JSON.parse(localStorage.getItem("bossKc") || '"N/A"')
+}
+
+function handleBossKcParsing(chatLine)
+{
+  // Remove first : in timestamp
+  let bossKc = chatLine.substring(chatLine.indexOf(':') + 1);
+  // Remove second : in timestamp
+  bossKc = bossKc.substring(bossKc.indexOf(':') + 5);
+
+  if(bossKc.startsWith("You have killed"))
+  {
+    // Remove final : which occurs after the message "Welcome to your session against"
+    bossKc = bossKc.substring(bossKc.indexOf(':') + 2);
+    bossKc = bossKc[0].trim;
+    bossKc = bossKc.replace(/[.,;:]+$/, "");
+    bossKc = bossKc.split(' ')[0];
+    console.log("Boss is: " + bossKc);
+    updateBossInfo(JSON.parse(localStorage.getItem("bossName") || '"No boss"'), bossKc);
+    updateChatHistory(chatLine);
+  }
+}
+
 
 // Make sure it’s exposed globally so our inline HTML script can see it:
 (window as any).getCurrentBoss = getCurrentBoss;
@@ -554,6 +592,7 @@ TODO:
     !localStorage.getItem("itemTotal") &&
     !localStorage.getItem("itemChat") &&
     !localStorage.getItem("bossName") &&
+    !localStorage.getItem("bossKc") &&
     !localStorage.getItem(appName)
   ) {
     localStorage.setItem(appName, JSON.stringify({ chat: 0, data: [], mode: "history" }));
