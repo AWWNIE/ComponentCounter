@@ -71,41 +71,8 @@ reader.readargs = {
 		a1lib.mixColor(67, 188, 188), //Ancient components
 		a1lib.mixColor(255, 255, 255), // Normal Text White
    	 	a1lib.mixColor(159,255,159),   // Clan chat green
-		a1lib.mixColor(147, 245, 148), //raksha idle messaging
-		a1lib.mixColor(255, 255, 0) // wilderness flash events + guthix cache
 	],
 };
-
-/**
- * Scans stored chat history for the most recent
- * "Welcome to your session against: <boss>." line,
- * optionally preceded by “[HH:MM:SS]”. Strips off any trailing
- * commas, semicolons, periods, or colons from the boss name.
- */
-function getCurrentBoss(): string | null {
-  const history = sessionStorage.getItem(`${appName}chatHistory`);
-		console.log(history)
-  if (!history) return null;
-
-  const lines = history.split("\n");
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const raw = lines[i].trim();
-    const match = raw.match(
-      /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Welcome to your session against:\s*(.+)$/
-    );
-	console.log(match);
-    if (match) {
-      let bossName = match[1];
-      // Remove any trailing commas, semicolons, periods, or colons
-      bossName = bossName.replace(/[.,;:]+$/, "");
-      return bossName;
-    }
-  }
-  return null;
-}
-
-// Make sure it’s exposed globally so our inline HTML script can see it:
-(window as any).getCurrentBoss = getCurrentBoss;
 
 window.setTimeout(function () {
   //Find all visible chatboxes on screen
