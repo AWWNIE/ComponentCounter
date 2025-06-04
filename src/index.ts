@@ -78,30 +78,33 @@ reader.readargs = {
  * Scans stored chat history for the most recent
  * "Welcome to your session against: <boss>" line,
  * optionally preceded by a “[HH:MM:SS]” timestamp.
+ * If the boss name ends with a period, it’s removed.
  */
 function getCurrentBoss(): string | null {
   const history = sessionStorage.getItem(`${appName}chatHistory`);
   if (!history) return null;
 
   const lines = history.split("\n");
-  // Check newest → oldest
   for (let i = lines.length - 1; i >= 0; i--) {
     const raw = lines[i].trim();
-    /**
-     * Regex breakdown:
-     *  ^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?   ⇒  optionally match “[HH:MM:SS]” + any spaces
-     *  Welcome to your session against:\s* ⇒  literal text + optional spaces
-     *  (.+)$                            ⇒  capture everything after as boss name
-     */
     const match = raw.match(
       /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Welcome to your session against:\s*(.+)$/
     );
     if (match) {
-      return match[1]; // e.g. "Raksha" or "Vorago"
+      // match[1] might be “Vorago.” or “Raksha” etc.
+      let bossName = match[1];
+      // Remove a single trailing period, if present
+      if (bossName.endsWith(".")) {
+        bossName = bossName.slice(0, -1);
+      }
+      return bossName;
     }
   }
   return null;
 }
+
+// Expose it so the HTML polling loop can call it:
+(window as any).getCurrentBoss = getCurrentBoss;
 
 // Expose it for the HTML-side polling loop
 (window as any).getCurrentBoss = getCurrentBoss;
