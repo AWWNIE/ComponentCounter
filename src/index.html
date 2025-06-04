@@ -579,8 +579,8 @@
     // Skip Discord Integration: clear saved data, clear updateSaveData, hide the form, and show main content
     skipBtn.addEventListener("click", () => {
       // Clear any localStorage entries
-      localStorage.removeItem("discordID");
-      localStorage.removeItem("discordWebhook");
+      //localStorage.removeItem("discordID");
+      //localStorage.removeItem("discordWebhook");
 
       // Clear persisted data via updateSaveData
       updateSaveData({ discordID: "" });
