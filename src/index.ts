@@ -39,7 +39,11 @@ if (window.alt1) {
 reader.readargs = {
 	colors: [
 		a1lib.mixColor(0, 255, 255), //Seren text color
-		a1lib.mixColor(245, 245, 1), //Broach text color
+		a1lib.mixColor(245, 245, 0), //Broach text color
+		a1lib.mixColor(255, 128, 0), //Uncommon Mats
+		a1lib.mixColor(255, 165, 0), //Scavenging comps
+		a1lib.mixColor(255, 0, 0), //Rare Mats
+		a1lib.mixColor(67, 188, 188), //Ancient components
 	],
 };
 
