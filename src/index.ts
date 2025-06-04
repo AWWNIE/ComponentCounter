@@ -165,7 +165,7 @@ function messageParser(chatLine)
     console.log("Message is: " + chatLine);
     let item = chatLine.match(/\[\d+:\d+:\d+\]\nWelcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
     console.log("Detected message: " + item);
-    handleBossParsing(item);
+    handleBossParsing(chatLine, item);
   }
   else {
     console.log(chatLine);
@@ -185,14 +185,6 @@ function messageParser(chatLine)
   }
 }
 
-function updateDropData2(chatLine, getItem)
-{
-  updateSaveData({ data: getItem });
-  updateChatHistory(chatLine);
-  checkAnnounce(getItem);
-  showItems();
-}
-
 function updateDropData(chatLine, item)
 {
   console.log("Logging chatline: " + chatLine);
@@ -209,11 +201,12 @@ function updateDropData(chatLine, item)
   showItems();
 }
 
-function handleBossParsing(match)
+function handleBossParsing(chatLine, match)
 {
   let bossName = match[1];
   bossName = bossName.replace(/[.,;:]+$/, "");
   console.log("Parsed boss name:" + bossName);
+  updateChatHistory(chatLine);
   updateBossInfo(bossName);
 }
 
