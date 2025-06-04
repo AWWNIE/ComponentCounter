@@ -24,6 +24,38 @@ body.nis {
   margin-top: 8px;
 }
 
+/* Prevent overlaps between boss display and list */
+#bossDisplay {
+  margin-bottom: 2rem;
+}
+
+/* Adjust header position */
+.header {
+  position: relative;
+  margin-bottom: 1rem;
+  background-color: transparent;
+  color: #fff;
+  border: none;
+}
+
+/* Ensure item list is spaced properly */
+.list-group {
+  padding-top: 3rem;
+}
+
+/* Add padding to list items for clarity */
+.list-group-item {
+  padding: 0.75rem 1rem;
+}
+
+/* Clarify "Total Seren Spirits collected" line */
+.total {
+  margin-top: 1.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+  color: rgb(0, 255, 255);
+}
+
 /* ───────────────────────────────────────────────────────────────
    Header (the “Loading…” or history toggle item)
 ──────────────────────────────────────────────────────────────── */
