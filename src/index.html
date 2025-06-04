@@ -83,7 +83,7 @@
 
             <!-- Container for spinner / success / error icon -->
             <div id="saveStatusContainer" class="text-center my-4" style="display: none;">
-              <!-- Content inserted dynamically via safe DOM methods -->
+              <!-- Content inserted dynamically -->
             </div>
 
           </div>
@@ -247,114 +247,57 @@
       if (!installBtn) return;
 
       installBtn.addEventListener("click", () => {
-        // If inside Alt1’s built-in browser, use the API:
+        // If we’re inside Alt1’s built-in browser, call the API:
         if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
           alt1.installApp(APP_INSTALL_URL).catch((err) => {
             console.error("alt1.installApp failed:", err);
-            showErrorMessage("Failed to install via Alt1 API.");
+            saveStatusContainer.textContent = "Failed to install via Alt1 API.";
           });
           return;
         }
-        // Otherwise, fallback to protocol link
+        // Otherwise, fall back to the protocol link
         window.location.href = `alt1://addapp/${APP_INSTALL_URL}`;
       });
     }
 
-    // Build and show an error message (with a big ❌ icon)
-    function showErrorMessage(errorText) {
-      // Clear any existing children
-      saveStatusContainer.textContent = "";
-      saveStatusContainer.style.display = "block";
-
-      // Big red X
-      const iconDiv = document.createElement("div");
-      iconDiv.className = "fs-1 text-danger";
-      iconDiv.textContent = "❌";
-      saveStatusContainer.appendChild(iconDiv);
-
-      // Text below
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "mt-2";
-      msgDiv.textContent = errorText; 
-      saveStatusContainer.appendChild(msgDiv);
-    }
-
-    // Build and show a success message (with a big ✅ icon)
-    function showSuccessMessage(successText) {
-      saveStatusContainer.textContent = "";
-      saveStatusContainer.style.display = "block";
-
-      const iconDiv = document.createElement("div");
-      iconDiv.className = "fs-1 text-success";
-      iconDiv.textContent = "✅";
-      saveStatusContainer.appendChild(iconDiv);
-
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "mt-2";
-      msgDiv.textContent = successText;
-      saveStatusContainer.appendChild(msgDiv);
-    }
-
-    // Show Alt1 error with Install button
+    // Show an error screen if Alt1 is not installed or permissions missing.
     function showAlt1Error(type) {
       discordFormFields.style.display = "none";
-      saveStatusContainer.textContent = "";
 
-      const iconDiv = document.createElement("div");
-      iconDiv.className = "fs-1 text-danger";
-      iconDiv.textContent = "❌";
-      saveStatusContainer.appendChild(iconDiv);
-
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "mt-2";
-
+      let messageText;
       if (type === "notInstalled") {
-        msgDiv.textContent = "App is not installed through Alt1.";
+        messageText = "App is not installed through Alt1.";
       } else {
-        msgDiv.textContent = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are all enabled.";
+        messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are all enabled.";
       }
-      saveStatusContainer.appendChild(msgDiv);
 
-      // Create Install button
-      const btnContainer = document.createElement("div");
-      btnContainer.className = "mt-3";
-      const installBtn = document.createElement("button");
-      installBtn.id = "installBtn";
-      installBtn.className = "btn btn-primary";
-      installBtn.textContent = "Install";
-      btnContainer.appendChild(installBtn);
-      saveStatusContainer.appendChild(btnContainer);
-
+      // Replace the old anchor with a button we can bind
+      saveStatusContainer.innerHTML = `
+        <div class="fs-1 text-danger">❌</div>
+        <div class="mt-2">${messageText}</div>
+        <div class="mt-3">
+          <button id="installBtn" class="btn btn-primary">Install</button>
+        </div>
+      `;
       saveStatusContainer.style.display = "block";
 
+      // Bind our “Install” button listener now that it’s in the DOM
       bindInstallButton();
     }
 
-    // Show Alt1 success (checkmarks), then callback
+    // Show a temporary success screen with green checks for Alt1 and permissions.
     function showAlt1Success(callback) {
       discordFormFields.style.display = "none";
-      saveStatusContainer.textContent = "";
-
-      const iconDiv = document.createElement("div");
-      iconDiv.className = "fs-1 text-success";
-      iconDiv.textContent = "✅";
-      saveStatusContainer.appendChild(iconDiv);
-
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "mt-2";
-      msgDiv.textContent = "Alt1 is installed and all permissions granted:";
-      saveStatusContainer.appendChild(msgDiv);
-
-      const listDiv = document.createElement("div");
-      listDiv.className = "text-start mt-2";
-
-      ["Alt1 installed", "Gamestate", "Overlay", "Pixel"].forEach((label) => {
-        const lineDiv = document.createElement("div");
-        lineDiv.textContent = "✅ " + label;
-        listDiv.appendChild(lineDiv);
-      });
-      saveStatusContainer.appendChild(listDiv);
-
+      saveStatusContainer.innerHTML = `
+        <div class="fs-1 text-success">✅</div>
+        <div class="mt-2">Alt1 is installed and all permissions granted:</div>
+        <div class="text-start mt-2">
+          <div>✅ Alt1 installed</div>
+          <div>✅ Gamestate</div>
+          <div>✅ Overlay</div>
+          <div>✅ Pixel</div>
+        </div>
+      `;
       saveStatusContainer.style.display = "block";
 
       setTimeout(() => {
@@ -393,20 +336,7 @@
       }
     });
 
-    ///////////// Helper: Strict Validation for Discord ID & Webhook /////////////
-
-    function isValidDiscordId(id) {
-      // Exactly 18 digits (Discord Snowflake)
-      return /^\d{18}$/.test(id);
-    }
-
-    function isValidWebhookUrl(url) {
-      // Must start with the official Discord webhook prefix
-      return /^https:\/\/discord\.com\/api\/webhooks\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+$/.test(url);
-    }
-
-    ///////////// LOAD Saved Info Handler /////////////
-
+    // Load Saved Info: check Alt1, then show spinner, validate, apply or show error
     loadSavedBtn.addEventListener("click", () => {
       checkAlt1AndProceed(() => {
         const storedId = localStorage.getItem("discordID") || "";
@@ -414,21 +344,17 @@
 
         // Immediately hide form fields and show spinner
         discordFormFields.style.display = "none";
-        saveStatusContainer.textContent = "";
-        const spinnerDiv = document.createElement("div");
-        spinnerDiv.className = "spinner-border";
-        spinnerDiv.setAttribute("role", "status");
-        const spanVis = document.createElement("span");
-        spanVis.className = "visually-hidden";
-        spanVis.textContent = "Loading…";
-        spinnerDiv.appendChild(spanVis);
-        saveStatusContainer.appendChild(spinnerDiv);
+        saveStatusContainer.innerHTML = `
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading…</span>
+          </div>
+        `;
         saveStatusContainer.style.display = "block";
 
         setTimeout(() => {
           // Validate retrieved values
-          const idValid      = isValidDiscordId(storedId);
-          const webhookValid = isValidWebhookUrl(storedWebhook);
+          const idValid      = /^\d{18}$/.test(storedId);
+          const webhookValid = storedWebhook.startsWith("https://discord.com/api/webhooks/");
 
           if (!idValid || !webhookValid) {
             let errorMessage = "";
@@ -440,16 +366,10 @@
               errorMessage = "A valid Discord Webhook was not entered.";
             }
 
-            saveStatusContainer.textContent = "";
-            const iconDiv = document.createElement("div");
-            iconDiv.className = "fs-1 text-danger";
-            iconDiv.textContent = "❌";
-            saveStatusContainer.appendChild(iconDiv);
-
-            const msgDiv = document.createElement("div");
-            msgDiv.className = "mt-2";
-            msgDiv.textContent = errorMessage;
-            saveStatusContainer.appendChild(msgDiv);
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-danger">❌</div>
+              <div class="mt-2">${errorMessage}</div>
+            `;
 
             // After 2 seconds, hide status and show form again
             setTimeout(() => {
@@ -461,16 +381,10 @@
             updateSaveData({ discordID: storedId });
             updateSaveData({ discordWebhook: storedWebhook });
 
-            saveStatusContainer.textContent = "";
-            const iconDiv = document.createElement("div");
-            iconDiv.className = "fs-1 text-success";
-            iconDiv.textContent = "✅";
-            saveStatusContainer.appendChild(iconDiv);
-
-            const msgDiv = document.createElement("div");
-            msgDiv.className = "mt-2";
-            msgDiv.textContent = "Loaded successfully";
-            saveStatusContainer.appendChild(msgDiv);
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-success">✅</div>
+              <div class="mt-2">Loaded successfully</div>
+            `;
 
             // After 2 seconds, hide form container and show main content
             setTimeout(() => {
@@ -482,17 +396,15 @@
       });
     });
 
-    ///////////// SAVE New Info Handler /////////////
-
+    // Save New Info: check Alt1, then validate inputs, save, and proceed
     saveBtn.addEventListener("click", () => {
       checkAlt1AndProceed(() => {
-        // Always trim whitespace
         const idValue      = discordIdInput.value.trim();
         const webhookValue = discordWebhookInput.value.trim();
 
         // VALIDATE inputs before saving:
-        const idValid = isValidDiscordId(idValue);
-        const webhookValid = isValidWebhookUrl(webhookValue);
+        const idValid = /^\d{18}$/.test(idValue);
+        const webhookValid = webhookValue.startsWith("https://discord.com/api/webhooks/");
 
         if (!idValid || !webhookValid) {
           // Hide form fields, show red X + appropriate error text
@@ -507,17 +419,10 @@
             errorMessage = "A valid Discord Webhook was not entered.";
           }
 
-          saveStatusContainer.textContent = "";
-          const iconDiv = document.createElement("div");
-          iconDiv.className = "fs-1 text-danger";
-          iconDiv.textContent = "❌";
-          saveStatusContainer.appendChild(iconDiv);
-
-          const msgDiv = document.createElement("div");
-          msgDiv.className = "mt-2";
-          msgDiv.textContent = errorMessage;
-          saveStatusContainer.appendChild(msgDiv);
-
+          saveStatusContainer.innerHTML = `
+            <div class="fs-1 text-danger">❌</div>
+            <div class="mt-2">${errorMessage}</div>
+          `;
           saveStatusContainer.style.display = "block";
 
           // After 2 seconds, hide the status and return to the form
@@ -544,46 +449,29 @@
         discordFormFields.style.display = "none";
 
         // Show a Bootstrap spinner
-        saveStatusContainer.textContent = "";
-        const spinnerDiv = document.createElement("div");
-        spinnerDiv.className = "spinner-border";
-        spinnerDiv.setAttribute("role", "status");
-        const spanVis = document.createElement("span");
-        spanVis.className = "visually-hidden";
-        spanVis.textContent = "Saving…";
-        spinnerDiv.appendChild(spanVis);
-        saveStatusContainer.appendChild(spinnerDiv);
+        saveStatusContainer.innerHTML = `
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Saving…</span>
+          </div>
+        `;
         saveStatusContainer.style.display = "block";
 
         // After 2 seconds, replace spinner with success or error icon
         setTimeout(() => {
           const savedId = getSaveData("discordID");
           const savedWebhook = getSaveData("discordWebhook");
-          const success = savedId && savedWebhook &&
-                          isValidDiscordId(savedId) &&
-                          isValidWebhookUrl(savedWebhook);
+          const success = savedId && savedWebhook;
 
-          saveStatusContainer.textContent = "";
           if (success) {
-            const iconDiv = document.createElement("div");
-            iconDiv.className = "fs-1 text-success";
-            iconDiv.textContent = "✅";
-            saveStatusContainer.appendChild(iconDiv);
-
-            const msgDiv = document.createElement("div");
-            msgDiv.className = "mt-2";
-            msgDiv.textContent = "Saved successfully";
-            saveStatusContainer.appendChild(msgDiv);
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-success">✅</div>
+              <div class="mt-2">Saved successfully</div>
+            `;
           } else {
-            const iconDiv = document.createElement("div");
-            iconDiv.className = "fs-1 text-danger";
-            iconDiv.textContent = "❌";
-            saveStatusContainer.appendChild(iconDiv);
-
-            const msgDiv = document.createElement("div");
-            msgDiv.className = "mt-2";
-            msgDiv.textContent = "Save failed";
-            saveStatusContainer.appendChild(msgDiv);
+            saveStatusContainer.innerHTML = `
+              <div class="fs-1 text-danger">❌</div>
+              <div class="mt-2">Save failed</div>
+            `;
           }
 
           // After another 2 seconds, hide the form and show main content
