@@ -92,6 +92,7 @@ function getCurrentBoss(): string | null {
     const match = raw.match(
       /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Welcome to your session against:\s*(.+)$/
     );
+	console.log(match);
     if (match) {
       let bossName = match[1];
       // Remove any trailing commas, semicolons, periods, or colons
