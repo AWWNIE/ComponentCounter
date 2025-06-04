@@ -32,18 +32,20 @@
     href="https://runeapps.org/runeappslib.css"
   />
 
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body class="nis">
   <!-- ============================================= -->
-  <!-- Step 1: Discord-input form (shown first)       -->
+  <!-- Step 1: Discord‐input form (shown first)      -->
   <!-- ============================================= -->
   <div id="discordFormContainer" class="container my-5">
-    <div class="row">
-      <div class="col-12 col-md-6 offset-md-3">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6">
         <div class="card">
           <div class="card-body">
-            <!-- Container for form fields -->
+            <!-- Discord Settings Form -->
             <div id="discordFormFields">
               <h5 class="card-title text-center mb-4">Discord Settings</h5>
 
@@ -71,27 +73,26 @@
                 />
               </div>
 
-              <!-- Save button -->
+              <!-- Buttons -->
               <button id="saveDiscordBtn" class="btn btn-primary w-100 mb-2">
                 Save
               </button>
-
-              <!-- Load Saved Info button -->
               <button id="loadSavedBtn" class="btn btn-secondary w-100 mb-2">
                 Load Saved Info
               </button>
-
-              <!-- Skip Discord Integration button -->
               <button id="skipDiscordBtn" class="btn btn-outline-secondary w-100">
                 Skip
               </button>
             </div>
 
-            <!-- Container for spinner / success / error icon -->
-            <div id="saveStatusContainer" class="text-center my-4" style="display: none;">
-              <!-- Content inserted dynamically -->
+            <!-- Status / Spinner container -->
+            <div
+              id="saveStatusContainer"
+              class="text-center my-4"
+              style="display: none;"
+            >
+              <!-- Insert spinner / checkmark / error here dynamically -->
             </div>
-
           </div>
         </div>
       </div>
@@ -99,130 +100,131 @@
   </div>
 
   <!-- ============================================= -->
-  <!-- Step 2: Original content (hidden initially)    -->
+  <!-- Step 2: Main content (hidden until Discord config done) -->
   <!-- ============================================= -->
   <div id="mainContent" style="display: none;">
-    <!-- ─── New: Current Boss Display ─────────────────────── -->
-    <div id="bossDisplay" class="container">
+    <!-- ─── Current Boss banner ──────────────────────────── -->
+    <div id="bossDisplay">
       Current Boss: <span id="currentBossName">None</span>
     </div>
 
-    <ul class="itemList list-group">
-      <li class="list-group-item header" data-show="history" title="Loading">
+    <!-- ─── Item history list ───────────────────────────── -->
+    <ul class="list-group itemList">
+      <li
+        class="list-group-item header"
+        data-show="history"
+        title="Loading"
+      >
         Loading...
       </li>
       <li class="list-group-item total">
         Total Seren Spirits collected:
         <span id="total" style="font-weight:bold"></span>
       </li>
-      <li
-        class="list-group-item item"
-        style="word-wrap:break-word;white-space: normal"
-      >
+      <li class="list-group-item item">
         If this message is showing for an extended period of time, then the
         chatbox reader for Alt1 isn't working due to an update. Please be
         patient, and the issue will be fixed as soon as it can!
       </li>
     </ul>
 
+    <!-- ─── Fixed “Settings” button at bottom ─────────────── -->
     <div class="container">
-      <div class="row fixed-bottom">
-        <div class="col">
-          <div class="row">
-            <div class="col">
-              <button
-                class="nisbutton"
-                data-bs-toggle="modal"
-                data-bs-target="#settings"
-                type="button"
-              >
-                Settings
-              </button>
-            </div>
-          </div>
+      <div class="row fixed-bottom justify-content-center mb-3">
+        <div class="col-auto">
+          <button
+            class="nisbutton"
+            data-bs-toggle="modal"
+            data-bs-target="#settings"
+            type="button"
+          >
+            Settings
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <div
-      class="modal nis"
-      tabindex="-1"
-      role="dialog"
-      id="settings"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Settings</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
+  <!-- ============================================= -->
+  <!-- Settings Modal (Step 3)                        -->
+  <!-- ============================================= -->
+  <div
+    class="modal nis"
+    tabindex="-1"
+    role="dialog"
+    id="settings"
+  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Settings</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div
+              class="col text-start"
+              title="Allows the user to select the chat box the app should target."
             >
-              <span aria-hidden="true">&times;</span>
-            </button>
+              <h6>Select Chat</h6>
+            </div>
+            <div class="col">
+              <select class="chat form-select">
+                <option value="">Select Chat</option>
+              </select>
+            </div>
           </div>
-          <div class="modal-body">
-            <div class="row">
-              <div
-                class="col"
-                title="Allows the user to select the chat box the app should
-                target."
+          <div class="row mb-3">
+            <div class="col text-start" title="Exports the current data as a CSV file.">
+              <button class="nisbutton export">CSV Export</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col text-start">
+              <button
+                class="nisbutton"
+                data-type="reset"
+                data-bs-toggle="collapse"
+                href="#resetApp"
               >
-                <h6>Select Chat</h6>
-              </div>
-              <div class="col">
-                <select class="chat">
-                  <option value="">Select Chat</option>
-                </select>
-              </div>
+                Factory Reset
+              </button>
             </div>
-            <div class="row mt-3">
-              <div class="col" title="Exports the current data as a CSV file.">
-                <button class="nisbutton export">CSV Export</button>
-              </div>
-            </div>
-            <div class="row mt-3">
-              <div class="col">
-                <button
-                  class="nisbutton"
-                  data-type="reset"
-                  data-bs-toggle="collapse"
-                  href="#resetApp"
-                >
-                  Factory Reset
-                </button>
-              </div>
-            </div>
-            <div class="row collapse danger" id="resetApp">
-              <div class="col">
-                <div class="row">
-                  <div class="col text-center">
-                    This will remove all saved data and set all settings to
-                    default. This is irreversible!
-                  </div>
+          </div>
+          <div class="row collapse danger mt-3" id="resetApp">
+            <div class="col">
+              <div class="row">
+                <div class="col text-center">
+                  This will remove all saved data and set all settings to default.
+                  This is irreversible!
                 </div>
-                <div class="row mt-2">
-                  <div class="col">
-                    <button
-                      class="nisbutton clear"
-                      data-type="reset"
-                      data-bs-toggle="collapse"
-                      href="#resetApp"
-                    >
-                      Yes
-                    </button>
-                  </div>
-                  <div class="col">
-                    <button
-                      class="nisbutton"
-                      data-bs-toggle="collapse"
-                      href="#resetApp"
-                    >
-                      No
-                    </button>
-                  </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col text-end">
+                  <button
+                    class="nisbutton clear"
+                    data-type="reset"
+                    data-bs-toggle="collapse"
+                    href="#resetApp"
+                  >
+                    Yes
+                  </button>
+                </div>
+                <div class="col text-start">
+                  <button
+                    class="nisbutton"
+                    data-bs-toggle="collapse"
+                    href="#resetApp"
+                  >
+                    No
+                  </button>
                 </div>
               </div>
             </div>
@@ -230,19 +232,20 @@
         </div>
       </div>  
     </div>
-  </div> <!-- end #mainContent -->
+  </div>
 
-  <!-- ============================================ -->
-  <!-- Load your compiled TypeScript (main.js)     -->
-  <!-- ============================================ -->
+  <!-- ============================================= -->
+  <!-- Load your compiled TypeScript (main.js)       -->
+  <!-- ============================================= -->
   <script src="./main.js"></script>
 
-  <!-- ============================================ -->
-  <!-- Inline script: loading → success/error → show content -->
-  <!-- ============================================ -->
+  <!-- ============================================= -->
+  <!-- Inline script: Alt1 check, Discord logic, show/hide content, boss polling -->
+  <!-- ============================================= -->
   <script>
     const APP_INSTALL_URL = 'https://awwnie.github.io/ComponentCounter/appconfig.json';
 
+    // DOM references
     const discordFormContainer = document.getElementById("discordFormContainer");
     const discordFormFields    = document.getElementById("discordFormFields");
     const saveStatusContainer  = document.getElementById("saveStatusContainer");
@@ -252,17 +255,14 @@
     const saveBtn              = document.getElementById("saveDiscordBtn");
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
     const skipBtn              = document.getElementById("skipDiscordBtn");
+    const bossNameSpan         = document.getElementById("currentBossName");
 
-    // ─── NEW: Grab reference to the boss-name span ───────────────────
-    const bossNameSpan = document.getElementById("currentBossName");
-
-    // Helper: bind the dynamic “Install” button inside the error container
+    // ─── Bind “Install” button if Alt1 missing ──────────────────
     function bindInstallButton() {
       const installBtn = document.getElementById("installBtn");
       if (!installBtn) return;
 
       installBtn.addEventListener("click", () => {
-        // If we’re inside Alt1’s built-in browser, call the API:
         if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
           alt1.installApp(APP_INSTALL_URL).catch((err) => {
             console.error("alt1.installApp failed:", err);
@@ -270,14 +270,12 @@
           });
           return;
         }
-        // Otherwise, fall back to the protocol link
         window.location.href = `alt1://addapp/${APP_INSTALL_URL}`;
       });
     }
 
-    // Show an error screen if Alt1 is not installed or permissions missing.
+    // ─── Show Alt1‐not‐installed or permissions error ───────────
     function showAlt1Error(type) {
-      // Hide the form fields
       discordFormFields.style.display = "none";
 
       let messageText;
@@ -287,7 +285,6 @@
         messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are all enabled.";
       }
 
-      // Replace the old anchor with a button we can bind
       saveStatusContainer.innerHTML = `
         <div class="fs-1 text-danger">❌</div>
         <div class="mt-2 text-white">${messageText}</div>
@@ -296,12 +293,10 @@
         </div>
       `;
       saveStatusContainer.style.display = "block";
-
-      // Bind our “Install” button listener now that it’s in the DOM
       bindInstallButton();
     }
 
-    // Show a temporary success screen with green checks for Alt1 and permissions.
+    // ─── Show Alt1 success (all permissions ok), then call callback ─
     function showAlt1Success(callback) {
       discordFormFields.style.display = "none";
       saveStatusContainer.innerHTML = `
@@ -322,7 +317,7 @@
       }, 2000);
     }
 
-    // Wrapper: check Alt1 presence & required permissions, then proceed or error
+    // ─── Check Alt1 presence & permissions, then either error or callback ─
     function checkAlt1AndProceed(callback) {
       if (!window.alt1 || !alt1.permissionInstalled) {
         showAlt1Error("notInstalled");
@@ -335,58 +330,46 @@
       showAlt1Success(callback);
     }
 
-    // On page load, immediately check Alt1 status. If missing, show error.
+    // ─── On page load: prepare buttons, show placeholder, check Alt1 ─────
     window.addEventListener("DOMContentLoaded", () => {
-      // Always hide the main content initially
       mainContent.style.display = "none";
 
-      // Prepare Save/Load buttons based on localStorage
-      const storedId = localStorage.getItem("discordID");
+      // Show save button, hide load if no data saved
+      const storedId      = localStorage.getItem("discordID");
       const storedWebhook = localStorage.getItem("discordWebhook");
+      saveBtn.style.display = "block";
+      loadSavedBtn.style.display = (storedId && storedWebhook) ? "block" : "none";
 
-      saveBtn.style.display = "block"; 
-      if (storedId && storedWebhook) {
-        loadSavedBtn.style.display = "block";
-      } else {
-        loadSavedBtn.style.display = "none";
-      }
-
-      // ====== NEW: Show boss placeholder until function is defined ======
+      // Show “None” until getCurrentBoss is defined
       bossNameSpan.textContent = "None";
 
-      // ====== EXISTING: check Alt1 right away ======
+      // Alt1 sanity check: if missing or no perms, show error
       if (!window.alt1 || !alt1.permissionInstalled) {
-        // Not running inside Alt1 → show “not installed” message
         showAlt1Error("notInstalled");
         return;
       }
       if (!alt1.permissionGameState || !alt1.permissionOverlay || !alt1.permissionPixel) {
-        // Running inside Alt1 but missing permissions
         showAlt1Error("noPermission");
         return;
       }
-      // If we reach here, Alt1 is present and all permissions are granted:
-      // leave the Discord form visible and let the user proceed.
-      // (If you want a quick “Alt1 OK” check, you could call showAlt1Success(() => { /* show form */ }); but here we simply leave the form up.)
+      // If here, Alt1 is installed + all perms – leave Discord form visible
     });
 
-    // Load Saved Info: check Alt1, then show spinner, validate, apply or show error
+    // ─── Load Saved Info ────────────────────────────────────────────────
     loadSavedBtn.addEventListener("click", () => {
       checkAlt1AndProceed(() => {
-        const storedId = localStorage.getItem("discordID") || "";
+        const storedId      = localStorage.getItem("discordID") || "";
         const storedWebhook = localStorage.getItem("discordWebhook") || "";
 
-        // Immediately hide form fields and show spinner
         discordFormFields.style.display = "none";
         saveStatusContainer.innerHTML = `
-        <div class="spinner-border text-white" role="status">
-          <span class="visually-hidden">Loading…</span>
-        </div>
+          <div class="spinner-border text-white" role="status">
+            <span class="visually-hidden">Loading…</span>
+          </div>
         `;
         saveStatusContainer.style.display = "block";
 
         setTimeout(() => {
-          // Validate retrieved values
           const idValid      = /^\d{18}$/.test(storedId);
           const webhookValid = storedWebhook.startsWith("https://discord.com/api/webhooks/");
 
@@ -405,13 +388,11 @@
               <div class="mt-2 text-white">${errorMessage}</div>
             `;
 
-            // After 2 seconds, hide status and show form again
             setTimeout(() => {
               saveStatusContainer.style.display = "none";
               discordFormFields.style.display = "block";
             }, 2000);
           } else {
-            // Valid: call updateSaveData and show success
             updateSaveData({ discordID: storedId });
             updateSaveData({ discordWebhook: storedWebhook });
 
@@ -420,7 +401,6 @@
               <div class="mt-2 text-white">Loaded successfully</div>
             `;
 
-            // After 2 seconds, hide form container and show main content
             setTimeout(() => {
               discordFormContainer.style.display = "none";
               mainContent.style.display = "block";
@@ -430,18 +410,16 @@
       });
     });
 
-    // Save New Info: check Alt1, then validate inputs, save, and proceed
+    // ─── Save New Info ───────────────────────────────────────────────────
     saveBtn.addEventListener("click", () => {
       checkAlt1AndProceed(() => {
         const idValue      = discordIdInput.value.trim();
         const webhookValue = discordWebhookInput.value.trim();
 
-        // VALIDATE inputs before saving:
-        const idValid = /^\d{18}$/.test(idValue);
+        const idValid      = /^\d{18}$/.test(idValue);
         const webhookValid = webhookValue.startsWith("https://discord.com/api/webhooks/");
 
         if (!idValid || !webhookValid) {
-          // Hide form fields, show red X + appropriate error text
           discordFormFields.style.display = "none";
 
           let errorMessage = "";
@@ -459,42 +437,31 @@
           `;
           saveStatusContainer.style.display = "block";
 
-          // After 2 seconds, hide the status and return to the form
           setTimeout(() => {
             saveStatusContainer.style.display = "none";
             discordFormFields.style.display = "block";
           }, 2000);
-
           return;
         }
 
-        // Store valid inputs in localStorage
         localStorage.setItem("discordID", idValue);
         localStorage.setItem("discordWebhook", webhookValue);
-
-        // After storing, ensure Load button is visible
         loadSavedBtn.style.display = "block";
-
-        // Call existing save-to-localStorage functions:
         updateSaveData({ discordID: idValue });
         updateSaveData({ discordWebhook: webhookValue });
 
-        // Hide the input fields
         discordFormFields.style.display = "none";
-
-        // Show a Bootstrap spinner
         saveStatusContainer.innerHTML = `
-        <div class="spinner-border text-white" role="status">
-          <span class="visually-hidden">Saving…</span>
-        </div>
+          <div class="spinner-border text-white" role="status">
+            <span class="visually-hidden">Saving…</span>
+          </div>
         `;
         saveStatusContainer.style.display = "block";
 
-        // After 2 seconds, replace spinner with success or error icon
         setTimeout(() => {
-          const savedId = getSaveData("discordID");
+          const savedId      = getSaveData("discordID");
           const savedWebhook = getSaveData("discordWebhook");
-          const success = savedId && savedWebhook;
+          const success      = savedId && savedWebhook;
 
           if (success) {
             saveStatusContainer.innerHTML = `
@@ -508,7 +475,6 @@
             `;
           }
 
-          // After another 2 seconds, hide the form and show main content
           setTimeout(() => {
             discordFormContainer.style.display = "none";
             mainContent.style.display = "block";
@@ -517,23 +483,18 @@
       });
     });
 
-    // Skip Discord Integration: clear saved data, clear updateSaveData, hide the form, and show main content
+    // ─── Skip Discord Integration ───────────────────────────────────────
     skipBtn.addEventListener("click", () => {
-      // Clear persisted data via updateSaveData
       updateSaveData({ discordID: "" });
       updateSaveData({ discordWebhook: "" });
-
-      // Hide discord form and show main content
       discordFormContainer.style.display = "none";
       mainContent.style.display = "block";
     });
 
-    // ─── NEW: Periodically ask index.ts for current boss and update the span ───────────────────
-    // Note: getCurrentBoss() should be defined in index.ts (compiled into main.js).
+    // ─── Poll getCurrentBoss() every 600ms and update #currentBossName ──
     setInterval(() => {
       if (typeof getCurrentBoss === "function") {
         const boss = getCurrentBoss();
-          console.log(boss);
         if (boss && boss !== bossNameSpan.textContent) {
           bossNameSpan.textContent = boss;
         }
