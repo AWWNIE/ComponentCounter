@@ -229,8 +229,9 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
   // ** Replace `YOUR_PRICE_HERE` and `YOUR_KILLCOUNT_HERE` with real values if you have them.
   //    For now, those remain placeholders in the embed. **
   const dropName = getItem.item;        // e.g. "10 x Rune Essence"
-  const price = "{price}";              // ← fill in dynamically if you track price somewhere
-  const killCount = "{kill count}";     // ← fill in dynamically if you track kill count somewhere
+  const price = "price";              // ← fill in dynamically if you track price somewhere
+  const killCount = "kill count";     // ← fill in dynamically if you track kill count somewhere
+  const discordThumbnailUrl =  "https://runescape.wiki/images/thumb/Uncharted_island_map_%28Deep_Sea_Fishing%29_detail.png/100px-Uncharted_island_map_%28Deep_Sea_Fishing%29_detail.png?ac6b0";
 
   const embedPayload = {
     author: {
@@ -252,7 +253,7 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
       },
     ],
     thumbnail: {
-      url: "https://runescape.wiki/images/thumb/Uncharted_island_map_%28Deep_Sea_Fishing%29_detail.png/100px-Uncharted_island_map_%28Deep_Sea_Fishing%29_detail.png?ac6b0",
+      url: discordThumbnailUrl,
     },
     color: 9175295, // 0x8c00ff in decimal
     footer: {
