@@ -167,6 +167,46 @@ function isInHistory(chatLine) {
   return false;
 }
 
+/**
+ * Given an item name (e.g. "Abyssal Whip"), this function:
+ * 1. Normalizes it (spaces → underscores).
+ * 2. Fetches the “latest” GE data from Weird Gloop.
+ * 3. Extracts the item’s id and price.
+ * 4. Builds the RuneScape ItemDB thumbnail URL using that id.
+ *
+ * Example thumbnail pattern (using their current cache‐buster):
+ *   https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=<ITEM_ID>
+ *
+ * @param {string} itemName — The GE item name (case‐insensitive; spaces allowed).
+ * @returns {Promise<{ price: number, thumbnailUrl: string }>}
+ */
+async function fetchLatestPriceAndThumbnail(itemName) {
+
+  const normalized = itemName.trim().replace(/\s+/g, "_");
+  const url = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${encodeURIComponent(normalized)}`;
+  const resp = await fetch(url, {
+    headers: {
+      "User-Agent": "MyRS3App/Drop Tracker (Alt1)"
+    }
+  });
+
+  if (!resp.ok) {
+    throw new Error(`Error fetching GE data: ${resp.status} ${resp.statusText}`);
+  }
+
+  const data = await resp.json();
+	
+  const entry = Array.isArray(data[normalized]) ? data[normalized][0] : null;
+  if (!entry || typeof entry.id !== "number") {
+    throw new Error(`No GE data found for "${itemName}"`);
+  }
+  const { id, timestamp, price, volume } = entry;
+  const cacheBuster = "1748957839452";
+  const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/${cacheBuster}_obj_big.gif?id=${id}`;
+
+  return { price, thumbnailUrl };
+}
+
 function showItems() {
   itemList.querySelectorAll("li.item").forEach((el) => el.remove());
   itemTotal.innerHTML = getSaveData("data").length;
@@ -230,13 +270,12 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
   const mention = userId ? `<@${userId}> ` : "";
 
   // ─── Build the embed object ───────────────────────────────────────────────────
-  // ** Replace `YOUR_PRICE_HERE` and `YOUR_KILLCOUNT_HERE` with real values if you have them.
-  //    For now, those remain placeholders in the embed. **
-  const dropName = getItem.item;        // e.g. "10 x Rune Essence"
-  const price = "price";              // ← fill in dynamically if you track price somewhere
-  const killCount = "kill count";     // ← fill in dynamically if you track kill count somewhere
-  const discordThumbnailUrl =  "https://runescape.wiki/images/thumb/Uncharted_island_map_%28Deep_Sea_Fishing%29_detail.png/100px-Uncharted_island_map_%28Deep_Sea_Fishing%29_detail.png?ac6b0";
 
+  const dropName = getItem.item;   
+	
+  fetchLatestPriceAndThumbnail(dropName)	
+  const killCount = "kill count";     // ← fill in dynamically if you track kill count somewhere
+	  
   const embedPayload = {
     author: {
       name: "Runescape Drop Tracker",
@@ -257,7 +296,7 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
       },
     ],
     thumbnail: {
-      url: discordThumbnailUrl,
+      url: thumbnailUrl,
     },
     color: 9175295, // 0x8c00ff in decimal
     footer: {
