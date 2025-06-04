@@ -74,6 +74,30 @@ reader.readargs = {
 	],
 };
 
+function getCurrentBoss(): string | null {
+  // 1) Read chat history (you already track incoming chat lines in readChatbox())
+  // 2) If a line matches: “Welcome to your session against: <boss>”
+  // 3) Extract <boss> and return it, else return null.
+
+  // Example implementation sketch:
+  const history = sessionStorage.getItem(`${appName}chatHistory`);
+  if (!history) return null;
+
+  const lines = history.split("\n");
+  // Walk from newest to oldest
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim();
+    const match = line.match(/Welcome to your session against:\s*(.+)$/);
+    if (match) {
+      return match[1]; // e.g. “Raksha” or “Vorago”
+    }
+  }
+  return null;
+}
+
+// Make sure it’s exposed globally so our inline HTML script can see it:
+(window as any).getCurrentBoss = getCurrentBoss;
+
 window.setTimeout(function () {
   //Find all visible chatboxes on screen
   let findChat = setInterval(function () {
@@ -282,19 +306,10 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   }
 
   const data = await resp.json();
-  console.log(data);
-  console.log(data[nonNormalized]);
-  console.log("Original Data directly from source");
-  console.log(data[nonNormalized]["id"]);
-  console.log(data[nonNormalized]["price"]);
-  console.log("Zero");
+
   const id = data[nonNormalized]["id"];
   const price = data[nonNormalized]["price"];
-  console.log("Data after moving to variable");
-  console.log(id);
-  console.log(price);
   const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=${id}`;
-  console.log(thumbnailUrl);
   return { price, thumbnailUrl };
 }
 
