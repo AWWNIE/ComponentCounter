@@ -278,10 +278,10 @@ function handleBossKcParsing(chatLine)
 
   if(bossKc.startsWith("You have killed"))
   {
-    // Remove final : which occurs after the message "Welcome to your session against"
-    bossKc = bossKc.substring(bossKc.indexOf(':') + 2);
+    // Remove final : which occurs after the message "You have killed"
+    bossKc = bossKc.replace("You have killed ", "")
     bossKc = bossKc.split(' ')[0];
-    console.log("Boss is: " + bossKc);
+    console.log("KC is: " + bossKc);
     updateBossInfo(JSON.parse(localStorage.getItem("bossName") || '"No boss"'), bossKc);
     updateChatHistory(chatLine);
   }
