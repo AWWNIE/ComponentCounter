@@ -20,8 +20,18 @@
     crossorigin="anonymous"
   ></script>
 
-  <!-- Your existing CSS -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- RuneApps / NIS CSS -->
+  <!--<link
+    rel="stylesheet"
+    type="text/css"
+    href="https://runeapps.org/nis/nis.css"
+  />
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://runeapps.org/runeappslib.css"
+  />-->
+
 </head>
 
 <body class="nis">
@@ -29,45 +39,75 @@
   <!-- Step 1: Discord‐input form (shown first)      -->
   <!-- ============================================= -->
   <div id="discordFormContainer" class="container my-5">
-    <!-- … (unchanged) … -->
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <!-- Discord Settings Form -->
+            <div id="discordFormFields">
+              <h5 class="card-title text-center mb-4">Discord Settings</h5>
+
+              <!-- Discord ID input -->
+              <div class="mb-3">
+                <label for="discordIdInput" class="form-label">Discord ID</label>
+                <input
+                  type="text"
+                  id="discordIdInput"
+                  class="form-control"
+                  placeholder="Enter your Discord ID"
+                />
+              </div>
+
+              <!-- Discord Webhook input -->
+              <div class="mb-4">
+                <label for="discordWebhookInput" class="form-label">
+                  Discord Webhook URL
+                </label>
+                <input
+                  type="text"
+                  id="discordWebhookInput"
+                  class="form-control"
+                  placeholder="Enter your Webhook URL"
+                />
+              </div>
+
+              <!-- Buttons -->
+              <button id="saveDiscordBtn" class="btn btn-primary w-100 mb-2">
+                Save
+              </button>
+              <button id="loadSavedBtn" class="btn btn-secondary w-100 mb-2">
+                Load Saved Info
+              </button>
+              <button id="skipDiscordBtn" class="btn btn-outline-secondary w-100">
+                Skip
+              </button>
+            </div>
+
+            <!-- Status / Spinner container -->
+            <div
+              id="saveStatusContainer"
+              class="text-center my-4"
+              style="display: none;"
+            >
+              <!-- Insert spinner / checkmark / error here dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ============================================= -->
   <!-- Step 2: Main content (hidden until Discord config done) -->
   <!-- ============================================= -->
   <div id="mainContent" style="display: none;">
-
-    <!-- ─── Current Boss banner (always on top) ──────────────────────────── -->
+    <!-- ─── Current Boss banner ──────────────────────────── -->
     <div id="bossDisplay">
       Current Boss: <span id="currentBossName">None</span>
     </div>
 
-    <!-- ─── Button Row (Settings + Item History) ────────────────────────── -->
-    <div class="container">
-      <div class="row justify-content-center mb-3 buttonRow">
-        <div class="col-auto">
-          <!-- Settings button (same as before, but no longer fixed‐bottom) -->
-          <button
-            class="nisbutton"
-            data-bs-toggle="modal"
-            data-bs-target="#settings"
-            type="button"
-          >
-            Settings
-          </button>
-        </div>
-        <div class="col-auto">
-          <!-- New “Item History” button to toggle the list below -->
-          <button id="toggleHistoryBtn" class="nisbutton">
-            Item History
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ─── Item history list (starts visible or hidden by default) ──────── -->
-    <!--    You can choose to start it hidden (display:none) or visible.    -->
-    <ul class="list-group itemList" id="historyList">
+    <!-- ─── Item history list ───────────────────────────── -->
+    <ul class="list-group itemList">
       <li
         class="list-group-item header"
         data-show="history"
@@ -86,7 +126,22 @@
       </li>
     </ul>
 
-  </div> <!-- /#mainContent -->
+    <!-- ─── Fixed “Settings” button at bottom ─────────────── -->
+    <div class="container">
+      <div class="row fixed-bottom justify-content-center mb-3">
+        <div class="col-auto">
+          <button
+            class="nisbutton"
+            data-bs-toggle="modal"
+            data-bs-target="#settings"
+            type="button"
+          >
+            Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================================= -->
   <!-- Settings Modal (Step 3)                        -->
@@ -97,7 +152,84 @@
     role="dialog"
     id="settings"
   >
-    <!-- … (unchanged) … -->
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Settings</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div
+              class="col text-start"
+              title="Allows the user to select the chat box the app should target."
+            >
+              <h6>Select Chat</h6>
+            </div>
+            <div class="col">
+              <select class="chat form-select">
+                <option value="">Select Chat</option>
+              </select>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col text-start" title="Exports the current data as a CSV file.">
+              <button class="nisbutton export">CSV Export</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col text-start">
+              <button
+                class="nisbutton"
+                data-type="reset"
+                data-bs-toggle="collapse"
+                href="#resetApp"
+              >
+                Factory Reset
+              </button>
+            </div>
+          </div>
+          <div class="row collapse danger mt-3" id="resetApp">
+            <div class="col">
+              <div class="row">
+                <div class="col text-center">
+                  This will remove all saved data and set all settings to default.
+                  This is irreversible!
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col text-end">
+                  <button
+                    class="nisbutton clear"
+                    data-type="reset"
+                    data-bs-toggle="collapse"
+                    href="#resetApp"
+                  >
+                    Yes
+                  </button>
+                </div>
+                <div class="col text-start">
+                  <button
+                    class="nisbutton"
+                    data-bs-toggle="collapse"
+                    href="#resetApp"
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>  
+    </div>
   </div>
 
   <!-- ============================================= -->
@@ -123,24 +255,6 @@
     const skipBtn              = document.getElementById("skipDiscordBtn");
     const bossNameSpan         = document.getElementById("currentBossName");
 
-    // New reference for the history list and toggle button:
-    const historyList       = document.getElementById("historyList");
-    const toggleHistoryBtn  = document.getElementById("toggleHistoryBtn");
-
-    // Initially: let’s start with the history list HIDDEN (you can change to visible if you prefer):
-    historyList.style.display = "none";
-
-    // When “Item History” is clicked, simply show/hide the <ul>:
-    toggleHistoryBtn.addEventListener("click", () => {
-      if (historyList.style.display === "none") {
-        historyList.style.display = "block";
-        toggleHistoryBtn.textContent = "Hide History";
-      } else {
-        historyList.style.display = "none";
-        toggleHistoryBtn.textContent = "Item History";
-      }
-    });
-
     // ─── Bind “Install” button if Alt1 missing ──────────────────
     function bindInstallButton() {
       const installBtn = document.getElementById("installBtn");
@@ -158,7 +272,7 @@
       });
     }
 
-    // ─── Show Alt1‐not‐installed or permissions error ──────────
+    // ─── Show Alt1‐not‐installed or permissions error ───────────
     function showAlt1Error(type) {
       discordFormFields.style.display = "none";
 
@@ -214,7 +328,7 @@
       showAlt1Success(callback);
     }
 
-    // ─── On page load: prepare buttons, show placeholder, check Alt1 ────
+    // ─── On page load: prepare buttons, show placeholder, check Alt1 ─────
     window.addEventListener("DOMContentLoaded", () => {
       mainContent.style.display = "none";
 
@@ -239,7 +353,7 @@
       // If here, Alt1 is installed + all perms – leave Discord form visible
     });
 
-    // ─── Load Saved Info ──────────────────────────────────────────────
+    // ─── Load Saved Info ────────────────────────────────────────────────
     loadSavedBtn.addEventListener("click", () => {
       checkAlt1AndProceed(() => {
         const storedId      = localStorage.getItem("discordID") || "";
@@ -294,7 +408,7 @@
       });
     });
 
-    // ─── Save New Info ─────────────────────────────────────────────────
+    // ─── Save New Info ───────────────────────────────────────────────────
     saveBtn.addEventListener("click", () => {
       checkAlt1AndProceed(() => {
         const idValue      = discordIdInput.value.trim();
@@ -375,7 +489,7 @@
       mainContent.style.display = "block";
     });
 
-    // ─── Poll getCurrentBoss() every 600ms and update #currentBossName ─
+    // ─── Poll getCurrentBoss() every 600ms and update #currentBossName ──
     setInterval(() => {
       if (typeof getCurrentBoss === "function") {
         const boss = getCurrentBoss();
