@@ -230,6 +230,8 @@
   <!-- Inline script: loading → success/error → show content -->
   <!-- ============================================ -->
   <script>
+    const APP_INSTALL_URL = 'https://awwnie.github.io/ComponentCounter/appconfig.json';
+
     const discordFormContainer = document.getElementById("discordFormContainer");
     const discordFormFields    = document.getElementById("discordFormFields");
     const saveStatusContainer  = document.getElementById("saveStatusContainer");
@@ -238,6 +240,25 @@
     const discordWebhookInput  = document.getElementById("discordWebhookInput");
     const saveBtn              = document.getElementById("saveDiscordBtn");
     const loadSavedBtn         = document.getElementById("loadSavedBtn");
+
+    // Helper: bind the dynamic “Install” button inside the error container
+    function bindInstallButton() {
+      const installBtn = document.getElementById("installBtn");
+      if (!installBtn) return;
+
+      installBtn.addEventListener("click", () => {
+        // If we’re inside Alt1’s built-in browser, call the API:
+        if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
+          alt1.installApp(APP_INSTALL_URL).catch((err) => {
+            console.error("alt1.installApp failed:", err);
+            saveStatusContainer.textContent = "Failed to install via Alt1 API.";
+          });
+          return;
+        }
+        // Otherwise, fall back to the protocol link
+        window.location.href = `alt1://addapp/${APP_INSTALL_URL}`;
+      });
+    }
 
     // Show an error screen if Alt1 is not installed or permissions missing.
     function showAlt1Error(type) {
@@ -250,17 +271,18 @@
         messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are all enabled.";
       }
 
+      // Replace the old anchor with a button we can bind
       saveStatusContainer.innerHTML = `
         <div class="fs-1 text-danger">❌</div>
         <div class="mt-2">${messageText}</div>
         <div class="mt-3">
-          <a href="alt1://addapp/https://awwnie.github.io/ComponentCounter/appconfig.json" class="btn btn-primary">
-            Install
-          </a>
+          <button id="installBtn" class="btn btn-primary">Install</button>
         </div>
       `;
       saveStatusContainer.style.display = "block";
-      // Do not auto-hide or revert; user must install/grant manually.
+
+      // Bind our “Install” button listener now that it’s in the DOM
+      bindInstallButton();
     }
 
     // Show a temporary success screen with green checks for Alt1 and permissions.
