@@ -634,11 +634,12 @@
     setInterval(() => {
       if (typeof getCurrentBoss === "function") {
         const boss = getCurrentBoss();
+          console.log(boss);
         if (boss && boss !== bossNameSpan.textContent) {
           bossNameSpan.textContent = boss;
         }
       }
-    }, 500);
+    }, 600);
   </script>
 </body>
 </html>
