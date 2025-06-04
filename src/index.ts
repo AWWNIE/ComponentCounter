@@ -226,7 +226,7 @@ function handleBossParsing(chatLine)
   // Remove first : in timestamp
   let bossName = chatLine.substring(chatLine.indexOf(':') + 1);
   // Remove second : in timestamp
-  bossName = bossName.substring(bossName.indexOf(':') + 2);
+  bossName = bossName.substring(bossName.indexOf(':') + 5);
 
   if(bossName.startsWith("Welcome to your session against"))
   {
