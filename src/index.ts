@@ -151,15 +151,19 @@ function readChatbox() {
 function messageParser(chatLine)
 {
   if (chatLine.indexOf("Seren spirit gifts you") > -1) {
+    console.log("Detected Seren spirit message!");
     let item = chatLine.match(/\[\d+:\d+:\d+\] The Seren spirit gifts you: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
     updateDropData(chatLine, item);
 
   } else if (chatLine.indexOf("Materials gained") > -1) {
+    console.log("Detected material message!");
     let item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
     updateDropData(chatLine, item);
   }
   else if(chatLine.indexOf("Welcome to your session against") > -1) {
+    console.log("Detected boss instance!");
     let item = chatLine.match(/Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
+    console.log("Detected message: " + item);
     handleBossParsing(item);
   }
   else {
@@ -206,12 +210,10 @@ function updateDropData(chatLine, item)
 
 function handleBossParsing(match)
 {
-  if (match) {
-    let bossName = match[1];
-    bossName = bossName.replace(/[.,;:]+$/, "");
-    console.log("Parsed boss name:" + bossName);
-    updateBossInfo(bossName);
-  }
+  let bossName = match[1];
+  bossName = bossName.replace(/[.,;:]+$/, "");
+  console.log("Parsed boss name:" + bossName);
+  updateBossInfo(bossName);
 }
 
 function updateBossInfo(chatLine)
