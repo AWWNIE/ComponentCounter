@@ -281,4 +281,15 @@ body.nis {
   box-shadow: none;
   background: none;
 }
+/* ───────────────────────────────────────────────────────────
+   Button row directly under #bossDisplay
+──────────────────────────────────────────────────────────── */
+.buttonRow {
+  margin-top: 0.5rem;   /* small gap under the “Current Boss” banner */
+}
+
+/* Ensure the two buttons are spaced nicely on desktop & mobile */
+.buttonRow .col-auto {
+  margin: 0 0.25rem;    /* tiny left/right gutter between Settings & History */
+}
 
