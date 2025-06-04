@@ -164,10 +164,8 @@ function messageParser(chatLine)
     console.log("Detected boss instance!");
     console.log("Message is: " + chatLine);
     let str = chatLine;
-    for(let i = 0; i < 3; i++)
-    {
-      str = str.substring(str.indexOf(':') + 1)
-    }
+    str = str.substring(str.indexOf(':') + 1)
+
     console.log("Boss is: " + str);
 
     // let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
