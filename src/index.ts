@@ -248,13 +248,15 @@ function updateBossInfo(bossName, bossKc)
   if(JSON.parse(localStorage.getItem("bossName")) == bossName)
   {
     // Just update KC
+    console.log("Updating KC only: " + bossKc);
     localStorage.setItem("bossKc", JSON.stringify(bossKc));
+    return;
   }
   // Not the same boss, refresh data. Clear KC
   console.log("Updating boss info: " + bossName);
 
   localStorage.setItem("bossName", JSON.stringify(bossName));
-  localStorage.setItem("bossKc", JSON.stringify("No boss"));
+  localStorage.setItem("bossKc", JSON.stringify("N/A"));
 }
 
 function getCurrentBoss()
