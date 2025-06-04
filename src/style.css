@@ -234,3 +234,62 @@ body.nis {
     padding: 0.5rem 0.75rem;
   }
 }
+
+/* Unified box style for Current Boss and Item History */
+#bossDisplay,
+.itemList,
+.list-group-item,
+.header,
+.total {
+  background-color: #2a2a2a;
+  border: 1px solid #A67D3D;
+  border-radius: 4px;
+  color: #FFFFFF;
+  padding: 0.75rem 1rem;
+  margin: 1rem auto;
+  max-width: 800px;
+  box-sizing: border-box;
+}
+
+/* Header style (Item History title) */
+.header {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #E2BE62;
+  text-align: center;
+}
+
+/* Total Seren Spirits collected style */
+.total {
+  font-weight: bold;
+  color: rgb(0, 255, 255);
+  text-align: left;
+}
+
+/* Individual items style */
+.list-group-item {
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+/* Reset list-group container */
+.list-group {
+  border: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 800px;
+  box-shadow: none;
+  background: none;
+}
+/* ───────────────────────────────────────────────────────────
+   Button row directly under #bossDisplay
+──────────────────────────────────────────────────────────── */
+.buttonRow {
+  margin-top: 0.5rem;   /* small gap under the “Current Boss” banner */
+}
+
+/* Ensure the two buttons are spaced nicely on desktop & mobile */
+.buttonRow .col-auto {
+  margin: 0 0.25rem;    /* tiny left/right gutter between Settings & History */
+}
+
