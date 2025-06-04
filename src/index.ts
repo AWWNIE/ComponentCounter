@@ -164,12 +164,9 @@ function messageParser(chatLine)
     console.log("Detected boss instance!");
     console.log("Message is: " + chatLine);
 
-    let str = chatLine.substring(chatLine.indexOf(':') + 1);
-    console.log("Boss is: " + str);
-
     // let item = chatLine.match(/\[\d+:\d+:\d+\] Welcome to your session against: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
     // console.log("Detected message: " + item);
-    handleBossParsing(chatLine, str);
+    handleBossParsing(chatLine);
   }
   else {
     console.log(chatLine);
@@ -205,8 +202,17 @@ function updateDropData(chatLine, item)
   showItems();
 }
 
-function handleBossParsing(chatLine, bossName)
+function handleBossParsing(chatLine)
 {
+  // Remove first : in timestamp
+  let bossName = chatLine.substring(chatLine.indexOf(':') + 1);
+  // Remove second : in timestamp
+  bossName = bossName.substring(bossName.indexOf(':') + 1);
+  // Remove final : which occurs after the message "Welcome to your session against"
+  bossName = bossName.substring(bossName.indexOf(':') + 1);
+
+  console.log("Boss is: " + bossName);
+
   bossName = bossName.replace(/[.,;:]+$/, "");
   console.log("Parsed boss name:" + bossName);
   updateChatHistory(chatLine);
