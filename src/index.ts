@@ -167,14 +167,24 @@ function isInHistory(chatLine) {
   return false;
 }
 
-async function fetchLatestPriceAndThumbnail(itemName) {
-
+/**
+ * Fetches the latest GE price + thumbnail URL for any given item name.
+ */
+async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
+  price: number;
+  thumbnailUrl: string;
+}> {
+  // Normalize name → underscores
   const normalized = itemName.trim().replace(/\s+/g, "_");
-  const url = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${encodeURIComponent(normalized)}`;
+  const url = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${encodeURIComponent(
+    normalized
+  )}`;
+
   const resp = await fetch(url, {
     headers: {
-      "User-Agent": "MyRS3App/Drop Tracker (Alt1)"
-    }
+      // Descriptive UA for WeirdGloop
+      "User-Agent": "MyRS3App/Drop Tracker (Alt1)",
+    },
   });
 
   if (!resp.ok) {
@@ -182,12 +192,13 @@ async function fetchLatestPriceAndThumbnail(itemName) {
   }
 
   const data = await resp.json();
-	
   const entry = Array.isArray(data[normalized]) ? data[normalized][0] : null;
+
   if (!entry || typeof entry.id !== "number") {
     throw new Error(`No GE data found for "${itemName}"`);
   }
-  const { id, timestamp, price, volume } = entry;
+
+  const { id, price } = entry;
   const cacheBuster = "1748957839452";
   const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/${cacheBuster}_obj_big.gif?id=${id}`;
 
@@ -245,7 +256,7 @@ function showItems() {
  * NOTE: Because this is running *inside Alt1 (a browser-like environment), we simply
  *       construct the JSON object manually and POST it to the webhook URL. 
  */
-function checkAnnounce(getItem: { item: string; time: Date }) {
+async function checkAnnounce(getItem: { item: string }) {
   const webhook = getSaveData("discordWebhook");
   const userId = getSaveData("discordID");
 
@@ -256,27 +267,35 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
   // If a Discord ID is stored, format it as a mention; otherwise, leave it blank.
   const mention = userId ? `<@${userId}> ` : "";
 
-  // ─── Build the embed object ───────────────────────────────────────────────────
+  // Build the embed fields—price/thumbnail require awaiting the async function:
+  let price: number | null = null;
+  let thumbnailUrl: string | null = null;
 
-  const dropName = getItem.item;   
-	
-  const priceInfo = fetchLatestPriceAndThumbnail(dropName)	
-  const price = priceInfo[0];
-  const thumbnailUrl = priceInfo[1];
-	
-  const killCount = "kill count";     // ← fill in dynamically if you track kill count somewhere
-	  
-  const embedPayload = {
+  try {
+    const result = await fetchLatestPriceAndThumbnail(getItem.item);
+    price = result.price;
+    thumbnailUrl = result.thumbnailUrl;
+  } catch (err) {
+    console.error("Failed to fetch price/thumbnail:", err);
+    // If you want to fall back to a placeholder (or simply omit fields), you can do so here.
+    // For now, we’ll leave price & thumbnailUrl as null if it fails.
+  }
+
+  // Fill in killCount however you track it:
+  const killCount = " kill count goes here ";
+
+  const embedPayload: any = {
     author: {
       name: "Runescape Drop Tracker",
       icon_url:
         "https://raw.githubusercontent.com/AWWNIE/ComponentCounter/refs/heads/main/readme-assets/embed_icon.png",
     },
-    description: `You have received **${dropName}**!`,
+    description: `You have received **${getItem.item}**!`,
     fields: [
       {
-        name: `${dropName}`,
-        value: `${price}`,
+        name: getItem.item,
+        // If price lookup failed, show “Unavailable” instead of “null”
+        value: price != null ? `${price} gp` : "Price unavailable",
         inline: true,
       },
       {
@@ -285,25 +304,25 @@ function checkAnnounce(getItem: { item: string; time: Date }) {
         inline: true,
       },
     ],
-    thumbnail: {
-      url: thumbnailUrl,
-    },
-    color: 9175295, // 0x8c00ff in decimal
+    color: 0x8c00ff, // decimal 9175295
     footer: {
       text: "Obtained",
     },
     timestamp: getItem.time.toISOString(),
   };
 
+  // Only add thumbnail section if we successfully fetched one:
+  if (thumbnailUrl) {
+    embedPayload.thumbnail = { url: thumbnailUrl };
+  }
+
   // ─── POST to Discord webhook ───────────────────────────────────────────────────
-  fetch(webhook, {
+  await fetch(webhook, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       username: "Drop Tracker",
-      content: mention,          // if mention is empty, it just posts no extra text
+      content: mention, // mention will be “<@ID> ” or empty string
       embeds: [embedPayload],
     }),
   });
