@@ -261,6 +261,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   console.log(data[nonNormalized]);
   console.log(data[nonNormalized]["id"]);
   console.log(data[nonNormalized]["price"]);
+  console.log("Zero");
   /*
   console.log(Array.isArray(data[nonNormalized]));
   console.log(data[nonNormalized][0]);
