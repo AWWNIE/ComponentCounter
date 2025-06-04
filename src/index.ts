@@ -87,7 +87,9 @@ function getCurrentBoss(): string | null {
   // Walk from newest to oldest
   for (let i = lines.length - 1; i >= 0; i--) {
     const line = lines[i].trim();
+	  console.log(line)
     const match = line.match(/Welcome to your session against:\s*(.+)$/);
+	  console.log(match)
     if (match) {
       return match[1]; // e.g. “Raksha” or “Vorago”
     }
