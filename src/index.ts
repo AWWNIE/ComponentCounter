@@ -244,9 +244,9 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   }
 
   const { id, price } = entry;
-  const cacheBuster = "1748957839452";
-  const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/${cacheBuster}_obj_big.gif?id=${id}`;
-
+  const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=${id}`;
+  console.log(thumbnailUrl);
+	console.log(price);
   return { price, thumbnailUrl };
 }
 
