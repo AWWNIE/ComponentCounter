@@ -182,11 +182,14 @@ function messageParser(chatLine)
 
 function updateDropData(chatLine, item)
 {
+  console.log("Logging chatline: " + chatLine);
+  console.log("Logging item: " + item);
+
   let getItem = {
     item: item[1].trim(),
     time: new Date(),
   };
-  console.log(getItem);
+  console.log("Logging getItem: " + getItem);
   updateSaveData({ data: getItem });
   updateChatHistory(chatLine);
   checkAnnounce(getItem);
