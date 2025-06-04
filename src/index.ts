@@ -71,6 +71,7 @@ reader.readargs = {
 		a1lib.mixColor(67, 188, 188), //Ancient components
 		a1lib.mixColor(255, 255, 255), // Normal Text White
    	 	a1lib.mixColor(159,255,159),   // Clan chat green
+		a1lib.mixColor(147, 245, 148) //raksha idle messaging
 	],
 };
 
