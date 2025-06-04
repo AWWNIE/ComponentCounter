@@ -74,28 +74,37 @@ reader.readargs = {
 	],
 };
 
+/**
+ * Scans stored chat history for the most recent
+ * "Welcome to your session against: <boss>" line,
+ * optionally preceded by a “[HH:MM:SS]” timestamp.
+ */
 function getCurrentBoss(): string | null {
-  // 1) Read chat history (you already track incoming chat lines in readChatbox())
-  // 2) If a line matches: “Welcome to your session against: <boss>”
-  // 3) Extract <boss> and return it, else return null.
-
-  // Example implementation sketch:
   const history = sessionStorage.getItem(`${appName}chatHistory`);
   if (!history) return null;
 
   const lines = history.split("\n");
-  // Walk from newest to oldest
+  // Check newest → oldest
   for (let i = lines.length - 1; i >= 0; i--) {
-    const line = lines[i].trim();
-	  console.log(line)
-    const match = line.match(/Welcome to your session against:\s*(.+)$/);
-	  console.log(match)
+    const raw = lines[i].trim();
+    /**
+     * Regex breakdown:
+     *  ^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?   ⇒  optionally match “[HH:MM:SS]” + any spaces
+     *  Welcome to your session against:\s* ⇒  literal text + optional spaces
+     *  (.+)$                            ⇒  capture everything after as boss name
+     */
+    const match = raw.match(
+      /^(?:\[\d{2}:\d{2}:\d{2}\]\s*)?Welcome to your session against:\s*(.+)$/
+    );
     if (match) {
-      return match[1]; // e.g. “Raksha” or “Vorago”
+      return match[1]; // e.g. "Raksha" or "Vorago"
     }
   }
   return null;
 }
+
+// Expose it for the HTML-side polling loop
+(window as any).getCurrentBoss = getCurrentBoss;
 
 // Make sure it’s exposed globally so our inline HTML script can see it:
 (window as any).getCurrentBoss = getCurrentBoss;
