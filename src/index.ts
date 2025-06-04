@@ -176,6 +176,24 @@ function extractItemName(str) {
   return m ? m[1].trim() : s;
 }
 
+function normalizeAndCapitalize(itemName) {
+  // 1) Trim whitespace and convert all characters to lowercase,
+  //    then replace one‐or‐more spaces/tabs/etc. with a single underscore.
+  const lowerWithUnderscores = itemName
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+
+  // 2) Uppercase only the first letter, keep the rest exactly as-is (lowercase + underscores).
+  if (lowerWithUnderscores.length === 0) {
+    return "";
+  }
+  return (
+    lowerWithUnderscores.charAt(0).toUpperCase() +
+    lowerWithUnderscores.slice(1)
+  );
+}
+
 /**
  * Fetches the latest GE price + thumbnail URL for any given item name.
  */
@@ -184,10 +202,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   thumbnailUrl: string;
 }> {
   // Normalize name → underscores
-  const normalized = itemName.trim().replace(/\s+/g, "_");
-  const url = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${encodeURIComponent(
-    normalized
-  )}`;
+  const normalized = normalizeAndCapitalize(itemName);
+  const url = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${normalized}`;
 
   const resp = await fetch(url, {
     headers: {
