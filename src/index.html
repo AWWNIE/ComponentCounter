@@ -355,6 +355,7 @@
 
     // Show an error screen if Alt1 is not installed or permissions missing.
     function showAlt1Error(type) {
+      // Hide the form fields
       discordFormFields.style.display = "none";
 
       let messageText;
@@ -412,21 +413,36 @@
       showAlt1Success(callback);
     }
 
-    // On page load, decide which button to show
+    // On page load, immediately check Alt1 status. If missing, show error.
     window.addEventListener("DOMContentLoaded", () => {
+      // Always hide the main content initially
       mainContent.style.display = "none";
 
+      // Prepare Save/Load buttons based on localStorage
       const storedId = localStorage.getItem("discordID");
       const storedWebhook = localStorage.getItem("discordWebhook");
 
-      // Always display Save button
-      saveBtn.style.display = "block";
-
+      saveBtn.style.display = "block"; 
       if (storedId && storedWebhook) {
         loadSavedBtn.style.display = "block";
       } else {
         loadSavedBtn.style.display = "none";
       }
+
+      // ====== NEW: check Alt1 right away ======
+      if (!window.alt1 || !alt1.permissionInstalled) {
+        // Not running inside Alt1 → show “not installed” message
+        showAlt1Error("notInstalled");
+        return;
+      }
+      if (!alt1.permissionGameState || !alt1.permissionOverlay || !alt1.permissionPixel) {
+        // Running inside Alt1 but missing permissions
+        showAlt1Error("noPermission");
+        return;
+      }
+      // If we reach here, Alt1 is present and all permissions are granted:
+      // leave the Discord form visible and let the user proceed.
+      // (If you want a quick “Alt1 OK” check, you could call showAlt1Success(() => { /* show form */ }); but here we simply leave the form up.)
     });
 
     // Load Saved Info: check Alt1, then show spinner, validate, apply or show error
@@ -578,10 +594,6 @@
 
     // Skip Discord Integration: clear saved data, clear updateSaveData, hide the form, and show main content
     skipBtn.addEventListener("click", () => {
-      // Clear any localStorage entries
-      //localStorage.removeItem("discordID");
-      //localStorage.removeItem("discordWebhook");
-
       // Clear persisted data via updateSaveData
       updateSaveData({ discordID: "" });
       updateSaveData({ discordWebhook: "" });
