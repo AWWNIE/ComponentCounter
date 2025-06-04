@@ -253,15 +253,19 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
 
   const data = await resp.json();
   console.log(data);
+  /*
   console.log(Array.isArray(data[normalized]));
   console.log(data[normalized][0]);
-  const entry = Array.isArray(data[normalized]) ? data[normalized][0] : null;
+  const entry = Array.isArray(data[normalized]) ? data[normalized] : null;
   console.log(entry);
   if (!entry) {
     throw new Error(`No GE data found for "${itemName}"`);
   }
+  */
 
-  const { id, price } = entry;
+  const id = data[0].value;
+  const price = data[1].value;
+
   const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=${id}`;
   console.log(thumbnailUrl);
 	console.log(price);
