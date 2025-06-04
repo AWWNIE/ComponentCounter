@@ -230,7 +230,7 @@ function normalizeAndCapitalize(itemName) {
 }
 
 function removeUnderscores(input: string): string {
-  return input.replace(/_/g, "");
+  return input.replace(/_/g, " ");
 }
 
 /**
