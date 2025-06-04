@@ -229,6 +229,10 @@ function normalizeAndCapitalize(itemName) {
   );
 }
 
+function removeUnderscores(input: string): string {
+  return input.replace(/_/g, "");
+}
+
 /**
  * Fetches the latest GE price + thumbnail URL for any given item name.
  */
@@ -239,7 +243,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   // Normalize name → underscores
   const normalized = normalizeAndCapitalize(itemName);
   const url = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${normalized}`;
-
+  const nonNormalized = removeUnderscores(normalized)
+	
   const resp = await fetch(url, {
     headers: {
       // Descriptive UA for WeirdGloop
@@ -253,18 +258,18 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
 
   const data = await resp.json();
   console.log(data);
-  /*
-  console.log(Array.isArray(data[normalized]));
-  console.log(data[normalized][0]);
-  const entry = Array.isArray(data[normalized]) ? data[normalized] : null;
+
+  console.log(Array.isArray(data[nonNormalized]));
+  console.log(data[nonNormalized][0]);
+  const entry = Array.isArray(data[nonNormalized]) ? data[nonNormalized][0] : null;
   console.log(entry);
   if (!entry) {
     throw new Error(`No GE data found for "${itemName}"`);
   }
-  */
 
-  const id = data[0].value;
-  const price = data[1].value;
+
+  //const id = data[0].value;
+  //const price = data[1].value;
 
   const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=${id}`;
   console.log(thumbnailUrl);
