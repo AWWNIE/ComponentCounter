@@ -1,10 +1,6 @@
 /* ───────────────────────────────────────────────────────────────
    Base layout tweaks
-─────────────────────────────────────────────────────────-─────── */
-
-/* Add enough top‐padding so that the fixed .header (loading/history)
-   never covers the rest of the content. Adjust the 4rem if your header
-   height changes. */
+──────────────────────────────────────────────────────────────── */
 body.nis {
   padding-top: 4rem; /* push content below the fixed header */
   background-color: #1e1e1e;
@@ -25,7 +21,7 @@ body.nis {
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Header (the “Loading…” or history toggle item)
+   HEADER (the “Loading…” or history toggle item)
 ──────────────────────────────────────────────────────────────── */
 
 /* The “Loading…” header is fixed at top:10px and spans 100%. */
@@ -63,7 +59,7 @@ body.nis {
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Item list (history + total + messages)
+   ITEM LIST (history + total + messages)
 ──────────────────────────────────────────────────────────────── */
 
 /* Make the list take up remaining viewport height minus header & bossDisplay,
@@ -103,7 +99,7 @@ body.nis {
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Discord form (step 1) and modal styling
+   DISCORD FORM (step 1) and modal styling
 ──────────────────────────────────────────────────────────────── */
 
 /* Card container for Discord form */
@@ -184,7 +180,7 @@ body.nis {
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Modal (settings) background + text
+   SETTINGS MODAL background + text
 ──────────────────────────────────────────────────────────────── */
 .modal-body,
 .modal-header,
@@ -194,7 +190,7 @@ body.nis {
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Utility classes
+   UTILITY classes
 ──────────────────────────────────────────────────────────────── */
 .warning {
   background-color: yellow;
@@ -208,7 +204,7 @@ body.nis {
 }
 
 /* ───────────────────────────────────────────────────────────────
-   Responsive tweaks
+   RESPONSIVE tweaks
 ──────────────────────────────────────────────────────────────── */
 
 /* Ensure the bossDisplay and list shrink/grow on smaller viewports */
@@ -281,6 +277,25 @@ body.nis {
   box-shadow: none;
   background: none;
 }
+
+/* ───────────────────────────────────────────────────────────────
+   Replaced inline‐style rules:
+   • Hide #mainContent by default
+   • Hide #saveStatusContainer by default
+   • Make #total bold
+──────────────────────────────────────────────────────────────── */
+#mainContent {
+  display: none;
+}
+
+#saveStatusContainer {
+  display: none;
+}
+
+#total {
+  font-weight: bold;
+}
+
 /* ───────────────────────────────────────────────────────────
    Button row directly under #bossDisplay
 ──────────────────────────────────────────────────────────── */
@@ -292,4 +307,3 @@ body.nis {
 .buttonRow .col-auto {
   margin: 0 0.25rem;    /* tiny left/right gutter between Settings & History */
 }
-
