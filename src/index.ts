@@ -157,6 +157,7 @@ async function showItems() {
       let priceText = "--";
       try {
         // Fetch the latest GE price for this item (gp)
+        console.log(rawName)
         const { price } = await fetchLatestPriceAndThumbnail(rawName);
         priceText = `${price.toLocaleString()} gp`;
       } catch {
@@ -218,13 +219,27 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   });
 
   if (!resp.ok) {
-    throw new Error(`Error fetching GE data: ${resp.status} ${resp.statusText}`);
+    throw new Error(`Error fetching GE data from WeirdGloop: ${resp.status} ${resp.statusText}`);
   }
 
   const data = await resp.json();
   const id = data[nonNormalized]["id"];
+  console.log(id);
   const price = data[nonNormalized]["price"];
-  const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/1748957839452_obj_big.gif?id=${id}`;
+  
+  const url = `https://secure.runescape.com/m=itemdb_rs/api/catalogue/detail.json?item=${id}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch item data from RS API: (status ${response.status})`);
+  }
+  const data2: {
+    item: {
+      icon_large: string;
+    };
+  } = await response.json();
+  const thumbnailUrl = data2.item.icon_large;
+  console.log(thumbnailUrl);
+  
   return { price, thumbnailUrl };
 }
 
