@@ -1,0 +1,314 @@
+Below is a revised version of the proxy that incorporates the following mitigations:
+
+1. **Restricted CORS** (whitelist instead of `*`)
+2. **Input validation** (item IDs must be numeric)
+3. **Rate-limiting** (using `express‐rate‐limit`)
+4. **In-memory caching** (using `node-cache`) to avoid hammering RuneScape’s API
+5. **Generic error responses** (no raw upstream status codes or stack traces are leaked)
+6. **Basic logging and security headers** (via `morgan` and `helmet`)
+7. **Optional API-key check** (you can disable or remove this block if you don’t need authentication)
+
+---
+
+## 1. `package.json`
+
+Make sure to include all the new dependencies (`express‐rate‐limit`, `node-cache`, `helmet`, `morgan`). Also set `"type": "module"` so we can continue using `import` syntax.
+
+```json
+{
+  "name": "rs3-proxy",
+  "version": "1.0.0",
+  "description": "Secure proxy for RuneScape ItemDB detail.json",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.4.1"
+  }
+}
+```
+
+* `cors` for CORS handling (with a whitelist).
+* `express-rate-limit` to throttle requests.
+* `node-cache` for simple in-memory caching.
+* `helmet` to set various HTTP headers for basic security.
+* `morgan` for request logging.
+* `node-fetch` to call the RuneScape API.
+
+---
+
+## 2. `server.js`
+
+```js
+/**
+ * server.js
+ *
+ * A more secure Express proxy for RuneScape's ItemDB detail.json endpoint.
+ * 
+ * Mitigations included:
+ *   1. Restricted CORS (whitelisted origins only).
+ *   2. Rate limiting (per-IP).
+ *   3. Input validation (ID must be digits).
+ *   4. In-memory caching (NodeCache with a short TTL).
+ *   5. Helmet for basic security headers.
+ *   6. Morgan for request logging.
+ *   7. Generic error responses (no upstream status codes leaked).
+ *   8. Optional API-key check.
+ */
+
+import express from "express";
+import fetch from "node-fetch";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+import NodeCache from "node-cache";
+import helmet from "helmet";
+import morgan from "morgan";
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ─── 1. BASIC SECURITY HEADERS ─────────────────────────────────────────────────
+app.use(helmet());
+
+// ─── 2. REQUEST LOGGING ───────────────────────────────────────────────────────
+app.use(morgan("combined"));
+
+// ─── 3. CORS WITH WHITELIST ────────────────────────────────────────────────────
+// Replace these with your actual front-end domains (or localhost during dev).
+const ALLOWED_ORIGINS = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://your-frontend-domain.com"
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // If no origin (e.g. cURL, Postman), allow it. Otherwise only allow if in whitelist.
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS policy: This origin is not allowed."));
+    }
+  },
+  methods: ["GET"],
+  maxAge: 86400 // 24 hours preflight cache
+};
+
+app.use(cors(corsOptions));
+
+// ─── 4. RATE LIMITER ───────────────────────────────────────────────────────────
+// Limit each IP to 60 requests per minute.
+const limiter = rateLimit({
+  windowMs:  60 * 1000,   // 1 minute
+  max:       60,          // limit each IP to 60 requests per windowMs
+  statusCode: 429,
+  message: { error: "Too many requests – please try again later." }
+});
+app.use("/api/", limiter);
+
+// ─── 5. IN-MEMORY CACHE ────────────────────────────────────────────────────────
+// Cache each item-ID response for 60 seconds (so repeated hits with the same ID
+// within that window don’t re-fetch from RuneScape).
+const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
+
+// ─── 6. OPTIONAL: API-KEY CHECK ─────────────────────────────────────────────────
+// If you want to require an API key, set ENV var PROXY_API_KEY and uncomment below.
+// Otherwise, remove or comment out this middleware entirely.
+/*
+app.use((req, res, next) => {
+  const key = req.get("X-API-KEY");
+  if (!process.env.PROXY_API_KEY) {
+    // If no key is configured on the server, skip the check.
+    return next();
+  }
+  if (!key || key !== process.env.PROXY_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized: invalid API key." });
+  }
+  next();
+});
+*/
+
+// ─── 7. VALIDATE ITEM ID MIDDLEWARE ─────────────────────────────────────────────
+function validateItemId(req, res, next) {
+  const id = req.params.id;
+  // Only allow 1–9 digits:
+  if (!/^[0-9]{1,9}$/.test(id)) {
+    return res.status(400).json({ error: "Invalid item ID format." });
+  }
+  next();
+}
+
+// ─── 8. MAIN ROUTE ──────────────────────────────────────────────────────────────
+app.get("/api/item/:id", validateItemId, async (req, res) => {
+  const itemId = req.params.id;
+  const cacheKey = `item:${itemId}`;
+
+  // 8a. Check cache first
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
+
+  // 8b. If not cached, fetch from RuneScape API
+  const targetUrl = `https://secure.runescape.com/m=itemdb_rs/api/catalogue/detail.json?item=${itemId}`;
+
+  try {
+    const upstream = await fetch(targetUrl, { method: "GET" });
+
+    if (!upstream.ok) {
+      // If RuneScape returns 404, 500, etc., treat it as a 502 Bad Gateway.
+      console.error(
+        `[Upstream ${upstream.status}] Fetching item ${itemId} failed.`
+      );
+      return res
+        .status(502)
+        .json({ error: "Cannot fetch item data at this time." });
+    }
+
+    const data = await upstream.json();
+
+    // 8c. Store in cache (so subsequent calls within TTL don’t hit RS again)
+    cache.set(cacheKey, data);
+
+    // 8d. Return JSON to client
+    return res.json(data);
+  } catch (err) {
+    // Log the actual error (stack trace) server-side, but send a generic response.
+    console.error("Error fetching from RuneScape API:", err);
+    return res
+      .status(502)
+      .json({ error: "Cannot fetch item data at this time." });
+  }
+});
+
+// ─── 9. 404 HANDLER ────────────────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ error: "Endpoint not found." });
+});
+
+// ─── 10. START SERVER ──────────────────────────────────────────────────────────
+// By default listens on all interfaces (0.0.0.0). If you only want localhost:
+//    app.listen(PORT, "127.0.0.1", () => { … });
+app.listen(PORT, () => {
+  console.log(`RS3 proxy (secure) listening on http://localhost:${PORT}`);
+});
+```
+
+### What’s changed, step by step:
+
+1. **Helmet**
+
+   * `app.use(helmet())` sets a collection of safe default HTTP headers (e.g. `X-Frame-Options`, `X-Content-Type-Options`, etc.)
+
+2. **Morgan**
+
+   * `app.use(morgan("combined"))` logs each request in “combined” format. You can redirect these logs to a file or external service if desired.
+
+3. **CORS Whitelist**
+
+   * Instead of `app.use(cors())`, we define `ALLOWED_ORIGINS` (your front-end(s) only).
+   * Any request from a non-whitelisted origin will get a CORS error.
+
+4. **Rate Limiter**
+
+   * Using `express-rate-limit`, we cap each IP at 60 requests per minute to reduce brute-force or DoS risk.
+   * If an IP exceeds 60 calls in 60 seconds, it receives a `429` with `{ error: "Too many requests – please try again later." }`.
+
+5. **In-Memory Cache**
+
+   * We use `node-cache` with a TTL of 60 seconds.
+   * If the same `:id` is requested within that minute, we return the cached JSON immediately, saving both outbound bandwidth and load on RuneScape’s servers.
+
+6. **API-Key Check (Optional)**
+
+   * If you set an environment variable `PROXY_API_KEY`, uncomment that block so all requests must include `X-API-KEY: <your_key>`.
+   * If `PROXY_API_KEY` is unset, the check is effectively a no-op (any call is allowed).
+   * If you don’t need authentication at all, simply delete or comment out the entire API-key middleware.
+
+7. **Input Validation**
+
+   * The `validateItemId` middleware ensures `:id` is between 1 and 9 digits.
+   * Anything else (letters, punctuation, huge strings) is rejected with a `400` and `{ error: "Invalid item ID format." }`.
+
+8. **Generic Error Handling**
+
+   * If `fetch` to RS returns a non-OK status (404, 500, etc.), we log the upstream status internally and return a `502 Bad Gateway` with `{ error: "Cannot fetch item data at this time." }`.
+   * If the `fetch` throws (network error, DNS fail, timeout), we catch it, log the stack trace, and also return a `502`.
+   * **No raw RS status codes or stack traces** are exposed to the client.
+
+9. **Binding & 404**
+
+   * The final middleware returns a consistent 404 JSON for any other route.
+   * You can choose to bind only to `127.0.0.1` if this proxy is for internal use. To do so, change the last line to:
+
+   ```js
+   app.listen(PORT, "127.0.0.1", () => {
+     console.log(`RS3 proxy (secure) listening on http://127.0.0.1:${PORT}`);
+   });
+   ```
+
+---
+
+### How to run:
+
+1. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+2. **(Optionally) set your API key**
+
+   ```bash
+   export PROXY_API_KEY="your_secret_here"
+   ```
+
+   – or skip if you’re not using API-key protection.
+
+3. **Start the server**
+
+   ```bash
+   npm start
+   ```
+
+   By default, it listens on port 3000.
+
+4. **Test**
+
+   * From an allowed origin (e.g. your front-end at `http://localhost:5173`), you can do:
+
+     ```js
+     fetch("http://localhost:3000/api/item/51806")
+       .then(res => res.json())
+       .then(json => console.log(json))
+       .catch(err => console.error(err));
+     ```
+   * From anywhere else (e.g. a domain not in `ALLOWED_ORIGINS`), browsers will block the request due to CORS.
+
+---
+
+### Additional Recommendations (Beyond Code)
+
+* **Deploy behind HTTPS**:
+
+  * If you deploy on Heroku, Vercel, or Netlify, they give you HTTPS out of the box.
+  * If you self-host, use Nginx (or Caddy) with a Let’s Encrypt certificate.
+
+* **Monitor & Audit**:
+
+  * Periodically run `npm audit` (or integrate it into your CI) to catch newly reported vulnerabilities in your dependencies.
+  * Use a log aggregator or APM (e.g. Datadog, LogDNA, Papertrail) if you need deeper monitoring.
+
+* **WAF / DDoS Protection** (for public usage):
+
+  * If you expose this to the open internet at scale, consider putting Cloudflare (or another WAF/CDN) in front. Their layer-7 protections help absorb spikes and malicious traffic.
+
+With these changes in place, you’ve covered the most common risks (CORS-abuse, DoS, input-validation, cache hammering, error-leakage, etc.) while still preserving a straightforward proxy to RuneScape’s item-detail JSON.
