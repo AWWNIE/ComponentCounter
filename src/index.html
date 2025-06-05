@@ -87,19 +87,34 @@
   <!-- Step 2: Main content (hidden until Discord config done) -->
   <!-- ============================================= -->
   <div id="mainContent">
-    <!-- ─── Current Boss banner ──────────────────────────── -->
-    <div id="bossDisplay">
-      Current Boss: <span id="currentBossName">None</span>
+    <!-- ─── Current Boss banner + Settings button ──────────────────────────── -->
+    <div id="bossDisplay" class="d-flex align-items-center justify-content-between mx-auto mt-5 mb-3" style="max-width:800px; padding:0.75rem 1rem; background-color:#2a2a2a; border:1px solid #A67D3D; border-radius:4px; color:#ffffff; box-sizing:border-box;">
+      <div style="flex:0 0 80%; font-size:1rem;">
+        Current Boss: <span id="currentBossName" style="font-weight:bold; color:#E2BE62;">None</span>
+      </div>
+      <div style="flex:0 0 20%; text-align:right;">
+        <button
+          class="nisbutton"
+          data-bs-toggle="modal"
+          data-bs-target="#settings"
+          type="button"
+        >
+          Settings
+        </button>
+      </div>
     </div>
 
     <!-- ─── Item history list ───────────────────────────── -->
-    <ul class="list-group itemList">
+    <ul class="list-group itemList mx-auto" style="max-width:800px; padding-top:0;">
+      <!-- Changed class from “header” (which conflicted with the CSS .header) to “list-header”,
+           and left it as a plain list‐group‐item so it inherits the correct styling. -->
       <li
-        class="list-group-item header"
+        id="listHeader"
+        class="list-group-item list-header"
         data-show="history"
         title="Loading"
       >
-        Loading...
+        Loading…
       </li>
       <li class="list-group-item total">
         Total Seren Spirits collected:
@@ -107,27 +122,11 @@
       </li>
       <li class="list-group-item item">
         If this message is showing for an extended period of time,
-        then the chatbox reader for Alt1 isn't working due to an update.
+        then the chatbox reader for Alt1 isn’t working due to an update.
         Please be patient, and the issue will be fixed as soon as it
         can!
       </li>
     </ul>
-
-    <!-- ─── Fixed “Settings” button at bottom ─────────────── -->
-    <div class="container">
-      <div class="row fixed-bottom justify-content-center mb-3">
-        <div class="col-auto">
-          <button
-            class="nisbutton"
-            data-bs-toggle="modal"
-            data-bs-target="#settings"
-            type="button"
-          >
-            Settings
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- ============================================= -->
