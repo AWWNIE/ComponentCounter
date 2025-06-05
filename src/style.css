@@ -1,309 +1,153 @@
 /* ───────────────────────────────────────────────────────────────
-   Base layout tweaks
+   BASE LAYOUT & TYPOGRAPHY
 ──────────────────────────────────────────────────────────────── */
-body.nis {
-  padding-top: 4rem; /* push content below the fixed header */
+
+/* Overall page background, font, and removal of default margins */
+html,
+body {
   background-color: #1e1e1e;
+  color: #ffffff;
   font-family: 'RuneScape UF', sans-serif;
-  margin: 0; /* reset any default margins */
+  margin: 0;
+  padding: 0;
 }
 
-/* Center all .row text by default, but override where needed */
+/* Ensure every heading uses the accent color and the RuneScape font */
+h1, h2, h3, h4, h5, h6 {
+  color: #E2BE62;
+  font-family: 'RuneScape UF', sans-serif;
+  margin: 1rem 0 0.5rem;
+}
+
+/* Paragraphs and spans inherit the base white color */
+p,
+span {
+  color: #ffffff;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+
+/* Links use the accent color; no underline unless hovered */
+a {
+  color: #E2BE62;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Lists (unordered & ordered) */
+ul,
+ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+li {
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   OVERRIDES FOR BOOTSTRAP RESET ELEMENTS
+──────────────────────────────────────────────────────────────── */
+
+/* Ensure any Bootstrap “container” or “row” text is centered unless overridden */
 .row {
   text-align: center;
 }
 
-/* Ensure .main container (if used) scrolls within 75vh. */
-.main {
-  overflow-y: auto;
-  max-height: 75vh;
-  margin-top: 8px;
-}
-
-/* ───────────────────────────────────────────────────────────────
-   HEADER (the “Loading…” or history toggle item)
-──────────────────────────────────────────────────────────────── */
-
-/* The “Loading…” header is fixed at top:10px and spans 100%. */
-.header {
-  text-align: center;
-  background: url(https://runeapps.org/nis/alt1-currentskin/nisbutton.png) 0px -100%/24px 400% repeat content-box;
-  background-color: black;
-  color: black;
-  font-family: 'trajan-pro-3';
-  padding: 0.5rem 0; /* give it some vertical padding */
-  position: fixed;
-  top: 10px;
-  width: 100%;
-  z-index: 1000; /* stay above everything else */
-}
-
-/* Make sure the first visible content (e.g. #bossDisplay) lives below .header */
-#bossDisplay {
-  margin-top: 1rem;    /* small gap below header */
-  margin-bottom: 1.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #2a2a2a;
-  border: 1px solid #A67D3D;
-  border-radius: 4px;
-  color: #FFFFFF;
-  font-size: 1rem;
-  width: calc(100% - 2rem); /* allow 1rem padding on left/right on narrow screens */
-  max-width: 800px; /* cap width for large desktops */
-  margin-left: auto;
-  margin-right: auto;
-}
-#bossDisplay span {
-  font-weight: bold;
-  color: #E2BE62;
-}
-
-/* ───────────────────────────────────────────────────────────────
-   ITEM LIST (history + total + messages)
-──────────────────────────────────────────────────────────────── */
-
-/* Make the list take up remaining viewport height minus header & bossDisplay,
-   and enable scrolling if items overflow vertically. */
-.list-group {
-  position: relative;
-  margin: auto; /* center horizontally within viewport */
-  max-width: 800px; /* cap width for large screens */
-  padding-top: 2rem; /* extra top‐padding so the fixed .header doesn’t cover list items */
-  height: calc(100vh - 10px - 0.5rem /* header top + padding */ - 3.5rem /* bossDisplay + margins */);
-  overflow-y: auto;
-  background: transparent;
-  border: none;
-}
-
-/* Each list item should wrap text and never be clipped. */
-.list-group-item {
-  background: transparent;
-  border: grey solid 1px;
-  white-space: normal; /* allow wrapping */
-  word-wrap: break-word;
-  padding: 0.5rem 1rem;
-  color: white;
-  text-align: left;
-}
-
-/* The “Total Seren Spirits collected” line gets a bit of extra top‐margin
-   so it never touches the “Loading…” header or bossDisplay. */
-.total {
-  color: rgb(0, 255, 255);
-  margin-top: 1.5rem;
-}
-
-/* Hide the scrollbar on WebKit if desired */
-.list-group::-webkit-scrollbar {
-  display: none;
-}
-
-/* ───────────────────────────────────────────────────────────────
-   DISCORD FORM (step 1) and modal styling
-──────────────────────────────────────────────────────────────── */
-
-/* Card container for Discord form */
-#discordFormContainer .card {
-  background-color: #292929;
-  border: 2px solid #A67D3D;
-  border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-}
-#discordFormContainer .card-body {
-  padding: 1.5rem;
-}
-#discordFormContainer .card-title {
-  color: #E2BE62;
-  font-size: 1.25rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-/* Labels/inputs */
-#discordFormContainer .form-label {
-  color: #FFFFFF;
-  font-weight: bold;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
-}
-#discordFormContainer .form-control {
+/* Forms: inputs, selects, textareas all get the dark background + gold border */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea,
+select {
   background-color: #1f1f1f;
   border: 1px solid #A67D3D;
-  color: #FFFFFF;
+  color: #ffffff;
   border-radius: 4px;
+  font-family: 'RuneScape UF', sans-serif;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
-#discordFormContainer .form-control::placeholder {
-  color: #AAAAAA;
+
+/* Placeholder text color */
+input::placeholder,
+textarea::placeholder {
+  color: #aaaaaa;
 }
-#discordFormContainer .form-control:focus {
+
+/* Focus state for form controls: golden glow */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
   border-color: #E2BE62;
   box-shadow: 0 0 5px rgba(166, 125, 61, 0.8);
   background-color: #1f1f1f;
 }
 
-/* Buttons */
-#discordFormContainer .btn {
-  background-color: #3C3C3C;
-  border: 1px solid #A67D3D;
-  color: #E2BE62;
+/* All buttons use the same base dark background, gold border, and RuneScape font */
+button,
+.btn {
+  background-color: #3C3C3C !important;
+  border: 1px solid #A67D3D !important;
+  color: #E2BE62 !important;
+  font-family: 'RuneScape UF', sans-serif;
   font-weight: bold;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Hover states for buttons */
+button:hover,
+.btn:hover {
+  background-color: #555555 !important;
+  border-color: #E2BE62 !important;
+  color: #ffffff !important;
+}
+
+/* Disable default Bootstrap’s white modal header/footer backgrounds */
+.modal-content {
+  background-color: #2a2a2a !important;
+  border: 1px solid #A67D3D;
   border-radius: 4px;
 }
-#discordFormContainer .btn:hover {
-  background-color: #555555;
-  border-color: #E2BE62;
-}
-#discordFormContainer .btn-outline-secondary {
-  background-color: transparent;
-  border: 1px solid #A67D3D;
-  color: #E2BE62;
-}
-#discordFormContainer .btn-outline-secondary:hover {
-  background-color: #3C3C3C;
-  border-color: #E2BE62;
-  color: #FFFFFF;
-}
-
-/* Status icons (success / error) */
-#saveStatusContainer .text-success {
-  color: #4EC83D !important;
-}
-#saveStatusContainer .text-danger {
-  color: #C83D3D !important;
-}
-#saveStatusContainer .text-white {
-  color: #FFFFFF !important;
-}
-
-/* Center the Skip button text */
-#skipDiscordBtn {
-  margin-top: 0.5rem;
-}
-
-/* ───────────────────────────────────────────────────────────────
-   SETTINGS MODAL background + text
-──────────────────────────────────────────────────────────────── */
-.modal-body,
 .modal-header,
+.modal-body,
 .modal-footer {
-  background-color: grey;
-  color: white;
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
 }
 
-/* ───────────────────────────────────────────────────────────────
-   UTILITY classes
-──────────────────────────────────────────────────────────────── */
-.warning {
-  background-color: yellow;
-  color: black;
-  font-weight: bold;
-}
-.danger {
-  background-color: red;
-  color: black;
+/* Override Bootstrap form labels to be white */
+.form-label,
+label {
+  color: #ffffff;
   font-weight: bold;
 }
 
+/* Any form‐group margins reset */
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
 /* ───────────────────────────────────────────────────────────────
-   RESPONSIVE tweaks
+   SPECIFIC PAGE COMPONENTS (KEEPING EXISTING STRUCTURE)
 ──────────────────────────────────────────────────────────────── */
 
-/* Ensure the bossDisplay and list shrink/grow on smaller viewports */
-@media (max-width: 992px) {
-  #bossDisplay,
-  .list-group {
-    width: calc(100% - 2rem); /* 1rem padding on each side */
-  }
-}
-
-/* Ensure Discord form adapts on very small screens */
-@media (max-width: 576px) {
-  #discordFormContainer .col-12 {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-  #discordFormContainer .form-label,
-  #discordFormContainer .form-control {
-    font-size: 0.9rem;
-  }
-  #discordFormContainer .btn {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-  }
-}
-
-/* Unified box style for Current Boss and Item History */
-#bossDisplay,
-.itemList,
-.list-group-item,
-.header,
-.total {
-  background-color: #2a2a2a;
-  border: 1px solid #A67D3D;
-  border-radius: 4px;
-  color: #FFFFFF;
-  padding: 0.75rem 1rem;
-  margin: 1rem auto;
-  max-width: 800px;
-  box-sizing: border-box;
-}
-
-/* Header style (Item History title) */
+/* Header bar (“Loading…” or history toggle) */
 .header {
+  position: fixed;
+  top: 10px;
+  width: 100%;
+  z-index: 1000;
+  background: url(https://runeapps.org/nis/alt1-currentskin/nisbutton.png) 0px -100%/24px 400% repeat content-box;
+  background-color: #2a2a2a;
+  color: #E2BE62;
+  font-family: 'trajan-pro-3', sans-serif;
   font-weight: bold;
   font-size: 1.1rem;
-  color: #E2BE62;
-  text-align: center;
-}
-
-/* Total Seren Spirits collected style */
-.total {
-  font-weight: bold;
-  color: rgb(0, 255, 255);
-  text-align: left;
-}
-
-/* Individual items style */
-.list-group-item {
-  font-size: 0.95rem;
-  text-align: left;
-}
-
-/* Reset list-group container */
-.list-group {
-  border: none;
-  padding: 0;
-  margin: 0 auto;
-  max-width: 800px;
-  box-shadow: none;
-  background: none;
-}
-
-/* ───────────────────────────────────────────────────────────────
-   Replaced inline‐style rules:
-   • Hide #mainContent by default
-   • Hide #saveStatusContainer by default
-   • Make #total bold
-──────────────────────────────────────────────────────────────── */
-#mainContent {
-  display: none;
-}
-
-#saveStatusContainer {
-  display: none;
-}
-
-#total {
-  font-weight: bold;
-}
-
-/* ───────────────────────────────────────────────────────────
-   Button row directly under #bossDisplay
-──────────────────────────────────────────────────────────── */
-.buttonRow {
-  margin-top: 0.5rem;   /* small gap under the “Current Boss” banner */
-}
-
-/* Ensure the two buttons are spaced nicely on desktop & mobile */
-.buttonRow .col-auto {
-  margin: 0 0.25rem;    /* tiny left/right gutter between Settings & History */
-}
