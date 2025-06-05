@@ -20,6 +20,7 @@ const saveBtn = document.getElementById("saveDiscordBtn")!;
 const loadSavedBtn = document.getElementById("loadSavedBtn")!;
 const skipBtn = document.getElementById("skipDiscordBtn")!;
 const bossNameSpan = document.getElementById("currentBossName")!;
+const listHeader = document.getElementById("listHeader")!;
 
 // ─── Re‐export/updateSaveData & getSaveData (already existed) ────────────
 const appName = "SerenTracker";
@@ -744,7 +745,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ─── NEW / ADDED: Bind “#listHeader” click to toggle between “total” & “history” ───────────────
-  const listHeader = document.getElementById("listHeader");
   if (listHeader) {
     listHeader.addEventListener("click", () => {
       const newMode = getSaveData("mode") === "total" ? "history" : "total";
