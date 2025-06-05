@@ -227,8 +227,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   console.log(id);
   const price = data[nonNormalized]["price"];
   
-  const url = `https://secure.runescape.com/m=itemdb_rs/api/catalogue/detail.json?item=${id}`;
-  const response = await fetch(url);
+  const url2 = `https://secure.runescape.com/m=itemdb_rs/api/catalogue/detail.json?item=${id}`;
+  const response = await fetch(url2);
   if (!response.ok) {
     throw new Error(`Failed to fetch item data from RS API: (status ${response.status})`);
   }
