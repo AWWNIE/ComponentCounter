@@ -105,7 +105,7 @@ if (window.alt1) {
 
 // Function to determine the total of all items recorded.
 function getTotal() {
-  let total: Record<string, integer> = {};
+  let total: Record<string, number> = {};
   getSaveData("data").forEach((item: any) => {
     const data = item.item.split(" x ");
     total[data[1]] = parseInt(total[data[1]]) + parseInt(data[0]) || parseInt(data[0]);
