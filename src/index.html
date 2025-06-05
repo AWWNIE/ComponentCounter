@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -20,18 +20,8 @@
     crossorigin="anonymous"
   ></script>
 
-  <!-- RuneApps / NIS CSS -->
-  <!--<link
-    rel="stylesheet"
-    type="text/css"
-    href="https://runeapps.org/nis/nis.css"
-  />
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://runeapps.org/runeappslib.css"
-  />-->
-
+  <!-- Our custom CSS -->
+  <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body class="nis">
@@ -84,12 +74,8 @@
             </div>
 
             <!-- Status / Spinner container -->
-            <div
-              id="saveStatusContainer"
-              class="text-center my-4"
-              style="display: none;"
-            >
-              <!-- Insert spinner / checkmark / error here dynamically -->
+            <div id="saveStatusContainer" class="text-center my-4">
+              <!-- The spinner, checkmark, or error message will be inserted here by script -->
             </div>
           </div>
         </div>
@@ -100,7 +86,7 @@
   <!-- ============================================= -->
   <!-- Step 2: Main content (hidden until Discord config done) -->
   <!-- ============================================= -->
-  <div id="mainContent" style="display: none;">
+  <div id="mainContent">
     <!-- ─── Current Boss banner ──────────────────────────── -->
     <div id="bossDisplay">
       Current Boss: <span id="currentBossName">None</span>
@@ -117,12 +103,13 @@
       </li>
       <li class="list-group-item total">
         Total Seren Spirits collected:
-        <span id="total" style="font-weight:bold"></span>
+        <span id="total"></span>
       </li>
       <li class="list-group-item item">
-        If this message is showing for an extended period of time, then the
-        chatbox reader for Alt1 isn't working due to an update. Please be
-        patient, and the issue will be fixed as soon as it can!
+        If this message is showing for an extended period of time,
+        then the chatbox reader for Alt1 isn't working due to an update.
+        Please be patient, and the issue will be fixed as soon as it
+        can!
       </li>
     </ul>
 
@@ -233,271 +220,8 @@
   </div>
 
   <!-- ============================================= -->
-  <!-- Load your compiled TypeScript (main.js)       -->
+  <!-- Load the compiled TypeScript (main.js)       -->
   <!-- ============================================= -->
   <script src="./main.js"></script>
-
-  <!-- ============================================= -->
-  <!-- Inline script: Alt1 check, Discord logic, show/hide content, boss polling -->
-  <!-- ============================================= -->
-  <script>
-    const APP_INSTALL_URL = 'https://awwnie.github.io/ComponentCounter/appconfig.json';
-
-    // DOM references
-    const discordFormContainer = document.getElementById("discordFormContainer");
-    const discordFormFields    = document.getElementById("discordFormFields");
-    const saveStatusContainer  = document.getElementById("saveStatusContainer");
-    const mainContent          = document.getElementById("mainContent");
-    const discordIdInput       = document.getElementById("discordIdInput");
-    const discordWebhookInput  = document.getElementById("discordWebhookInput");
-    const saveBtn              = document.getElementById("saveDiscordBtn");
-    const loadSavedBtn         = document.getElementById("loadSavedBtn");
-    const skipBtn              = document.getElementById("skipDiscordBtn");
-    const bossNameSpan         = document.getElementById("currentBossName");
-
-    // ─── Bind “Install” button if Alt1 missing ──────────────────
-    function bindInstallButton() {
-      const installBtn = document.getElementById("installBtn");
-      if (!installBtn) return;
-
-      installBtn.addEventListener("click", () => {
-        if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
-          alt1.installApp(APP_INSTALL_URL).catch((err) => {
-            console.error("alt1.installApp failed:", err);
-            saveStatusContainer.textContent = "Failed to install via Alt1 API.";
-          });
-          return;
-        }
-        window.location.href = `alt1://addapp/${APP_INSTALL_URL}`;
-      });
-    }
-
-    // ─── Show Alt1‐not‐installed or permissions error ───────────
-    function showAlt1Error(type) {
-      discordFormFields.style.display = "none";
-
-      let messageText;
-      if (type === "notInstalled") {
-        messageText = "App is not installed through Alt1.";
-      } else {
-        messageText = "Required permissions not granted. Ensure gamestate, overlay, and pixel permissions are all enabled.";
-      }
-
-      saveStatusContainer.innerHTML = `
-        <div class="fs-1 text-danger">❌</div>
-        <div class="mt-2 text-white">${messageText}</div>
-        <div class="mt-3">
-          <button id="installBtn" class="btn btn-primary">Install</button>
-        </div>
-      `;
-      saveStatusContainer.style.display = "block";
-      bindInstallButton();
-    }
-
-    // ─── Show Alt1 success (all permissions ok), then call callback ─
-    function showAlt1Success(callback) {
-      discordFormFields.style.display = "none";
-      saveStatusContainer.innerHTML = `
-        <div class="fs-1 text-success">✅</div>
-        <div class="mt-2 text-white">Alt1 is installed and all permissions granted:</div>
-        <div class="text-start mt-2">
-          <div class="text-white">✅ Alt1 installed</div>
-          <div class="text-white">✅ Gamestate</div>
-          <div class="text-white">✅ Overlay</div>
-          <div class="text-white">✅ Pixel</div>
-        </div>
-      `;
-      saveStatusContainer.style.display = "block";
-
-      setTimeout(() => {
-        saveStatusContainer.style.display = "none";
-        callback();
-      }, 2000);
-    }
-
-    // ─── Check Alt1 presence & permissions, then either error or callback ─
-    function checkAlt1AndProceed(callback) {
-      if (!window.alt1 || !alt1.permissionInstalled) {
-        showAlt1Error("notInstalled");
-        return;
-      }
-      if (!alt1.permissionGameState || !alt1.permissionOverlay || !alt1.permissionPixel) {
-        showAlt1Error("noPermission");
-        return;
-      }
-      showAlt1Success(callback);
-    }
-
-    // ─── On page load: prepare buttons, show placeholder, check Alt1 ─────
-    window.addEventListener("DOMContentLoaded", () => {
-      mainContent.style.display = "none";
-
-      // Show save button, hide load if no data saved
-      const storedId      = localStorage.getItem("discordID");
-      const storedWebhook = localStorage.getItem("discordWebhook");
-      saveBtn.style.display = "block";
-      loadSavedBtn.style.display = (storedId && storedWebhook) ? "block" : "none";
-
-      // Show “None” until getCurrentBoss is defined
-      bossNameSpan.textContent = "None";
-
-      // Alt1 sanity check: if missing or no perms, show error
-      if (!window.alt1 || !alt1.permissionInstalled) {
-        showAlt1Error("notInstalled");
-        return;
-      }
-      if (!alt1.permissionGameState || !alt1.permissionOverlay || !alt1.permissionPixel) {
-        showAlt1Error("noPermission");
-        return;
-      }
-      // If here, Alt1 is installed + all perms – leave Discord form visible
-    });
-
-    // ─── Load Saved Info ────────────────────────────────────────────────
-    loadSavedBtn.addEventListener("click", () => {
-      checkAlt1AndProceed(() => {
-        const storedId      = localStorage.getItem("discordID") || "";
-        const storedWebhook = localStorage.getItem("discordWebhook") || "";
-
-        discordFormFields.style.display = "none";
-        saveStatusContainer.innerHTML = `
-          <div class="spinner-border text-white" role="status">
-            <span class="visually-hidden">Loading…</span>
-          </div>
-        `;
-        saveStatusContainer.style.display = "block";
-
-        setTimeout(() => {
-          const idValid      = /^\d{18}$/.test(storedId);
-          const webhookValid = storedWebhook.startsWith("https://discord.com/api/webhooks/");
-
-          if (!idValid || !webhookValid) {
-            let errorMessage = "";
-            if (!idValid && !webhookValid) {
-              errorMessage = "Invalid Discord ID and Discord Webhook.";
-            } else if (!idValid) {
-              errorMessage = "A valid Discord ID was not entered.";
-            } else {
-              errorMessage = "A valid Discord Webhook was not entered.";
-            }
-
-            saveStatusContainer.innerHTML = `
-              <div class="fs-1 text-danger">❌</div>
-              <div class="mt-2 text-white">${errorMessage}</div>
-            `;
-
-            setTimeout(() => {
-              saveStatusContainer.style.display = "none";
-              discordFormFields.style.display = "block";
-            }, 2000);
-          } else {
-            updateSaveData({ discordID: storedId });
-            updateSaveData({ discordWebhook: storedWebhook });
-
-            saveStatusContainer.innerHTML = `
-              <div class="fs-1 text-success">✅</div>
-              <div class="mt-2 text-white">Loaded successfully</div>
-            `;
-
-            setTimeout(() => {
-              discordFormContainer.style.display = "none";
-              mainContent.style.display = "block";
-            }, 2000);
-          }
-        }, 2000);
-      });
-    });
-
-    // ─── Save New Info ───────────────────────────────────────────────────
-    saveBtn.addEventListener("click", () => {
-      checkAlt1AndProceed(() => {
-        const idValue      = discordIdInput.value.trim();
-        const webhookValue = discordWebhookInput.value.trim();
-
-        const idValid      = /^\d{18}$/.test(idValue);
-        const webhookValid = webhookValue.startsWith("https://discord.com/api/webhooks/");
-
-        if (!idValid || !webhookValid) {
-          discordFormFields.style.display = "none";
-
-          let errorMessage = "";
-          if (!idValid && !webhookValid) {
-            errorMessage = "Invalid Discord ID and Discord Webhook.";
-          } else if (!idValid) {
-            errorMessage = "A valid Discord ID was not entered.";
-          } else {
-            errorMessage = "A valid Discord Webhook was not entered.";
-          }
-
-          saveStatusContainer.innerHTML = `
-            <div class="fs-1 text-danger">❌</div>
-            <div class="mt-2 text-white">${errorMessage}</div>
-          `;
-          saveStatusContainer.style.display = "block";
-
-          setTimeout(() => {
-            saveStatusContainer.style.display = "none";
-            discordFormFields.style.display = "block";
-          }, 2000);
-          return;
-        }
-
-        localStorage.setItem("discordID", idValue);
-        localStorage.setItem("discordWebhook", webhookValue);
-        loadSavedBtn.style.display = "block";
-        updateSaveData({ discordID: idValue });
-        updateSaveData({ discordWebhook: webhookValue });
-
-        discordFormFields.style.display = "none";
-        saveStatusContainer.innerHTML = `
-          <div class="spinner-border text-white" role="status">
-            <span class="visually-hidden">Saving…</span>
-          </div>
-        `;
-        saveStatusContainer.style.display = "block";
-
-        setTimeout(() => {
-          const savedId      = getSaveData("discordID");
-          const savedWebhook = getSaveData("discordWebhook");
-          const success      = savedId && savedWebhook;
-
-          if (success) {
-            saveStatusContainer.innerHTML = `
-              <div class="fs-1 text-success">✅</div>
-              <div class="mt-2 text-white">Saved successfully</div>
-            `;
-          } else {
-            saveStatusContainer.innerHTML = `
-              <div class="fs-1 text-danger">❌</div>
-              <div class="mt-2 text-white">Save failed</div>
-            `;
-          }
-
-          setTimeout(() => {
-            discordFormContainer.style.display = "none";
-            mainContent.style.display = "block";
-          }, 2000);
-        }, 2000);
-      });
-    });
-
-    // ─── Skip Discord Integration ───────────────────────────────────────
-    skipBtn.addEventListener("click", () => {
-      updateSaveData({ discordID: "" });
-      updateSaveData({ discordWebhook: "" });
-      discordFormContainer.style.display = "none";
-      mainContent.style.display = "block";
-    });
-
-    // ─── Poll getCurrentBoss() every 600ms and update #currentBossName ──
-    setInterval(() => {
-      if (typeof getCurrentBoss === "function") {
-        const boss = getCurrentBoss();
-        if (boss && boss !== bossNameSpan.textContent) {
-          bossNameSpan.textContent = boss;
-        }
-      }
-    }, 600);
-  </script>
 </body>
 </html>
