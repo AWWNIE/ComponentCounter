@@ -477,11 +477,16 @@ function bindInstallButton() {
   if (!installBtn) return;
 
   installBtn.addEventListener("click", () => {
-    if (typeof alt1 !== "undefined" && typeof alt1.installApp === "function") {
-      alt1.installApp(APP_INSTALL_URL).catch((err) => {
-        console.error("alt1.installApp failed:", err);
-        saveStatusContainer.textContent = "Failed to install via Alt1 API.";
-      });
+    if (
+      typeof alt1 !== "undefined" &&
+      typeof (alt1 as any).installApp === "function"
+    ) {
+      (alt1 as any)
+        .installApp(APP_INSTALL_URL)
+        .catch((err: any) => {
+          console.error("alt1.installApp failed:", err);
+          saveStatusContainer.textContent = "Failed to install via Alt1 API.";
+        });
       return;
     }
     window.location.href = `alt1://addapp/${APP_INSTALL_URL}`;
