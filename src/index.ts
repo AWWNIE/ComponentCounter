@@ -61,7 +61,6 @@ const itemList = document.querySelector(".itemList") as HTMLUListElement;
 const chatSelector = document.querySelector(".chat") as HTMLSelectElement;
 const exportButton = document.querySelector(".export") as HTMLButtonElement;
 const clearButton = document.querySelector(".clear") as HTMLButtonElement;
-const listHeader = document.querySelector(".header") as HTMLElement;
 const itemTotal = document.getElementById("total")!;
 const timestampRegex = /\[\d{2}:\d{2}:\d{2}\]/g;
 const reader = new ChatboxReader();
@@ -372,13 +371,6 @@ clearButton.addEventListener("click", function () {
   location.reload();
 });
 
-// ─── “Toggle” between totals and history when header is clicked ─────────────────────
-listHeader.addEventListener("click", () => {
-  const newMode = getSaveData("mode") === "total" ? "history" : "total";
-  updateSaveData({ mode: newMode });
-  showItems();
-});
-
 // ─── Initial Chatbox‐finding & polling loop (unchanged) ──────────────────
 window.setTimeout(function () {
   const findChat = setInterval(function () {
@@ -655,6 +647,9 @@ document.addEventListener("DOMContentLoaded", () => {
           setTimeout(() => {
             discordFormContainer.style.display = "none";
             mainContent.style.display = "block";
+
+            // ─── Once mainContent is visible, populate the list for the first time ──────────────────
+            showItems();
           }, 2000);
         }
       }, 2000);
@@ -729,6 +724,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           discordFormContainer.style.display = "none";
           mainContent.style.display = "block";
+
+          // ─── Once mainContent is visible, populate the list for the first time ──────────────────
+          showItems();
         }, 2000);
       }, 2000);
     });
@@ -740,15 +738,28 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSaveData({ discordWebhook: "" });
     discordFormContainer.style.display = "none";
     mainContent.style.display = "block";
+
+    // ─── Once mainContent is visible (after skip), populate the list initially ────────────────
+    showItems();
   });
+
+  // ─── NEW / ADDED: Bind “#listHeader” click to toggle between “total” & “history” ───────────────
+  const listHeader = document.getElementById("listHeader");
+  if (listHeader) {
+    listHeader.addEventListener("click", () => {
+      const newMode = getSaveData("mode") === "total" ? "history" : "total";
+      updateSaveData({ mode: newMode });
+      showItems();
+    });
+  }
 
   // 8) Poll getCurrentBoss() every 600ms and update #currentBossName
   setInterval(() => {
-  if (typeof getCurrentBoss === "function") {
-    const boss = getCurrentBoss();
-    if (boss && boss !== bossNameSpan.textContent) {
-      bossNameSpan.textContent = boss;
+    if (typeof getCurrentBoss === "function") {
+      const boss = getCurrentBoss();
+      if (boss && boss !== bossNameSpan.textContent) {
+        bossNameSpan.textContent = boss;
+      }
     }
-  }
-}, 600);
+  }, 600);
 });
