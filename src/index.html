@@ -83,48 +83,37 @@
     </div>
   </div>
 
-  <!-- ============================================= -->
+ <!-- ============================================= -->
   <!-- Step 2: Main content (hidden until Discord config done) -->
   <!-- ============================================= -->
   <div id="mainContent">
-    <!-- ─── Current Boss banner + Settings button ──────────────────────────── -->
-    <div id="bossDisplay" class="d-flex align-items-center justify-content-between mx-auto mt-5 mb-3" style="max-width:800px; padding:0.75rem 1rem; background-color:#2a2a2a; border:1px solid #A67D3D; border-radius:4px; color:#ffffff; box-sizing:border-box;">
-      <div style="flex:0 0 80%; font-size:1rem;">
-        Current Boss: <span id="currentBossName" style="font-weight:bold; color:#E2BE62;">None</span>
+    <!-- ─── Boss + Settings row ──────────────────────────────────────────── -->
+    <div class="boss‐section d-flex align-items-center justify-content-between mx-auto">
+      <!-- Current Boss banner -->
+      <div id="bossDisplay">
+        Current Boss: <span id="currentBossName">No boss</span>
       </div>
-      <div style="flex:0 0 20%; text-align:right;">
-        <button
-          class="nisbutton"
-          data-bs-toggle="modal"
-          data-bs-target="#settings"
-          type="button"
-        >
-          Settings
-        </button>
-      </div>
+      <!-- Settings button (moved outside of #bossDisplay) -->
+      <button id="settingsBtn" class="nisbutton" data-bs-toggle="modal" data-bs-target="#settings">
+        Settings
+      </button>
     </div>
 
-    <!-- ─── Item history list ───────────────────────────── -->
-    <ul class="list-group itemList mx-auto" style="max-width:800px; padding-top:0;">
-      <!-- Changed class from “header” (which conflicted with the CSS .header) to “list-header”,
-           and left it as a plain list‐group‐item so it inherits the correct styling. -->
-      <li
-        id="listHeader"
-        class="list-group-item list-header"
-        data-show="history"
-        title="Loading"
-      >
-        Loading…
+    <!-- ─── “Total Seren Spirits” counter (now above the header) ───────────────────── -->
+    <div class="total">
+      Total Seren Spirits collected: <span id="total"></span>
+    </div>
+
+    <!-- ─── Item history / totals list ────────────────────────────────────────────── -->
+    <ul class="list‐group itemList mx-auto">
+      <!-- NOTE: Total is no longer a <li>; it’s now the .total <div> above. -->
+      <li id="listHeader" class="list‐group‐item list-header" data-show="history" title="Loading…">
+        Item Totals
       </li>
-      <li class="list-group-item total">
-        Total Seren Spirits collected:
-        <span id="total"></span>
-      </li>
-      <li class="list-group-item item">
-        If this message is showing for an extended period of time,
-        then the chatbox reader for Alt1 isn’t working due to an update.
-        Please be patient, and the issue will be fixed as soon as it
-        can!
+      <li class="list‐group‐item item">
+        If this message is showing for an extended period of time, then the chatbox
+        reader for Alt1 isn’t working due to an update. Please be patient, and the
+        issue will be fixed as soon as it can!
       </li>
     </ul>
   </div>
