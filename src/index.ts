@@ -172,7 +172,7 @@ async function showItems() {
         `<li class="list-group-item item d-flex justify-content-between align-items-center">
            <span>${entry.item}</span>
            <span style="font-size:0.85rem; color:#aaaaaa;">
-             ${foundTime} ${priceText}
+             ${priceText} @ ${foundTime}
            </span>
          </li>`
       );
@@ -479,6 +479,9 @@ function updateDropData(chatLine: string, itemMatch: RegExpMatchArray) {
   updateSaveData({ data: getItem });
   updateChatHistory(chatLine);
   checkAnnounce(getItem);
+
+  // showItems now is async, but we don’t need to await it here;
+  // it will update the list once the price fetches complete.
   showItems();
 }
 
@@ -741,11 +744,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 8) Poll getCurrentBoss() every 600ms and update #currentBossName
   setInterval(() => {
-    if (typeof getCurrentBoss === "function") {
-      const boss = getCurrentBoss();
-      if (boss && boss !== bossNameSpan.textContent) {
-        bossNameSpan.textContent = boss;
-      }
+  if (typeof getCurrentBoss === "function") {
+    const boss = getCurrentBoss();
+    if (boss && boss !== bossNameSpan.textContent) {
+      bossNameSpan.textContent = boss;
     }
-  }, 600);
+  }
+}, 600);
 });
