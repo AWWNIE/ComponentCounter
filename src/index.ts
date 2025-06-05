@@ -157,7 +157,7 @@ async function showItems() {
       let priceText = "--";
       try {
         // Fetch the latest GE price for this item (gp)
-        console.log(rawName)
+        console.log(rawName);
         const { price } = await fetchLatestPriceAndThumbnail(rawName);
         priceText = `${price.toLocaleString()} gp`;
       } catch {
@@ -221,8 +221,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   if (!resp.ok) {
     throw new Error(`Error fetching GE data from WeirdGloop: ${resp.status} ${resp.statusText}`);
   }
-
   const data = await resp.json();
+  console.log(data);
   const id = data[nonNormalized]["id"];
   console.log(id);
   const price = data[nonNormalized]["price"];
