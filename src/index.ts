@@ -120,33 +120,63 @@ function getTotal() {
   return total;
 }
 
-function showItems() {
-  itemList.querySelectorAll("li.item").forEach((el) => el.remove());
+async function showItems() {
+  // Remove any existing “item” lines
+  itemList.querySelectorAll("li.item").forEach(el => el.remove());
+
+  // Update the total-count display
   itemTotal.innerHTML = String(getSaveData("data").length);
 
+  // “Total” mode: list aggregated totals by item name
   if (getSaveData("mode") === "total") {
     listHeader.dataset.show = "history";
     listHeader.title = "Click to show History";
     listHeader.innerHTML = "Item Totals";
-    const total = getTotal();
-    Object.keys(total)
+
+    const totalCounts = getTotal();
+    Object.keys(totalCounts)
       .sort()
-      .forEach((item) =>
-        itemList.insertAdjacentHTML("beforeend", `<li class="list-group-item item">${item}: ${total[item]}</li>`)
-      );
-  } else {
-    listHeader.dataset.show = "total";
-    listHeader.title = "Click to show Totals";
-    listHeader.innerHTML = "Item History";
-    getSaveData("data")
-      .slice()
-      .reverse()
-      .map((item: any) => {
+      .forEach(itemName => {
         itemList.insertAdjacentHTML(
           "beforeend",
-          `<li class="list-group-item item" title="${new Date(item.time).toLocaleString()}">${item.item}</li>`
+          `<li class="list-group-item item">${itemName}: ${totalCounts[itemName]}</li>`
         );
       });
+  }
+  // “History” mode: show each drop in reverse chronological order, including time & price
+  else {
+    listHeader.dataset.show = "total";
+    listHeader.title = "Click to show Totals";
+    listHeader.innerHTML = "Recent History";
+
+    // We take a snapshot of saved data, reverse it, then iterate
+    const allDrops = getSaveData("data").slice().reverse();
+
+    for (const entry of allDrops) {
+      const rawName = extractItemName(entry.item);
+      let priceText = "--";
+      try {
+        // Fetch the latest GE price for this item (gp)
+        const { price } = await fetchLatestPriceAndThumbnail(rawName);
+        priceText = `${price.toLocaleString()} gp`;
+      } catch {
+        // If fetch fails, we simply leave “--”
+      }
+
+      // Format time as HH:MM:SS (e.g. “14:23:05”)
+      const foundTime = new Date(entry.time).toLocaleTimeString();
+
+      // Insert a single <li> with item name, price, and time (aligned right)
+      itemList.insertAdjacentHTML(
+        "beforeend",
+        `<li class="list-group-item item d-flex justify-content-between align-items-center">
+           <span>${entry.item}</span>
+           <span style="font-size:0.85rem; color:#aaaaaa;">
+             ${foundTime} ${priceText}
+           </span>
+         </li>`
+      );
+    }
   }
 }
 
@@ -342,9 +372,10 @@ clearButton.addEventListener("click", function () {
   location.reload();
 });
 
-// ─── "View" (history ↔ total toggle) logic (unchanged) ────────────────────
-listHeader.addEventListener("click", function () {
-  updateSaveData({ mode: this.dataset.show });
+// ─── “Toggle” between totals and history when header is clicked ─────────────────────
+listHeader.addEventListener("click", () => {
+  const newMode = getSaveData("mode") === "total" ? "history" : "total";
+  updateSaveData({ mode: newMode });
   showItems();
 });
 
