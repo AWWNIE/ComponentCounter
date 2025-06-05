@@ -105,11 +105,18 @@ if (window.alt1) {
 
 // Function to determine the total of all items recorded.
 function getTotal() {
-  let total: Record<string, number> = {};
+  const total: Record<string, number> = {};
+
   getSaveData("data").forEach((item: any) => {
-    const data = item.item.split(" x ");
-    total[data[1]] = parseInt(total[data[1]]) + parseInt(data[0]) || parseInt(data[0]);
+    // item.item is something like “3 x SomeRareDrop”
+    const [qtyStr, name] = item.item.split(" x ");
+    const qty = parseInt(qtyStr, 10);
+
+    // If we’ve never seen this drop before, treat its current total as 0
+    const prev = total[name] || 0;
+    total[name] = prev + qty;
   });
+
   return total;
 }
 
