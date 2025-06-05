@@ -16,239 +16,410 @@ body {
 h1, h2, h3, h4, h5, h6 {
   color: #E2BE62;
   font-family: 'RuneScape UF', sans-serif;
-  margin: 0;
-  padding: 0;
+  margin: 1rem 0 0.5rem;
 }
 
-/* Main container centering */
-.container {
-  margin: 0 auto;
-  padding: 0 1rem;
+/* Paragraphs and spans inherit the base white color */
+p,
+span {
+  color: #ffffff;
+  line-height: 1.5;
+  margin: 0.5rem 0;
 }
 
-/* Remove default list styles for .list-group */
+/* Links use the accent color; no underline unless hovered */
+a {
+  color: #E2BE62;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Lists (unordered & ordered) */
+ul,
+ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+li {
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   OVERRIDES FOR BOOTSTRAP RESET ELEMENTS
+──────────────────────────────────────────────────────────────── */
+
+/* Ensure any Bootstrap “container” or “row” text is centered unless overridden */
+.row {
+  text-align: center;
+}
+
+/* Forms: inputs, selects, textareas all get the dark background + gold border */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea,
+select {
+  background-color: #1f1f1f;
+  border: 1px solid #A67D3D;
+  color: #ffffff;
+  border-radius: 4px;
+  font-family: 'RuneScape UF', sans-serif;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Placeholder text color */
+input::placeholder,
+textarea::placeholder {
+  color: #aaaaaa;
+}
+
+/* Focus state for form controls: golden glow */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #E2BE62;
+  box-shadow: 0 0 5px rgba(166, 125, 61, 0.8);
+  background-color: #1f1f1f;
+}
+
+/* All buttons use the same base dark background, gold border, and RuneScape font */
+button,
+.btn {
+  background-color: #3C3C3C !important;
+  border: 1px solid #A67D3D !important;
+  color: #E2BE62 !important;
+  font-family: 'RuneScape UF', sans-serif;
+  font-weight: bold;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Hover states for buttons */
+button:hover,
+.btn:hover {
+  background-color: #555555 !important;
+  border-color: #E2BE62 !important;
+  color: #ffffff !important;
+}
+
+/* Disable default Bootstrap’s white modal header/footer backgrounds */
+.modal-content {
+  background-color: #2a2a2a !important;
+  border: 1px solid #A67D3D;
+  border-radius: 4px;
+}
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+}
+
+/* Override Bootstrap form labels to be white */
+.form-label,
+label {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* Any form‐group margins reset */
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   SPECIFIC PAGE COMPONENTS (KEEPING EXISTING STRUCTURE)
+──────────────────────────────────────────────────────────────── */
+
+/* Header bar (“Loading…” or history toggle) */
+.header {
+  position: fixed;
+  top: 10px;
+  width: 100%;
+  z-index: 1000;
+  background: url(https://runeapps.org/nis/alt1-currentskin/nisbutton.png) 0px -100%/24px 400% repeat content-box;
+  background-color: #2a2a2a;
+  color: #E2BE62;
+  font-family: 'trajan-pro-3', sans-serif;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 0.5rem 0;
+  border: 1px solid #A67D3D;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Boss display banner */
+#bossDisplay {
+  margin: 5rem auto 1.5rem; /* leave room for fixed .header */
+  max-width: 800px;
+  padding: 0.75rem 1rem;
+  background-color: #2a2a2a;
+  border: 1px solid #A67D3D;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+#bossDisplay span {
+  font-weight: bold;
+  color: #E2BE62;
+}
+
+/* List‐group container (history + total + messages) */
 .list-group {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  margin: 0 auto;
+  max-width: 800px;
+  padding-top: 2rem; /* so the fixed header doesn’t cover content */
+  height: calc(100vh - 10px - 0.5rem /* header */ - 3.5rem /* bossDisplay */);
+  overflow-y: auto;
+  background: transparent;
+  border: none;
+  box-sizing: border-box;
 }
 
-/* Style for individual list-group items */
+/* Individual list items */
 .list-group-item {
   background-color: #2a2a2a;
   border: 1px solid #A67D3D;
   border-radius: 4px;
   color: #ffffff;
-  margin-bottom: 0.5rem;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-/* Specifically style the “total” box to match a highlighted appearance */
-.list-group-item.total {
-  background-color: #3a3a3a;
-  border-color: #E2BE62;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Style for clickable header row (toggles history vs totals) */
-.list-group-item.list-header {
-  cursor: pointer;
-  user-select: none;
-  background-color: #2a2a2a;
-  border-color: #A67D3D;
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-/* “item” entries use a slightly different font color to stand out */
-.list-group-item.item {
-  color: #bbbbbb;
-}
-
-/* “nisbutton” custom class for buttons – dark background, gold border/text */
-.nisbutton {
-  background-color: #2a2a2a;
-  border: 1px solid #E2BE62;
-  border-radius: 4px;
-  color: #E2BE62;
-  font-family: 'RuneScape UF', sans-serif;
-  font-size: 1rem;
   padding: 0.5rem 1rem;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: background-color 0.2s ease-in-out;
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
 }
 
-.nisbutton:hover {
-  background-color: #3a3a3a;
-}
-
-/* Modal background/dark overlay adjustments */
-.modal.nis .modal-content {
-  background-color: #1e1e1e;
-  border: 1px solid #A67D3D;
-  border-radius: 4px;
-  color: #ffffff;
-}
-
-.modal.nis .modal-header,
-.modal.nis .modal-body,
-.modal.nis .modal-footer {
-  padding: 1rem;
-}
-
-.modal.nis .modal-title {
-  color: #E2BE62;
-  font-family: 'RuneScape UF', sans-serif;
-  font-size: 1.25rem;
-}
-
-/* Form labels and input styling */
-.form-label {
-  color: #ffffff;
-  font-family: 'RuneScape UF', sans-serif;
-  margin-bottom: 0.25rem;
-}
-
-.form-control {
+/* “Total Seren Spirits collected” line gets an accent color and extra top margin */
+.total {
+  font-weight: bold;
+  color: rgb(0, 255, 255);
+  margin-top: 1.5rem;
   background-color: #2a2a2a;
   border: 1px solid #A67D3D;
   border-radius: 4px;
-  color: #ffffff;
-  padding: 0.5rem;
-  font-family: 'RuneScape UF', sans-serif;
-}
-
-/* Spinner styling when saving/loading */
-.spinner-border.text-white {
-  width: 3rem;
-  height: 3rem;
-  border-width: 0.25em;
-}
-
-/* Utility: Center any element horizontally */
-.mx-auto {
+  padding: 0.75rem 1rem;
+  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-}
-
-/* Margin helpers */
-.mt-5 {
-  margin-top: 3rem;
-}
-
-.mb-3 {
-  margin-bottom: 1rem;
-}
-
-.mb-4 {
-  margin-bottom: 1.5rem;
-}
-
-/* Flex container for bossDisplay (originally) */
-/* We will override this later */
-#bossDisplay {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 800px;
-  margin: 3rem auto 1rem;
-  padding: 0.75rem 1rem;
-  background-color: #2a2a2a;
-  border: 1px solid #A67D3D;
-  border-radius: 4px;
-  color: #ffffff;
-  font-size: 1rem;
   box-sizing: border-box;
 }
 
-/* Boss name text */
-#bossDisplay span {
+/* Remove default scrollbar styling on WebKit */
+.list-group::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fixed “Settings” button row under bossDisplay */
+.buttonRow {
+  margin-top: 0.5rem;
+}
+.buttonRow .col-auto {
+  margin: 0 0.25rem;
+}
+
+/* Style for the “Settings” button (nisbutton class) */
+.nisbutton {
+  background-color: #3C3C3C;
+  border: 1px solid #A67D3D;
+  color: #E2BE62;
+  font-family: 'RuneScape UF', sans-serif;
+  font-weight: bold;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.nisbutton:hover {
+  background-color: #555555;
+  border-color: #E2BE62;
+  color: #ffffff;
+}
+
+/* Hide #mainContent until Discord settings are completed */
+#mainContent {
+  display: none;
+}
+
+/* Hide the save‐status container by default */
+#saveStatusContainer {
+  display: none;
+}
+
+/* Make the #total span bold */
+#total {
+  font-weight: bold;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   DISCORD FORM (STEP 1)
+──────────────────────────────────────────────────────────────── */
+
+/* Card container for the Discord form */
+#discordFormContainer .card {
+  background-color: #292929;
+  border: 2px solid #A67D3D;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+}
+#discordFormContainer .card-body {
+  padding: 1.5rem;
+}
+
+/* Card title styling */
+#discordFormContainer .card-title {
+  color: #E2BE62;
+  font-size: 1.25rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+/* Label / input overrides */
+#discordFormContainer .form-label {
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+}
+#discordFormContainer .form-control {
+  background-color: #1f1f1f;
+  border: 1px solid #A67D3D;
+  color: #ffffff;
+  border-radius: 4px;
+}
+#discordFormContainer .form-control::placeholder {
+  color: #aaaaaa;
+}
+#discordFormContainer .form-control:focus {
+  border-color: #E2BE62;
+  box-shadow: 0 0 5px rgba(166, 125, 61, 0.8);
+  background-color: #1f1f1f;
+}
+
+/* Buttons inside the Discord form */
+#discordFormContainer .btn {
+  background-color: #3C3C3C !important;
+  border: 1px solid #A67D3D !important;
+  color: #E2BE62 !important;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+#discordFormContainer .btn:hover {
+  background-color: #555555 !important;
+  border-color: #E2BE62 !important;
+  color: #ffffff !important;
+}
+#discordFormContainer .btn-outline-secondary {
+  background-color: transparent !important;
+  border: 1px solid #A67D3D !important;
+  color: #E2BE62 !important;
+}
+#discordFormContainer .btn-outline-secondary:hover {
+  background-color: #3C3C3C !important;
+  border-color: #E2BE62 !important;
+  color: #ffffff !important;
+}
+
+/* Center the Skip button text and add a tiny top margin */
+#skipDiscordBtn {
+  margin-top: 0.5rem;
+}
+
+/* Status icons (success / error) in #saveStatusContainer */
+#saveStatusContainer .text-success {
+  color: #4EC83D !important;
+}
+#saveStatusContainer .text-danger {
+  color: #C83D3D !important;
+}
+#saveStatusContainer .text-white {
+  color: #ffffff !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   SETTINGS MODAL (STEP 3)
+──────────────────────────────────────────────────────────────── */
+
+/* Modal backdrop is darkened by Bootstrap; ensure content is dark */
+.modal-backdrop.show {
+  opacity: 0.8;
+}
+.modal {
+  color: #ffffff;
+}
+.modal-dialog {
+  max-width: 600px;
+  margin: 1.75rem auto;
+}
+.modal-content {
+  background-color: #2a2a2a;
+  border: 1px solid #A67D3D;
+  border-radius: 4px;
+}
+.modal-header,
+.modal-body,
+.modal-footer {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+.modal-title {
   color: #E2BE62;
   font-weight: bold;
 }
 
-/* Settings button when inside bossDisplay (original) */
-#bossDisplay .nisbutton {
-  flex: 0 0 20%;
-  text-align: right;
-}
-
-/* Discord form container */
-#discordFormContainer {
-  display: block;
-}
-
-/* “Load Saved” & “Save” button rows */
-#saveStatusContainer,
-#discordFormFields {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-/* Style for collapse sections in modal */
-.collapse.danger {
-  background-color: #3a3a3a;
-  border: 1px solid #E24A4A;
-  border-radius: 4px;
+/* Collapse “danger” section inside settings */
+.danger {
+  background-color: #c83d3d;
+  color: #000000;
+  font-weight: bold;
   padding: 1rem;
-  margin-top: 1rem;
-}
-
-/* Style for CSV export button row */
-.nisbutton.export {
-  background-color: #2a2a2a;
-  border: 1px solid #E2BE62;
-  border-radius: 4px;
-  color: #E2BE62;
-  font-family: 'RuneScape UF', sans-serif;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-}
-
-/* Row headings inside modal settings */
-.modal-body .row .col h6 {
-  color: #E2BE62;
-  font-family: 'RuneScape UF', sans-serif;
-  margin: 0;
-}
-
-/* Style for “Factory Reset” area */
-.modal-body .row .col .nisbutton.clear {
-  background-color: #E24A4A;
-  border: 1px solid #3a3a3a;
-  color: #ffffff;
-  font-family: 'RuneScape UF', sans-serif;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
   border-radius: 4px;
 }
 
-/* Table-like styling if you ever convert lists to tables */
-.table {
-  width: 100%;
-  margin-bottom: 1rem;
-  color: #ffffff;
+/* Buttons inside modal use the same .nisbutton */
+.modal .nisbutton {
+  margin-top: 0.5rem;
 }
 
-.table th,
-.table td {
-  padding: 0.75rem;
-  vertical-align: top;
-  border-top: 1px solid #A67D3D;
+/* ───────────────────────────────────────────────────────────────
+   UTILITY CLASSES
+──────────────────────────────────────────────────────────────── */
+
+.warning {
+  background-color: #ffff00;
+  color: #000000;
+  font-weight: bold;
+  padding: 0.5rem;
+  border-radius: 4px;
 }
 
-.table thead th {
-  vertical-align: bottom;
-  border-bottom: 2px solid #A67D3D;
+.danger {
+  background-color: #ff0000;
+  color: #000000;
+  font-weight: bold;
+  padding: 0.5rem;
+  border-radius: 4px;
 }
 
-/* Responsive adjustments for small screens */
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  #bossDisplay,
+  .list-group {
+    width: calc(100% - 2rem);
+  }
+}
+
 @media (max-width: 576px) {
   #discordFormContainer .col-12 {
     padding-left: 0.5rem;
@@ -262,41 +433,4 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.9rem;
     padding: 0.5rem 0.75rem;
   }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   OVERRIDES / NEW RULES FOR REORDERING “Total” & MOVING SETTINGS
-───────────────────────────────────────────────────────────────── */
-
-/* 1) Make the “Settings” button sit flush right under the boss display */
-/*    with the same max-width (800px) and horizontal centering */
-.settings-container {
-  max-width: 800px;
-  margin: 0 auto 1.5rem;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* 2) Override #bossDisplay to drop flex layout (it now only contains “Current Boss”) */
-#bossDisplay {
-  display: block;
-  text-align: left;
-  margin: 3rem auto 1.5rem;
-  max-width: 800px;
-  padding: 0.75rem 1rem;
-  background-color: #2a2a2a;
-  border: 1px solid #A67D3D;
-  border-radius: 4px;
-  color: #ffffff;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-/* 3) Ensure that the “total” list item appears above the header */
-/*    (No extra CSS is strictly required here, since the HTML order change does the work) */
-
-/* 4) If needed, you can add spacing above/below the “total” box */
-.list-group-item.total {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
 }
