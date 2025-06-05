@@ -204,6 +204,32 @@ function removeUnderscores(input: string): string {
   return input.replace(/_/g, " ");
 }
 
+async function updateCacheBuster()
+{
+  fetch("https://runeapps.org/apps/ge/browse.php")
+      .then(res => res.text())
+      .then(html => {
+        // Define a regex that looks for "a=12/" followed by any characters up to "_obj"
+        const firstMatch = html.match(/a=12\/(.*?)_obj/);
+        if (firstMatch && firstMatch[1]) {
+          console.log("Cache buster fetched: " + firstMatch[1]);
+          localStorage.setItem("cacheBuster", JSON.stringify(firstMatch[1]));
+          // → e.g. "1749130146243" (whatever the first found ID is)
+        } else {
+          console.log("No 'a=12/..._obj' pattern found in page.");
+          return null;
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch page:", err);
+      });
+}
+
+function fetchCurrentCacheBuster()
+{
+  return JSON.parse(localStorage.getItem("cacheBuster") || '"NULL"');
+}
+
 async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   price: number;
   thumbnailUrl: string;
@@ -211,6 +237,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   const normalized = normalizeAndCapitalize(itemName);
   const url = `https://api.weirdgloop.org/exchange/history/rs/latest?name=${normalized}`;
   const nonNormalized = removeUnderscores(normalized);
+  const cacheBuster = fetchCurrentCacheBuster();
 
   const resp = await fetch(url, {
     headers: {
@@ -226,7 +253,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   const id = data[nonNormalized]["id"];
   console.log(id);
   const price = data[nonNormalized]["price"];
-  
+  /*
   const url2 = `https://secure.runescape.com/m=itemdb_rs/api/catalogue/detail.json?item=${id}`;
   const response = await fetch(url2);
   if (!response.ok) {
@@ -238,6 +265,8 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
     };
   } = await response.json();
   const thumbnailUrl = data2.item.icon_large;
+  */
+  const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/a=12/${cacheBuster}_obj_big.gif?id=${id}`;
   console.log(thumbnailUrl);
   
   return { price, thumbnailUrl };
@@ -613,6 +642,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
   // If we reach here, Alt1 is installed + all perms – keep Discord form visible
+
+  // Update cachebuster to be used
+  updateCacheBuster();
 
   // 5) Bind Load Saved
   loadSavedBtn.addEventListener("click", () => {
