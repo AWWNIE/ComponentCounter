@@ -6,7 +6,7 @@ Tracks drops in the chat box
 
 Install by copying this either copy pasting the following link in your browser.
 
-alt1://addapp/https://awwnie.github.io/SerenTracker/appconfig.json
+alt1://addapp/https://awwnie.github.io/ComponentCounter/appconfig.json
 
 Or, by going to the following link in the Alt1 Browser
 
