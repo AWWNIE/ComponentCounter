@@ -285,7 +285,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
 }
 
 // ─── Discord‐Announcement logic (unchanged) ──────────────────────────────
-async function checkAnnounce(getItem: { item: string; time: Date }) {
+async function checkAnnounce(getItem: { item: string; time: Date }, bossDrop: boolean = false) {
   const webhook = getSaveData("discordWebhook");
   const userId = getSaveData("discordID");
 
@@ -305,7 +305,13 @@ async function checkAnnounce(getItem: { item: string; time: Date }) {
     console.error("Failed to fetch price/thumbnail:", err);
   }
 
-  const killCount = " kill count goes here "; // Adjust as needed
+  let killCount = "N/A";
+
+  if(bossDrop)
+  {
+    killCount = getCurrentKc();
+  }
+
 
   const embedPayload: any = {
     author: {
@@ -399,6 +405,34 @@ function handleBossKcParsing(chatLine: string) {
     updateBossInfo(JSON.parse(localStorage.getItem("bossName") || '"No boss"'), bossKc);
     updateChatHistory(chatLine);
   }
+}
+
+function handleBossDrops(chatLine) {
+  console.log(chatLine);
+  const indexOfFirst = chatLine.indexOf("You receive:");
+  console.log(indexOfFirst);
+  // 13 is the length of "You receive: "
+  const bossitem = chatLine.slice(indexOfFirst + 13, chatLine.lastIndexOf());
+  console.log(("Drop item string: " + bossitem));
+  const getItem = {
+    item: bossitem,
+    time: new Date(),
+  };
+
+  updateSaveData({ data: getItem });
+  updateChatHistory(chatLine);
+
+  Object.entries(rareDropList).forEach(([boss, data]) => {
+    data.items.forEach(item => {
+      if(bossitem.includes(item))
+        console.log("Item found: " + bossitem)
+        checkAnnounce(getItem, true);
+    });
+  });
+
+  // showItems now is async, but we don’t need to await it here;
+  // it will update the list once the price fetches complete.
+  showItems();
 }
 
 function updateBossInfo(bossName: string, bossKc: string) {
@@ -501,6 +535,8 @@ function messageParser(chatLine: string) {
   } else if (chatLine.indexOf("Materials gained") > -1) {
     const item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
     if (item) updateDropData(chatLine, item);
+  } else if (chatLine.indexOf("You receive") > -1) {
+    handleBossDrops(chatLine);
   } else if (chatLine.indexOf("Welcome to your session against") > -1) {
     handleBossNameParsing(chatLine);
   } else if (chatLine.indexOf("You have killed") > -1) {
