@@ -77,6 +77,7 @@ const rareDropList = {
       "Robe bottom of the First Necromancer",
       "Hand wrap of the First Necromancer",
       "Foot wraps of the First Necromancer"
+        // Following items are for beta purposes
     ]
   },
   Raksha: {
@@ -89,7 +90,18 @@ const rareDropList = {
       "Greater Chain ability codex",
       "Divert ability codex"
     ]
+  },
+  ArchGlacor: {
+    items: [
+        // Following items are for beta purposes
+        "Crystal key",
+        "Crystal triskelion",
+        "Crushed nest",
+        "Water battlestaff",
+        "Water talisman"
+    ]
   }
+
 };
 
 // If inside Alt1, identify the app; otherwise, show a “click to install” li
@@ -266,7 +278,7 @@ async function fetchLatestPriceAndThumbnail(itemName: string): Promise<{
   } = await response.json();
   const thumbnailUrl = data2.item.icon_large;
   */
-  const thumbnailUrl = `https://secure.runescape.com/m=itemdb_rs/a=12/${cacheBuster}_obj_big.gif?id=${id}`;
+  const thumbnailUrl = `https://raw.githubusercontent.com/AWWNIE/awwnie.github.io/refs/heads/main/${id}.png`;
   console.log(thumbnailUrl);
   
   return { price, thumbnailUrl };
