@@ -543,6 +543,9 @@ function messageParser(chatLine: string) {
   } else if (chatLine.indexOf("You have killed") > -1) {
     handleBossKcParsing(chatLine);
   } else {
+    // Just log everything. Could be useful for debugging.
+    console.log(chatLine);
+    /*
     // Other special user drops
     if (chatLine.indexOf("EternalSong") > -1) {
       const item = chatLine.match(/\[\d+:\d+:\d+\] EternalSong: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
@@ -554,6 +557,7 @@ function messageParser(chatLine: string) {
       const item = chatLine.match(/\[\d+:\d+:\d+\] Awwni: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
       if (item) updateDropData(chatLine, item);
     }
+     */
   }
 }
 
