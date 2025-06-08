@@ -113,6 +113,75 @@ if (window.alt1) {
   itemList.insertAdjacentHTML("beforeend", newEle);
 }
 
+// Set Chat reader
+
+
+reader.readargs = {
+
+  colors: [
+
+    a1lib.mixColor(0,   255, 255),  // Seren text color / [0, 255, 255]
+
+    a1lib.mixColor(0,   255,   0),  // [0, 255, 0]
+
+    a1lib.mixColor(0,   175, 255),  // [0, 175, 255]
+
+    a1lib.mixColor(0,     0, 255),  // [0, 0, 255]
+
+    a1lib.mixColor(255,  82,  86),  // [255, 82, 86]
+
+    a1lib.mixColor(159, 255, 159),  // Clan chat green / [159, 255, 159]
+
+    a1lib.mixColor(0,   111,   0),  // [0, 111, 0]
+
+    a1lib.mixColor(255, 143, 143),  // [255, 143, 143]
+
+    a1lib.mixColor(255, 152,  31),  // [255, 152, 31]
+
+    a1lib.mixColor(255, 111,   0),  // [255, 111, 0]
+
+    a1lib.mixColor(255, 255,   0),  // [255, 255, 0]
+
+    a1lib.mixColor(239,   0, 175),  // [239, 0, 175]
+
+    a1lib.mixColor(255,  79, 255),  // [255, 79, 255]
+
+    a1lib.mixColor(175, 127, 255),  // [175, 127, 255]
+
+    a1lib.mixColor(191, 191, 191),  // [191, 191, 191]
+
+    a1lib.mixColor(127, 255, 255),  // [127, 255, 255]
+
+    a1lib.mixColor(128,   0,   0),  // [128, 0, 0]
+
+    a1lib.mixColor(255, 255, 255),  // Normal Text White / [255, 255, 255]
+
+    a1lib.mixColor(127, 169, 255),  // [127, 169, 255]
+
+    a1lib.mixColor(255, 140,  56),  // [255, 140, 56] (orange drop received text)
+
+    a1lib.mixColor(255,   0,   0),  // Rare Mats / [255, 0, 0] (red achievement/world message)
+
+    a1lib.mixColor( 69, 178,  71),  // [69, 178, 71] (blueish‐green friend broadcast)
+
+    a1lib.mixColor(164, 153, 125),  // [164, 153, 125] (brownish‐gray friends/fc/cc list name)
+
+    a1lib.mixColor(215, 195, 119),  // [215, 195, 119] (interface preset color)
+
+    a1lib.mixColor(255, 255, 176),  // [255, 255, 176] (GIM exclusive?)
+
+    a1lib.mixColor(245, 245,   0),  // Broach text colorMore actions
+
+    a1lib.mixColor(255, 128,   0),  // Uncommon Mats
+
+    a1lib.mixColor(255, 165,   0),  // Scavenging comps
+
+    a1lib.mixColor( 67, 188, 188)   // Ancient components
+
+  ],
+
+};
+
 // ─── showItems / getTotal / other core functions (unchanged) ────────────
 
 // Function to determine the total of all items recorded.
