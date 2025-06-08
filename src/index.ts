@@ -215,7 +215,7 @@ function normalizeAndCapitalize(itemName: string) {
 function removeUnderscores(input: string): string {
   return input.replace(/_/g, " ");
 }
-
+/*
 async function updateCacheBuster()
 {
   fetch("https://runeapps.org/apps/ge/browse.php")
@@ -236,7 +236,7 @@ async function updateCacheBuster()
         console.error("Failed to fetch page:", err);
       });
 }
-
+*/
 function fetchCurrentCacheBuster()
 {
   return JSON.parse(localStorage.getItem("cacheBuster") || '"NULL"');
@@ -536,6 +536,7 @@ function messageParser(chatLine: string) {
     const item = chatLine.match(/\[\d+:\d+:\d+\] Materials gained: (\d+ x [A-Za-z\s-&+'()1-4]+)/);
     if (item) updateDropData(chatLine, item);
   } else if (chatLine.indexOf("You receive") > -1) {
+    console.log("Boss drop detected");
     handleBossDrops(chatLine);
   } else if (chatLine.indexOf("Welcome to your session against") > -1) {
     handleBossNameParsing(chatLine);
@@ -692,7 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // If we reach here, Alt1 is installed + all perms – keep Discord form visible
 
   // Update cachebuster to be used
-  updateCacheBuster();
+  // updateCacheBuster();
 
   // 5) Bind Load Saved
   loadSavedBtn.addEventListener("click", () => {
