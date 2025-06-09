@@ -117,84 +117,47 @@ if (window.alt1) {
 
 reader.readargs = {
   colors: [
-    a1lib.mixColor(0,   255, 255),  // Seren text color / [0, 255, 255]
-    a1lib.mixColor(0,   255,   0),  // [0, 255, 0]
-    a1lib.mixColor(0,   175, 255),  // [0, 175, 255]
-    a1lib.mixColor(0,     0, 255),  // [0, 0, 255]
-    a1lib.mixColor(255,  82,  86),  // [255, 82, 86]
-    a1lib.mixColor(159, 255, 159),  // Clan chat green / [159, 255, 159]
-    a1lib.mixColor(0,   111,   0),  // [0, 111, 0]
-    a1lib.mixColor(255, 143, 143),  // [255, 143, 143]
-    a1lib.mixColor(255, 152,  31),  // [255, 152, 31]
-    a1lib.mixColor(255, 111,   0),  // [255, 111, 0]
-    a1lib.mixColor(255, 255,   0),  // [255, 255, 0]
-    a1lib.mixColor(239,   0, 175),  // [239, 0, 175]
-    a1lib.mixColor(255,  79, 255),  // [255, 79, 255]
-    a1lib.mixColor(175, 127, 255),  // [175, 127, 255]
-    a1lib.mixColor(191, 191, 191),  // [191, 191, 191]
-    a1lib.mixColor(127, 255, 255),  // [127, 255, 255]
-    a1lib.mixColor(128,   0,   0),  // [128, 0, 0]
-    a1lib.mixColor(255, 255, 255),  // Normal Text White / [255, 255, 255]
-    a1lib.mixColor(127, 169, 255),  // [127, 169, 255]
-    a1lib.mixColor(255, 140,  56),  // [255, 140, 56] (orange drop received text)
-    a1lib.mixColor(255,   0,   0),  // Rare Mats / [255, 0, 0] (red achievement/world message)
-    a1lib.mixColor( 69, 178,  71),  // [69, 178, 71] (blueish‐green friend broadcast)
-    a1lib.mixColor(164, 153, 125),  // [164, 153, 125] (brownish‐gray friends/fc/cc list name)
-    a1lib.mixColor(215, 195, 119),  // [215, 195, 119] (interface preset color)
-    a1lib.mixColor(255, 255, 176),  // [255, 255, 176] (GIM exclusive?)
-    a1lib.mixColor(245, 245,   0),  // Broach text colorMore actions
-    a1lib.mixColor(255, 128,   0),  // Uncommon Mats
-    a1lib.mixColor(255, 165,   0),  // Scavenging comps
-    a1lib.mixColor(67, 188, 188),   // Ancient components
-    a1lib.mixColor(0, 255, 0),
-    a1lib.mixColor(0, 255, 255),
-    a1lib.mixColor(0, 175, 255),
-    a1lib.mixColor(0, 0, 255),
-    a1lib.mixColor(255, 82, 86),
-    a1lib.mixColor(159, 255, 159),
-    a1lib.mixColor(0, 111, 0),
-    a1lib.mixColor(255, 143, 143),
-    a1lib.mixColor(255, 152, 31),
-    a1lib.mixColor(255, 111, 0),
-    a1lib.mixColor(255, 255, 0),
-    a1lib.mixColor(239, 0, 175),
-    a1lib.mixColor(255, 79, 255),
-    a1lib.mixColor(175, 127, 255),
-    a1lib.mixColor(191, 191, 191),
-    a1lib.mixColor(127, 255, 255),
-    a1lib.mixColor(128, 0, 0),
-    a1lib.mixColor(255, 255, 255),
-    a1lib.mixColor(127, 169, 255),
-    a1lib.mixColor(255, 140, 56), //orange drop received text
-    a1lib.mixColor(255, 0, 0), //red achievement world message
-    a1lib.mixColor(69, 178, 71), //blueish green friend broadcast
-    a1lib.mixColor(164, 153, 125), //brownish gray friends/fc/cc list name
-    a1lib.mixColor(215, 195, 119), //interface preset color
-    a1lib.mixColor(255, 255, 176), //gim exclusive?
-    a1lib.mixColor(234, 145, 1),
-    a1lib.mixColor(255, 255, 255), // Normal Text White
-    a1lib.mixColor(130, 70, 184),  // Gorvek Purple
-    a1lib.mixColor(159,255,159),   // Clan chat green
-    a1lib.mixColor(255, 82, 86),   // PM Red
-    a1lib.mixColor(255, 0, 0),     // Very Red Red
-    a1lib.mixColor(0, 174, 0),     // Crystal Mask Green
-    a1lib.mixColor(45, 184, 20),   // Completion Time Green
-    a1lib.mixColor(67, 188, 188),  // Contribution Score Green
-    a1lib.mixColor(102, 152, 255), // Notable Drops Blue
-    a1lib.mixColor(235, 47, 47),   // Rot Mistake Red
-    a1lib.mixColor(255, 255, 0),   // Blessing From The Gods Yellow
-    a1lib.mixColor(0, 255, 255),   // Seren Spirit Cyan
-    a1lib.mixColor(30, 255, 0),    // Catalyst Of Alteration Green
-    a1lib.mixColor(127, 169, 255), // Public Chat Blue
-    a1lib.mixColor(0, 255, 0),     // Artificer's Measure Green
-    a1lib.mixColor(255, 112, 0),   // Luck Ring Orange
-    a1lib.mixColor(163, 53, 238),   // Rare Drop Purple
-    a1lib.mixColor(30, 255, 0), // Main/very common wildy reward color (green)
-    a1lib.mixColor(102, 152, 255), // Common wildy reward color (blue)
-    a1lib.mixColor(163, 53, 238), // Uncommon wildy reward color (purple)
-    a1lib.mixColor(255, 128, 0), // Rare wildy reward color (orange)
-  ],
+    a1lib.mixColor(0, 255, 255),     // Seren Spirit Cyan
+    a1lib.mixColor(0, 255, 0),       // Artificer's Measure Green
+    a1lib.mixColor(0, 175, 255),     // [0, 175, 255]
+    a1lib.mixColor(0, 0, 255),       // [0, 0, 255]
+    a1lib.mixColor(255, 82, 86),     // PM Red
+    a1lib.mixColor(159, 255, 159),   // Clan chat green
+    a1lib.mixColor(0, 111, 0),       // [0, 111, 0]
+    a1lib.mixColor(255, 143, 143),   // [255, 143, 143]
+    a1lib.mixColor(255, 152, 31),    // [255, 152, 31]
+    a1lib.mixColor(255, 111, 0),     // [255, 111, 0]
+    a1lib.mixColor(255, 255, 0),     // Blessing From The Gods Yellow
+    a1lib.mixColor(239, 0, 175),     // [239, 0, 175]
+    a1lib.mixColor(255, 79, 255),    // [255, 79, 255]
+    a1lib.mixColor(175, 127, 255),   // [175, 127, 255]
+    a1lib.mixColor(191, 191, 191),   // [191, 191, 191]
+    a1lib.mixColor(127, 255, 255),   // [127, 255, 255]
+    a1lib.mixColor(128, 0, 0),       // [128, 0, 0]
+    a1lib.mixColor(255, 255, 255),   // Normal Text White
+    a1lib.mixColor(127, 169, 255),   // Public Chat Blue
+    a1lib.mixColor(255, 140, 56),    // orange drop received text
+    a1lib.mixColor(255, 0, 0),       // Very Red Red
+    a1lib.mixColor(69, 178, 71),     // blueish green friend broadcast
+    a1lib.mixColor(164, 153, 125),   // brownish gray friends/fc/cc list name
+    a1lib.mixColor(215, 195, 119),   // interface preset color
+    a1lib.mixColor(255, 255, 176),   // GIM exclusive?
+    a1lib.mixColor(245, 245, 0),     // Broach text color
+    a1lib.mixColor(255, 128, 0),     // Rare wildy reward color (orange)
+    a1lib.mixColor(255, 165, 0),     // Scavenging comps
+    a1lib.mixColor(67, 188, 188),    // Contribution Score Green
+    a1lib.mixColor(234, 145, 1),     // [234, 145, 1]
+    a1lib.mixColor(130, 70, 184),    // Gorvek Purple
+    a1lib.mixColor(0, 174, 0),       // Crystal Mask Green
+    a1lib.mixColor(45, 184, 20),     // Completion Time Green
+    a1lib.mixColor(102, 152, 255),   // Notable Drops Blue
+    a1lib.mixColor(235, 47, 47),     // Rot Mistake Red
+    a1lib.mixColor(30, 255, 0),      // Catalyst Of Alteration Green
+    a1lib.mixColor(255, 112, 0),     // Luck Ring Orange
+    a1lib.mixColor(163, 53, 238),    // Rare Drop Purple
+  ]
 };
+
 
 // ─── showItems / getTotal / other core functions (unchanged) ────────────
 
