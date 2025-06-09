@@ -172,6 +172,23 @@ reader.readargs = {
     a1lib.mixColor(215, 195, 119), //interface preset color
     a1lib.mixColor(255, 255, 176), //gim exclusive?
     a1lib.mixColor(234, 145, 1),
+    a1lib.mixColor(255, 255, 255), // Normal Text White
+    a1lib.mixColor(130, 70, 184),  // Gorvek Purple
+    a1lib.mixColor(159,255,159),   // Clan chat green
+    a1lib.mixColor(255, 82, 86),   // PM Red
+    a1lib.mixColor(255, 0, 0),     // Very Red Red
+    a1lib.mixColor(0, 174, 0),     // Crystal Mask Green
+    a1lib.mixColor(45, 184, 20),   // Completion Time Green
+    a1lib.mixColor(67, 188, 188),  // Contribution Score Green
+    a1lib.mixColor(102, 152, 255), // Notable Drops Blue
+    a1lib.mixColor(235, 47, 47),   // Rot Mistake Red
+    a1lib.mixColor(255, 255, 0),   // Blessing From The Gods Yellow
+    a1lib.mixColor(0, 255, 255),   // Seren Spirit Cyan
+    a1lib.mixColor(30, 255, 0),    // Catalyst Of Alteration Green
+    a1lib.mixColor(127, 169, 255), // Public Chat Blue
+    a1lib.mixColor(0, 255, 0),     // Artificer's Measure Green
+    a1lib.mixColor(255, 112, 0),   // Luck Ring Orange
+    a1lib.mixColor(163, 53, 238)   // Rare Drop Purple
   ],
 };
 
