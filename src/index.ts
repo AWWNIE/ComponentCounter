@@ -560,7 +560,7 @@ function readChatbox() {
   const opts = reader.read() || [];
   let chatStr = "";
   let chatArr: string[] = [];
-  console.log(chatArr);
+  console.log(opts);
   if (opts.length !== 0) {
     for (const line in opts) {
       if (!opts[line].text.match(timestampRegex) && line === "0") {
