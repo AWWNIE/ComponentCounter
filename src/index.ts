@@ -193,6 +193,9 @@ reader.readargs = {
     a1lib.mixColor(102, 152, 255), // Common wildy reward color (blue)
     a1lib.mixColor(163, 53, 238), // Uncommon wildy reward color (purple)
     a1lib.mixColor(255, 128, 0), // Rare wildy reward color (orange)
+    a1lib.mixColor(218, 137, 4),
+    a1lib.mixColor(216, 134, 2),
+    a1lib.mixColor(176, 110, 3),
   ],
 };
 
