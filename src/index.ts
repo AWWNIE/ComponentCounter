@@ -188,7 +188,11 @@ reader.readargs = {
     a1lib.mixColor(127, 169, 255), // Public Chat Blue
     a1lib.mixColor(0, 255, 0),     // Artificer's Measure Green
     a1lib.mixColor(255, 112, 0),   // Luck Ring Orange
-    a1lib.mixColor(163, 53, 238)   // Rare Drop Purple
+    a1lib.mixColor(163, 53, 238),   // Rare Drop Purple
+    a1lib.mixColor(30, 255, 0), // Main/very common wildy reward color (green)
+    a1lib.mixColor(102, 152, 255), // Common wildy reward color (blue)
+    a1lib.mixColor(163, 53, 238), // Uncommon wildy reward color (purple)
+    a1lib.mixColor(255, 128, 0), // Rare wildy reward color (orange)
   ],
 };
 
