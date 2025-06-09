@@ -114,7 +114,7 @@ if (window.alt1) {
 }
 
 // Set Chat reader
-
+/*
 reader.readargs = {
   colors: [
     a1lib.mixColor(0, 255, 255),     // Seren Spirit Cyan
@@ -158,6 +158,10 @@ reader.readargs = {
   ]
 };
 
+ */
+reader.readargs = {
+  colors: null  // or omit `colors` entirely if allowed
+};
 
 // ─── showItems / getTotal / other core functions (unchanged) ────────────
 
