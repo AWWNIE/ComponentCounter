@@ -114,6 +114,7 @@ if (window.alt1) {
 }
 
 // Set Chat reader
+/*
 reader.readargs = {
   colors: [
     a1lib.mixColor(0,   255, 255),  // Seren text color / [0, 255, 255]
@@ -172,7 +173,7 @@ reader.readargs = {
     a1lib.mixColor(255, 255, 176), //gim exclusive?
   ],
 };
-
+*/
 // ─── showItems / getTotal / other core functions (unchanged) ────────────
 
 // Function to determine the total of all items recorded.
